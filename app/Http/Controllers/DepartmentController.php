@@ -4,10 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
+use App\Http\Services\DepartmentService;
 use App\Models\Department;
 
 class DepartmentController extends Controller
 {
+
+    protected DepartmentService $departmentService;
+
+    public function __construct(DepartmentService $departmentService)
+    {
+        $this->departmentService = $departmentService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -29,7 +37,7 @@ class DepartmentController extends Controller
      */
     public function store(StoreDepartmentRequest $request)
     {
-        //
+        $this->departmentService->store();
     }
 
     /**
