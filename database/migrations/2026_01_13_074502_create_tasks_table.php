@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tasks', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->foreignId('assigned_to')->constrained('users')->nullable();
+            $table->foreignUuid('assigned_to')->constrained('users')->nullable();
             $table->decimal('expenses_total', 12, 2)->nullable();
             $table->enum('type', ['preset', 'custom']);
             $table->timestamps();
