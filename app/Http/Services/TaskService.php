@@ -5,7 +5,7 @@ namespace App\Http\Services;
 class TaskService
 {
 
-    public function store()
+    public function store(array $data)
     {
         dd('store');
     }

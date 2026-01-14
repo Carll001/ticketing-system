@@ -16,7 +16,9 @@ import task from '@/routes/task';
 import { Form, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
-    name: '',
+    title: '',
+    description: '',
+    assigned_to: '',
 });
 
 const createTask = () => {
@@ -47,7 +49,8 @@ const createTask = () => {
                 </DialogDescription>
                 </DialogHeader>
                 <div class="grid gap-4">
-                    
+                    <Label for="task-title">Task Title</Label>
+                    <Input id="task-title"/>
                 </div>
                 <DialogFooter>
                 <DialogClose as-child>
