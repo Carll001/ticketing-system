@@ -38,6 +38,7 @@ import type { InertiaLinkProps } from '@inertiajs/vue3';
 import { Link, usePage } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
 import { computed } from 'vue';
+import task from '@/routes/task';
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -61,6 +62,11 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Task',
+        href: task.index(),
         icon: LayoutGrid,
     },
 ];
