@@ -15,11 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->foreignUuid('assigned_to')->nullable()->constrained('departments');
-            $table->foreignUuid('creator_id')->constrained('users');
+            $table->foreignUuid('assigned_to')->constrained('users')->nullable();
             $table->decimal('expenses_total', 12, 2)->nullable();
-            $table->enum('type', ['preset', 'custom'])->default('preset');
-            $table->date('due_date')->nullable();
+            $table->enum('type', ['preset', 'custom']);
             $table->timestamps();
         });
     }

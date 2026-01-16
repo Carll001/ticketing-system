@@ -65,37 +65,3 @@ class BasePaginationRequest extends FormRequest
         return $params;
     }
 }
-
-<?php
-
-namespace App\Http\Resources;
-
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\MissingValue;
-
-class ClientResource extends JsonResource
-{
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
-    {
-        return [
-            ...parent::toArray($request),
-            'address' => ClientAddressResource::make(
-                $this->relationLoaded('address')
-                    ? $this->household_address
-                    : new MissingValue
-            ),
-            'living_situation' => LivingSituationResource::make($this->whenLoaded('livingSituation')),
-            // 'vulnerability_and_health' => VulnerabilityAndHealthResource::make($this->whenLoaded('vulnerabilityAndHealth')),
-            'family_members' => FamilyMemberResource::collection($this->whenLoaded('familyMembers')),
-            'intake_sheets' => IntakeSheetResource::collection($this->whenLoaded('intakeSheets')),
-            'latest_updated_at' => max(Carbon::parse($this->updated_at), Carbon::parse($this->address?->updated_at), Carbon::parse($this->livingSituation?->updated_at), Carbon::create($this->vulnerabilityAndHealth?->updated_at), Carbon::parse($this->familyMembers?->max('updated_at')), Carbon::parse($this->intakeSheets?->max('updated_at'))),
-        ];
-    }
-}
