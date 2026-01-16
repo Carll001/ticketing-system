@@ -18,7 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 const props = defineProps<{
-    tasks: Task[],
+    tasks: {data: Task[]},
 }>()
 
 const createTask = () => {
@@ -37,7 +37,7 @@ const createTask = () => {
                 <Button size="sm" @click="createTask">Create task</Button>
             </div>
             <div class="flex flex-col gap-4">
-                <TaskCard :tasks="props.tasks"/>
+                <TaskCard :tasks="props.tasks.data"/>
             </div>
         </div>
     </AppLayout>

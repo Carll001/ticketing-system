@@ -12,7 +12,7 @@ import taskLink from '@/routes/task';
 
 const props = defineProps<{
     departments: Department[],
-    task: Task,
+    task: {data: Task},
 }>()
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -21,12 +21,12 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: taskLink.index().url,
     },
     {
-        title: props.task.title,
-        href: taskLink.show(props.task.id).url,
+        title: props.task.data.title,
+        href: taskLink.show(props.task.data.id).url,
     },
     {
-        title: `Edit ${props.task.title}`,
-        href: taskLink.edit(props.task.id).url,
+        title: `Edit ${props.task.data.title}`,
+        href: taskLink.edit(props.task.data.id).url,
     },
 ];
 
@@ -34,7 +34,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 </script>
 <template>
-    <Head :title=" `Edit ${props.task.title}` " />
+    <Head :title=" `Edit ${props.task.data.title}` " />
     <AppLayout :breadcrumbs="breadcrumbs">
         
         <div class="p-4 flex flex-col flex-1">

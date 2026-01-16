@@ -4,7 +4,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Task } from '@/types';
 
 const props = defineProps<{
-    task: Task
+    task: {data: Task}
 }>();
 
 </script>

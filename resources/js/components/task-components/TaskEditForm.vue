@@ -43,31 +43,33 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 
 const props = defineProps<{
     departments: Department[],
-    task: Task,
+    task: {data: Task},
 }>()
 
 const form = useForm({
-    title: props.task.title,
-    description: props.task.description,
-    assigned_to: props.task.assigned_to === 'Anyone' ? null : props.task.assigned_to,
-    type: props.task.type,
-    due_date: props.task.due_date || '',
+    title: props.task.data.title,
+    description: props.task.data.description,
+    assigned_to: props.task.data.assigned_to === 'Anyone' ? null : props.task.data.assigned_to,
+    type: props.task.data.type,
+    due_date: props.task.data.due_date || '',
 });
 
 const date = ref(
-    props.task.due_date ? parseDate(props.task.due_date.split(' ')[0]) : undefined
-)
+    props.task.data.due_date 
+        ? parseDate(props.task.data.due_date.split('T')[0])  // only take the date part
+        : undefined
+);
 
 watch(date, (value) => {
-    form.due_date = value ?  value.toString() : ''
-})
+    form.due_date = value ? value.toString() : '';
+});
 
 const updateTask = () => {
-    form.put(taskLink.update(props.task.id).url);
+    form.put(taskLink.update(props.task.data.id).url);
 };
 
 const discardEdit = () => {
-    router.visit(taskLink.show(props.task.id).url, {
+    router.visit(taskLink.show(props.task.data.id).url, {
         preserveState: false,
     })
 } 

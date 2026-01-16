@@ -9,11 +9,11 @@ import { Head, router } from '@inertiajs/vue3';
 
 
 const props = defineProps<{
-    task: Task
+    task: {data: Task}
 }>();
 
 const editTask = () => {
-    router.get(taskLink.edit(props.task.id).url)
+    router.get(taskLink.edit(props.task.data.id).url)
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -22,41 +22,41 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: taskLink.index().url,
     },
     {
-        title: props.task.title,
-        href: taskLink.show(props.task.id).url,
+        title: props.task.data.title,
+        href: taskLink.show(props.task.data.id).url,
     },
 ]
 
 </script>
 
 <template>
-    <Head :title="task.title ?? 'Undefined'"/>
+    <Head :title="props.task.data.title ?? 'Undefined'"/>
 
     <AppLayout :breadcrumbs="breadcrumbs">
         
         <div class="flex flex-col flex-1 gap-4 p-4">
             <div class="flex items-start justify-between">
                 <section>
-                    <h3 class="text-3xl">{{ task.title }}</h3>
-                    <p class="text-muted-foreground">{{ task.description }}</p>
-                    <p class="text-muted-foreground text-sm">From: {{ task.creator?.name }}</p>
+                    <h3 class="text-3xl">{{ props.task.data.title }}</h3>
+                    <p class="text-muted-foreground">{{ props.task.data.description }}</p>
+                    <p class="text-muted-foreground text-sm">From: {{ props.task.data.creator?.name }}</p>
                 </section>
                 <section class="text-right">
                     <div class="flex gap-2 items-center">
                         <p class="text-muted-foreground text-sm">Assigned to:</p>
                         <Button class="text-xs p-2 h-8" variant="outline">
-                            {{ task.assigned_to }}
+                            {{ props.task.data.assigned_to }}
                         </Button>
                     </div>
                     <div>
                         <p class="text-muted-foreground text-sm gap-2">
-                            Due: {{ task.due_date }}
+                            Due: {{ props.task.data.due_date }}
                         </p>
                     </div>
                 </section>
             </div>
             <div class="flex justify-end gap-2">
-                <TaskDeleteDialog :id="props.task.id"/>
+                <TaskDeleteDialog :id="props.task.data.id"/>
                 <Button size="sm" @click="editTask">Edit task</Button>
                 <AddStepDialog :task="task"/>
             </div>

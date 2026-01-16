@@ -37,7 +37,7 @@ class TaskController extends Controller
         $departments = Department::all();
 
         return Inertia::render('Task/Index', [
-            'tasks' => TaskResource::collection($tasks)->resolve(),
+            'tasks' => TaskResource::collection($tasks),
             'departments' => $departments,
         ]);
     }
@@ -76,7 +76,7 @@ class TaskController extends Controller
         $departments = Department::all();
 
         return Inertia::render('Task/Show', [
-            'task' => new TaskResource($task)->resolve(),
+            'task' => TaskResource::make($task),
             'departments' => $departments,
         ]);
     }
@@ -89,7 +89,7 @@ class TaskController extends Controller
         $departments = Department::all();
 
         return Inertia::render('Task/Edit', [
-            'task' => new TaskResource($task)->resolve(),
+            'task' => TaskResource::make($task),
             'departments' => $departments,
         ]);
     }

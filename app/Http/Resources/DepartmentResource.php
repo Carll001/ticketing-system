@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TaskResource extends JsonResource
+class DepartmentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,6 @@ class TaskResource extends JsonResource
     {
         return [
             ...parent::toArray($request),
-            'description' => $this->description ?? 'No description',
-            'assigned_to' => $this->assigned_to ?? 'Anyone',
-            'due_date' => $this->due_date?->toDateString() ?? 'No due date',
-
         ];
     }
 }

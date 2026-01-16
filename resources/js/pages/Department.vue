@@ -30,15 +30,17 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-import { Head, useForm } from '@inertiajs/vue3';
+import { Form, Head, useForm } from '@inertiajs/vue3';
 import { Building, Pencil, Plus, Search, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
+import { Label } from '@/components/ui/label';
+import { Department } from '@/types';
 
 
 // Create function
 const props = defineProps<{
-    departments: any[];
+    departments:{data: Department[]};
 }>();
 
 const form = useForm({
@@ -110,11 +112,10 @@ const deleteDepartment = () => {
     <Head title="Department" />
 
     <AppLayout>
-        <div class="min-h-screen">
-            <div class="p-6 lg:p-8">
-                <div class="mb-8 grid gap-6 lg:grid-cols-3">
+        <div class="flex flex-col flex-1 gap-4 p-4">
                     <!-- Create Dialog -->
-                    <div class="flex items-end">
+                    <div class="flex justify-end">
+                        <div>
                         <Dialog v-model:open="isOpen">
                             <DialogTrigger as-child>
                                 <Button class="w-full lg:w-auto">
@@ -134,21 +135,22 @@ const deleteDepartment = () => {
                                     </DialogDescription>
                                 </DialogHeader>
 
-                                <form
+                                <Form
                                     @submit.prevent="createDepartment"
                                     class="space-y-5"
                                 >
                                     <div class="py-2">
-                                        <label class="text-sm font-medium">
+                                        <Label class="text-sm font-medium" for=dept-name>
                                             Department Name
                                             <span class="text-red-500">*</span>
-                                        </label>
+                                        </Label>
                                         <Input
+                                            id="dept-name"
                                             v-model="form.name"
                                             placeholder="e.g., Marketing Department"
                                         />
                                     </div>
-                                    <DialogFooter class="gap-2 border-t pt-4">
+                                    <DialogFooter class="gap-2">
                                         <DialogClose as-child>
                                             <Button
                                                 variant="outline"
@@ -163,12 +165,11 @@ const deleteDepartment = () => {
                                             >Create Department</Button
                                         >
                                     </DialogFooter>
-                                </form>
+                                </Form>
                             </DialogContent>
                         </Dialog>
+                        </div>
                     </div>
-                </div>
-
                 <!-- Edit Dialog -->
                 <div>
                     <Dialog v-model:open="editDialogOpen">
@@ -224,7 +225,7 @@ const deleteDepartment = () => {
                 </Dialog>
 
                 <!-- Search & Filters -->
-                <div class="mb-6 rounded-xl border p-4 shadow-sm">
+                <div class="rounded-xl border p-4 shadow-sm">
                     <div
                         class="flex flex-col gap-4 lg:flex-row lg:items-center"
                     >
@@ -356,7 +357,7 @@ const deleteDepartment = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            
         </div>
     </AppLayout>
 </template>

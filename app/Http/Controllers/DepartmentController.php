@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
+use App\Http\Resources\DepartmentResource;
 use App\Http\Services\DepartmentService;
 use App\Models\Department;
 use Inertia\Inertia;
@@ -25,7 +26,7 @@ class DepartmentController extends Controller
         $departments = Department::latest()->get();
 
         return Inertia::render('Department',[
-            'departments'=> $departments,
+            'departments'=> DepartmentResource::collection($departments),
         ]);
     }
 
