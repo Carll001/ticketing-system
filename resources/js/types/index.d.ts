@@ -27,7 +27,7 @@ export type AppPageProps<
 }
 
 export interface User {
-    id: number;
+    id: string;
     name: string;
     email: string;
     avatar?: string;
@@ -35,6 +35,25 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Task {
+    id: string
+    title: string
+    description: string
+    assigned_to: string
+    creator_id: string
+    type: string
+    due_date: string
+    created_at: string
+    updated_at: string
+
+    creator?: User
+}
+
+export interface Department {
+    id: string
+    name: string
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

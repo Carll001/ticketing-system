@@ -2,18 +2,27 @@
 
 namespace App\Http\Services;
 
+use App\Models\Task;
+use Illuminate\Support\Facades\Auth;
+
 class TaskService
 {
 
     public function store(array $data)
     {
-        dd('store');
+        return Task::create([
+            ...$data,
+            'creator_id' => Auth::id(),
+        ]);
     }
 
 
-    public function update()
+    public function update($task, array $data)
     {
-        dd('update');
+        
+        $task->update($data);
+        
+        return $task;
     }
 
 }
