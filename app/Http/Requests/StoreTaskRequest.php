@@ -21,10 +21,17 @@ class StoreTaskRequest extends FormRequest
      */
     public function rules(): array
     {
+        $required = $this->isMethod('post')
+            ? 'required'
+            : 'sometimes|required';
+
         return [
-            'title' => 'required|min:4|max:255',
-            'description' => 'nullable',
-            'assigned_to' => 'nullable|exists:departments,id'
+            'title' => "$required|min:4|max:255",
+            'description' => 'sometimes|nullable',
+            'assigned_to' => 'sometimes|nullable|uuid|exists:departments,id',
+            'due_date' => 'nullable|date',
+            'type' => $required,
         ];
     }
+
 }
