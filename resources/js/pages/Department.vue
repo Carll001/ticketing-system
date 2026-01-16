@@ -34,7 +34,6 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { Building, Pencil, Plus, Search, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
-import 'vue-sonner/style.css';
 
 
 // Create function
