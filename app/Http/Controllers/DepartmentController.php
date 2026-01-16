@@ -6,6 +6,7 @@ use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
 use App\Http\Services\DepartmentService;
 use App\Models\Department;
+use Inertia\Inertia;
 
 class DepartmentController extends Controller
 {
@@ -21,7 +22,11 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        //
+        $departments = Department::latest()->get();
+
+        return Inertia::render('Department',[
+            'departments'=> $departments,
+        ]);
     }
 
     /**
@@ -37,7 +42,9 @@ class DepartmentController extends Controller
      */
     public function store(StoreDepartmentRequest $request)
     {
-        $this->departmentService->store();
+        $this->departmentService->store($request->validated());
+
+        return back()->with('success','department created successfully!');
     }
 
     /**
@@ -61,7 +68,8 @@ class DepartmentController extends Controller
      */
     public function update(UpdateDepartmentRequest $request, Department $department)
     {
-        //
+      $this->departmentService->update($request->validated(), $department); 
+        return back()->with('success','Department created successfully!');
     }
 
     /**
@@ -69,6 +77,8 @@ class DepartmentController extends Controller
      */
     public function destroy(Department $department)
     {
-        //
+        $department->delete();
+
+        return back()->with('success', 'Department deleted successfully!');
     }
 }

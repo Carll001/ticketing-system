@@ -2,19 +2,25 @@
 
 namespace App\Http\Services;
 
+use App\Models\Department;
+
 class DepartmentService
 {
 
-    public function store()
+    public function store(array $data)
     {
-        dd('store');
+        return Department::create([
+            'name' => $data['name'],
+        ]);
     }
 
 
-    public function update()
+    public function update(array $data, Department $department)
     {
-        dd('update');
-    }
+        // dd('update');
 
+        $department->update($data);
+
+        return $department;
+    }
 }
-?>
