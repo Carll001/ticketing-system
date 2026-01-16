@@ -89,9 +89,9 @@ const updateDepartment = () => {
 // delete functions
 
 const deleteDialogOpen = ref(false);
-const deleteId = ref<number | null>(null);
+const deleteId = ref<string | null>(null);
 
-const confirmDelete = (id: number) => {
+const confirmDelete = (id: string) => {
     deleteId.value = id;
     deleteDialogOpen.value = true;
 };
@@ -278,7 +278,7 @@ const deleteDepartment = () => {
 
                         <TableBody>
                             <!-- Show this row if no departments exist -->
-                            <TableRow v-if="props.departments.length === 0">
+                            <TableRow v-if="props.departments.data.length === 0">
                                 <TableCell
                                     colspan="4"
                                     class="text-center text-gray-500"
@@ -290,7 +290,7 @@ const deleteDepartment = () => {
                             <!-- Otherwise, render all departments -->
                             <TableRow
                                 v-else
-                                v-for="dept in props.departments"
+                                v-for="dept in props.departments.data"
                                 :key="dept.id"
                             >
                                 <TableCell>
