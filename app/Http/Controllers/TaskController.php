@@ -7,8 +7,6 @@ use Inertia\Inertia;
 use App\Http\Services\TaskService;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
-use App\Http\Resources\TaskResource;
-use App\Models\Department;
 
 class TaskController extends Controller
 {
@@ -19,27 +17,12 @@ class TaskController extends Controller
         $this->taskService = $taskService;
     }
 
-
-    public function list()
-    {
-        // RETURN TASK DATA
-        return TaskResource::collection(Task::all());
-    }
-
-
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        // FETCH ALL TASK DATA
-        $tasks = Task::all();
-        $departments = Department::all();
-
-        return Inertia::render('Task/Index', [
-            'tasks' => TaskResource::collection($tasks)->resolve(),
-            'departments' => $departments,
-        ]);
+        return Inertia::render('Task');
     }
 
     /**
@@ -47,10 +30,7 @@ class TaskController extends Controller
      */
     public function create()
     {
-        $departments = Department::all();
-        return Inertia::render('Task/Create', [
-            'departments' => $departments,
-        ]);
+        //
     }
 
     /**
@@ -58,13 +38,13 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
-        // VALIDATION REQUEST
-        $data = $request->validated();
 
-        // STORING IN SERVICE
-        $this->taskService->store($data);
+   
+        $task = $request->validate();
 
-        return redirect()->route('task.index');
+        $task = $this->taskService->store($task);
+        
+        return back();
     }
 
     /**
@@ -72,13 +52,7 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $task->load('creator');    
-        $departments = Department::all();
-
-        return Inertia::render('Task/Show', [
-            'task' => new TaskResource($task)->resolve(),
-            'departments' => $departments,
-        ]);
+        //
     }
 
     /**
@@ -86,24 +60,15 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        $departments = Department::all();
-
-        return Inertia::render('Task/Edit', [
-            'task' => new TaskResource($task)->resolve(),
-            'departments' => $departments,
-        ]);
+        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreTaskRequest $request, Task $task)
+    public function update(UpdateTaskRequest $request, Task $task)
     {
-
-        $data = $request->validated();
-        $this->taskService->update($task, $data);
-
-        return redirect()->route('task.show', $task->id);
+        $this->taskService->update();
     }
 
     /**
@@ -111,8 +76,6 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        $task->delete();
-
-        return redirect()->route('task.index');
+        //
     }
 }
