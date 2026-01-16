@@ -20,8 +20,13 @@ Route::middleware(['auth'])->group(function(){
     Route::prefix('task')->group(function(){
         
        Route::get('/', [TaskController::class, 'index'])->name('task.index');
+       Route::get('/create', [TaskController::class, 'create'])->name('task.create');
+       Route::get('/{task}', [TaskController::class, 'show'])->name('task.show');
+       Route::get('/{task}/edit', [TaskController::class, 'edit'])->name('task.edit');
 
        Route::post('/', [TaskController::class, 'store'])->name('task.store');
+       Route::put('/{task}',  [TaskController::class, 'update'])->name('task.update');
+       Route::delete('/{task}', [TaskController::class, 'destroy'])->name('task.delete');
     });
 
 });
