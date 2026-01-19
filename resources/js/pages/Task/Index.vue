@@ -8,6 +8,13 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import taskLink from '@/routes/task';
 import { type BreadcrumbItem, Task } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+
+const props = defineProps<{
+    tasks: {data: Task[]},
+}>()
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,10 +23,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+// const assignedUser = computed(() => {
+//     if (!form.assigned_to) return 'Anyone';
 
-const props = defineProps<{
-    tasks: {data: Task[]},
-}>()
+//     const user = props.users.find(
+//         (user) => String(user.id) === form.assigned_to,
+//     );
+
+//     return user?.name;
+// });
+
 
 const createTask = () => {
     router.visit(taskLink.create(), {

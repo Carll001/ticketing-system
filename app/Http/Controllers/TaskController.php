@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StepRequest;
+use App\Http\Requests\TaskStepRequest;
 use App\Models\Task;
 use Inertia\Inertia;
 use App\Http\Services\TaskService;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Resources\DepartmentResource;
 use App\Http\Resources\TaskResource;
+use App\Http\Resources\TaskStepResource;
 use App\Models\Department;
+use App\Models\Step;
+use App\Models\TaskStep;
+use App\Models\TaskSteps;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
@@ -22,9 +30,10 @@ class TaskController extends Controller
 
     public function list()
     {
-        // RETURN TASK DATA
         return TaskResource::collection(Task::all());
     }
+
+
 
 
     /**
@@ -33,12 +42,12 @@ class TaskController extends Controller
     public function index()
     {
         // FETCH ALL TASK DATA
-        $tasks = Task::all();
-        $departments = Department::all();
+        $tasks = Task::with(['steps', 'assigned'])->get();
+        // $departments = Department::all();
 
         return Inertia::render('Task/Index', [
             'tasks' => TaskResource::collection($tasks),
-            'departments' => $departments,
+            'departments' => DepartmentResource::collection(Department::all()),
         ]);
     }
 
@@ -62,9 +71,9 @@ class TaskController extends Controller
         $data = $request->validated();
 
         // STORING IN SERVICE
-        $this->taskService->store($data);
+        $task = $this->taskService->store($data);
 
-        return redirect()->route('task.index');
+        return redirect()->route('task.show', $task->id);
     }
 
     /**
@@ -72,7 +81,13 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $task->load('creator');    
+        $task->load(['creator', 'steps.assigned', 'assigned', 'steps.fields' => function ($query) {
+            $query->orderByRaw("CASE 
+            WHEN type = 'Checkbox' THEN 1 
+            WHEN type = 'Input' THEN 2 
+            WHEN type = 'Description' THEN 3 
+            ELSE 4 END");
+        }]);
         $departments = Department::all();
 
         return Inertia::render('Task/Show', [
@@ -80,7 +95,7 @@ class TaskController extends Controller
             'departments' => $departments,
         ]);
     }
-
+    
     /**
      * Show the form for editing the specified resource.
      */

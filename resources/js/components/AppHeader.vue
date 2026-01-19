@@ -279,7 +279,7 @@ const rightNavItems: NavItem[] = [
 
         <div
             v-if="props.breadcrumbs.length > 0"
-            class="flex w-full border-b border-sidebar-border/70"
+            class="flex w-full border-sidebar-border/70"
         >
             <div
                 class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl"

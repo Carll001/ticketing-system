@@ -25,7 +25,6 @@ import { Form, router, useForm } from '@inertiajs/vue3';
 import { ChevronLeft } from 'lucide-vue-next';
 import InputError from '../InputError.vue';
 import Separator from '../ui/separator/Separator.vue';
-import TaskCustomForm from './TaskCustomForm.vue';
 import { store } from '@/routes/login';
 import { Department, Task } from '@/types';
 import { computed, Ref, ref, watch } from 'vue';
@@ -65,7 +64,7 @@ watch(date, (value) => {
 });
 
 const updateTask = () => {
-    form.put(taskLink.update(props.task.data.id).url);
+    form.patch(taskLink.update(props.task.data.id).url);
 };
 
 const discardEdit = () => {

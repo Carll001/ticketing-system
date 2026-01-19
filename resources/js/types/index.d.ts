@@ -49,11 +49,34 @@ export interface Task {
     updated_at: string
 
     creator?: User
+    steps?: Step[]
+    assigned?: Department
 }
 
+export interface Step {
+    id: string
+    task_id: string
+    title: string
+    description: string
+    assigned_to?: string
+    status: string
+
+    task: Task
+    assigned: User
+    fields?: Field[]
+}
 export interface Department {
     id: string
     name: string
+}
+
+export interface Field { 
+    id: string;
+    step_id: string;
+    type: 'Checkbox' | 'Input' | 'Description';
+    label: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

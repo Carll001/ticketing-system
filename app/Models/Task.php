@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Task extends Model
 {
@@ -23,5 +24,15 @@ class Task extends Model
     public function creator()
     {
         return $this->BelongsTo(User::class, 'creator_id');
+    }
+
+    public function steps(): HasMany
+    {
+        return $this->hasMany(Step::class);
+    }
+
+    public function assigned() 
+    {
+        return $this->belongsTo(Department::class, 'assigned_to');
     }
 }

@@ -36,6 +36,7 @@ import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { Label } from '@/components/ui/label';
 import { Department } from '@/types';
+import InputError from '@/components/InputError.vue';
 
 
 // Create function
@@ -148,7 +149,9 @@ const deleteDepartment = () => {
                                             id="dept-name"
                                             v-model="form.name"
                                             placeholder="e.g., Marketing Department"
+                                            
                                         />
+                                        <InputError :message="form.errors.name"/>
                                     </div>
                                     <DialogFooter class="gap-2">
                                         <DialogClose as-child>

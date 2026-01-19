@@ -3,15 +3,18 @@ import taskLink from '@/routes/task';
 import { Button } from '../ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { router } from '@inertiajs/vue3';
+import stepLink from '@/routes/step';
+import { Step } from '@/types';
+import { Trash } from 'lucide-vue-next';
 
 const props = defineProps<{
-    id: string
+    step: Step
 }>();
 
-const deleteTask = () => {
-    router.delete(taskLink.delete(props.id).url, {
-      preserveScroll: true,
-    })  
+const deleteStep = () => {
+    router.delete(stepLink.delete({ task: props.step.task_id, step: props.step.id }).url, {
+        preserveScroll: true,
+    })
 }
 
 </script>
@@ -32,7 +35,7 @@ const deleteTask = () => {
         <DialogClose as-child>
             <Button variant="ghost">Close</Button>
         </DialogClose>
-        <Button @click="deleteTask">Delete</Button>
+        <Button @click="deleteStep">Delete</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

@@ -25,7 +25,6 @@ import { Form, router, useForm } from '@inertiajs/vue3';
 import { ChevronLeft } from 'lucide-vue-next';
 import InputError from '../InputError.vue';
 import Separator from '../ui/separator/Separator.vue';
-import TaskCustomForm from './TaskCustomForm.vue';
 import { store } from '@/routes/login';
 import { Department } from '@/types';
 import { computed, Ref, ref, watch } from 'vue';
@@ -52,6 +51,7 @@ const form = useForm({
     title: '',
     description: '',
     assigned_to: null as string | null,
+    step_order: '',
     is_billable: false,
     expenses_total: 0,
     type: '',
@@ -77,14 +77,16 @@ const discardCreate = () => {
 </script>
 <template>
     <div class="space-y-4">
-        <Form @submit.prevent="storeTask">
+        <Form @submit.prevent="storeTask" v-slot="{processing}">
             <section class="flex justify-between">
                 <div class="flex gap-2">
                     <Heading title="Add Task" />
                 </div>
                 <div class="flex items-center gap-2">
                     <Button size="sm" type="button" variant="destructive" @click="discardCreate">Discard</Button>
-                    <Button size="sm" type="submit">Create</Button>
+                    <Button size="sm" type="submit" :disabled="processing">
+                        {{ processing ? 'Creating...' : 'Create'}}
+                    </Button>
                 </div>
             </section>
 
@@ -178,6 +180,33 @@ const discardCreate = () => {
                                         </SelectItem>
                                         <SelectItem value="custom">
                                             Custom
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="form.errors.type" />
+                        </div>
+
+                        <Separator class="my-4" />
+
+                        <div class="space-y-4">
+                            <Label for="tast-type"
+                                >Step order
+                                <span class="text-lg text-red-500"
+                                    >*</span
+                                ></Label>
+                            <Select id="step-order" v-model="form.step_order">
+                                <SelectTrigger class="w-full">
+                                    <SelectValue placeholder="Select a order" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Task order</SelectLabel>
+                                        <SelectItem value="sequence">
+                                            Sequence
+                                        </SelectItem>
+                                        <SelectItem value="random">
+                                            Random
                                         </SelectItem>
                                     </SelectGroup>
                                 </SelectContent>

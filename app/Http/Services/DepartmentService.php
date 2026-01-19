@@ -9,6 +9,7 @@ class DepartmentService
 
     public function store(array $data)
     {
+        dd('crate');
         return Department::create([
             'name' => $data['name'],
         ]);

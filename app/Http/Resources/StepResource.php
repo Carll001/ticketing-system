@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TaskResource extends JsonResource
+class StepResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,6 @@ class TaskResource extends JsonResource
     {
         return [
             ...parent::toArray($request),
-            'due_date' => $this->due_date?->toISOString(),
-
-            'steps' => StepResource::collection($this->whenLoaded('steps')),
-            'assigned' => DepartmentResource::make($this->whenLoaded('assigned')),
         ];
     }
 }
