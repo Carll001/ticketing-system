@@ -17,8 +17,6 @@ class DepartmentService
 
     public function update(array $data, Department $department)
     {
-        // dd('update');
-
         $department->update($data);
 
         return $department;

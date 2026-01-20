@@ -22,7 +22,17 @@ class StoreDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|min:4|max:255'
+            'name' => 'required|string|min:4|max:255'
+            // dd('store')
         ];
     }
-}
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'The department name is required.',
+            'name.min' => 'The department name must be at least 4 characters.',
+            'name.unique' => 'A department with this name already exists.',
+        ];
+    }
+} 
