@@ -37,11 +37,14 @@ import { toast } from 'vue-sonner';
 import { Label } from '@/components/ui/label';
 import { Department } from '@/types';
 import InputError from '@/components/InputError.vue';
+import { Link } from '@inertiajs/vue3'
+
+
 
 
 // Create function
 const props = defineProps<{
-    departments:{data: Department[]};
+    departments: { data: Department[] };
 }>();
 
 const form = useForm({
@@ -110,257 +113,205 @@ const deleteDepartment = () => {
 </script>
 
 <template>
+
     <Head title="Department" />
 
     <AppLayout>
         <div class="flex flex-col flex-1 gap-4 p-4">
-                    <!-- Create Dialog -->
-                    <div class="flex justify-end">
-                        <div>
-                        <Dialog v-model:open="isOpen">
-                            <DialogTrigger as-child>
-                                <Button class="w-full lg:w-auto">
-                                    <Plus class="mr-2 h-4 w-4" />
-                                    Create Department
-                                </Button>
-                            </DialogTrigger>
-
-                            <DialogContent class="sm:max-w-md">
-                                <DialogHeader>
-                                    <DialogTitle
-                                        >Create New Department</DialogTitle
-                                    >
-                                    <DialogDescription>
-                                        Add a new department to your
-                                        organization
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                <Form
-                                    @submit.prevent="createDepartment"
-                                    class="space-y-5"
-                                >
-                                    <div class="py-2">
-                                        <Label class="text-sm font-medium" for=dept-name>
-                                            Department Name
-                                            <span class="text-red-500">*</span>
-                                        </Label>
-                                        <Input
-                                            id="dept-name"
-                                            v-model="form.name"
-                                            placeholder="e.g., Marketing Department"
-                                            
-                                        />
-                                        <InputError :message="form.errors.name"/>
-                                    </div>
-                                    <DialogFooter class="gap-2">
-                                        <DialogClose as-child>
-                                            <Button
-                                                variant="outline"
-                                                class="flex-1 lg:flex-none"
-                                                @click="form.reset()"
-                                                >Cancel</Button
-                                            >
-                                        </DialogClose>
-                                        <Button
-                                            type="submit"
-                                            class="flex-1 lg:flex-none"
-                                            >Create Department</Button
-                                        >
-                                    </DialogFooter>
-                                </Form>
-                            </DialogContent>
-                        </Dialog>
-                        </div>
-                    </div>
-                <!-- Edit Dialog -->
+            <!-- Create Dialog -->
+            <div class="flex justify-end">
                 <div>
-                    <Dialog v-model:open="editDialogOpen">
+                    <Dialog v-model:open="isOpen">
+                        <DialogTrigger as-child>
+                            <Button class="w-full lg:w-auto">
+                                <Plus class="mr-2 h-4 w-4" />
+                                Create Department
+                            </Button>
+                        </DialogTrigger>
+
                         <DialogContent class="sm:max-w-md">
                             <DialogHeader>
-                                <DialogTitle>Edit Department</DialogTitle>
+                                <DialogTitle>Create New Department</DialogTitle>
+                                <DialogDescription>
+                                    Add a new department to your
+                                    organization
+                                </DialogDescription>
                             </DialogHeader>
 
-                            <form
-                                @submit.prevent="updateDepartment"
-                                class="space-y-5"
-                            >
-                                <Input
-                                    v-model="editForm.name"
-                                    placeholder="Department Name"
-                                />
-                                <DialogFooter class="gap-2 border-t pt-4">
+                            <Form @submit.prevent="createDepartment" class="space-y-5">
+                                <div class="py-2">
+                                    <Label class="text-sm font-medium" for=dept-name>
+                                        Department Name
+                                        <span class="text-red-500">*</span>
+                                    </Label>
+                                    <Input id="dept-name" v-model="form.name"
+                                        placeholder="e.g., Marketing Department" />
+                                    <InputError :message="form.errors.name" />
+                                </div>
+                                <DialogFooter class="gap-2">
                                     <DialogClose as-child>
-                                        <Button variant="outline"
-                                            >Cancel</Button
-                                        >
+                                        <Button variant="outline" class="flex-1 lg:flex-none"
+                                            @click="form.reset()">Cancel</Button>
                                     </DialogClose>
-                                    <Button type="submit">Update</Button>
+                                    <Button type="submit" class="flex-1 lg:flex-none">Create Department</Button>
                                 </DialogFooter>
-                            </form>
+                            </Form>
                         </DialogContent>
                     </Dialog>
                 </div>
-
-                <!-- delete dialog -->
-                <Dialog v-model:open="deleteDialogOpen">
-                    <DialogContent class="sm:max-w-sm">
+            </div>
+            <!-- Edit Dialog -->
+            <div>
+                <Dialog v-model:open="editDialogOpen">
+                    <DialogContent class="sm:max-w-md">
                         <DialogHeader>
-                            <DialogTitle>Delete Department</DialogTitle>
-                            <DialogDescription>
-                                Are you sure you want to delete this department?
-                                This action cannot be undone.
-                            </DialogDescription>
+                            <DialogTitle>Edit Department</DialogTitle>
                         </DialogHeader>
 
-                        <DialogFooter>
-                            <DialogClose as-child>
-                                <Button variant="outline">Cancel</Button>
-                            </DialogClose>
-                            <Button
-                                variant="destructive"
-                                @click="deleteDepartment"
-                            >
-                                Delete
-                            </Button>
-                        </DialogFooter>
+                        <form @submit.prevent="updateDepartment" class="space-y-5">
+                            <Input v-model="editForm.name" placeholder="Department Name" />
+                            <DialogFooter class="gap-2 border-t pt-4">
+                                <DialogClose as-child>
+                                    <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit">Update</Button>
+                            </DialogFooter>
+                        </form>
                     </DialogContent>
                 </Dialog>
+            </div>
 
-                <!-- Search & Filters -->
-                <div class="rounded-xl border p-4 shadow-sm">
-                    <div
-                        class="flex flex-col gap-4 lg:flex-row lg:items-center"
-                    >
-                        <div class="flex items-center gap-3">
-                            <!-- Search -->
-                            <div class="relative w-64">
-                                <Search
-                                    class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                                />
-                                <Input class="pl-10" placeholder="Search..." />
-                            </div>
+            <!-- delete dialog -->
+            <Dialog v-model:open="deleteDialogOpen">
+                <DialogContent class="sm:max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Delete Department</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete this department?
+                            This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
 
-                            <!-- Status Select -->
-                            <Select>
-                                <SelectTrigger class="w-36">
-                                    <SelectValue placeholder="All Status" />
-                                </SelectTrigger>
+                    <DialogFooter>
+                        <DialogClose as-child>
+                            <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button variant="destructive" @click="deleteDepartment">
+                            Delete
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
-                                <SelectContent>
-                                    <SelectItem value="active"
-                                        >Active</SelectItem
-                                    >
-                                    <SelectItem value="inactive"
-                                        >Inactive</SelectItem
-                                    >
-                                </SelectContent>
-                            </Select>
+            <!-- Search & Filters -->
+            <div class="rounded-xl border p-4 shadow-sm">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+                    <div class="flex items-center gap-3">
+                        <!-- Search -->
+                        <div class="relative w-64">
+                            <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input class="pl-10" placeholder="Search..." />
+                        </div>
 
-                            <!-- Filter Button -->
-                            <Button variant="outline"> Filter </Button>
+                        <!-- Status Select -->
+                        <Select>
+                            <SelectTrigger class="w-36">
+                                <SelectValue placeholder="All Status" />
+                            </SelectTrigger>
+
+                            <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <!-- Filter Button -->
+                        <Button variant="outline"> Filter </Button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-hidden rounded-xl border shadow-sm">
+                <div class="border-b p-6">
+                    <h2 class="text-lg">Department List</h2>
+                </div>
+
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Department</TableHead>
+                            <TableHead>Employees</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead class="text-end">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+
+                    <TableBody>
+                        <!-- Show this row if no departments exist -->
+                        <TableRow v-if="props.departments.data.length === 0">
+                            <TableCell colspan="4" class="text-center text-gray-500">
+                                No departments yet.
+                            </TableCell>
+                        </TableRow>
+
+                        <!-- Otherwise, render all departments -->
+                        <TableRow v-else v-for="dept in props.departments.data" :key="dept.id">
+                            <TableCell>
+                                <div class="flex items-center gap-3">
+                                    <Building class="h-4 w-4 text-primary" />
+                                    <p class="font-medium">
+                                        {{ dept.name }}
+                                    </p>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium">1</span>
+                                    <span class="text-sm">employees</span>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <span
+                                    class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                    Active
+                                </span>
+                            </TableCell>
+                            <TableCell>
+                                <div class="flex justify-end gap-2">
+                                    <Link :href="department.show(dept.id).url">
+                                    <Button size="sm" variant="outline" class="gap-1">
+                                        View
+                                    </Button>
+                                    </Link>
+
+                                    <Button @click="openEditDialog(dept)" size="sm" variant="outline" class="gap-1">
+                                        <Pencil class="h-3 w-3" />
+                                        Edit
+                                    </Button>
+                                    <Button @click="confirmDelete(dept.id)" size="sm" variant="destructive"
+                                        class="gap-1">
+                                        <Trash2 class="h-3 w-3" />
+                                        Delete
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+
+                <!-- Pagination -->
+                <div class="border-t px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm">Showing 5 of 5 departments</p>
+                        <div class="flex gap-2">
+                            <Button variant="outline" size="sm" disabled>Previous</Button>
+                            <Button variant="outline" size="sm" disabled>Next</Button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Table -->
-                <div class="overflow-hidden rounded-xl border shadow-sm">
-                    <div class="border-b p-6">
-                        <h2 class="text-lg">Department List</h2>
-                    </div>
-
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Department</TableHead>
-                                <TableHead>Employees</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead class="text-end">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-
-                        <TableBody>
-                            <!-- Show this row if no departments exist -->
-                            <TableRow v-if="props.departments.data.length === 0">
-                                <TableCell
-                                    colspan="4"
-                                    class="text-center text-gray-500"
-                                >
-                                    No departments yet.
-                                </TableCell>
-                            </TableRow>
-
-                            <!-- Otherwise, render all departments -->
-                            <TableRow
-                                v-else
-                                v-for="dept in props.departments.data"
-                                :key="dept.id"
-                            >
-                                <TableCell>
-                                    <div class="flex items-center gap-3">
-                                        <Building
-                                            class="h-4 w-4 text-primary"
-                                        />
-                                        <p class="font-medium">
-                                            {{ dept.name }}
-                                        </p>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-medium">1</span>
-                                        <span class="text-sm">employees</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <span
-                                        class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
-                                    >
-                                        Active
-                                    </span>
-                                </TableCell>
-                                <TableCell>
-                                    <div class="flex justify-end gap-2">
-                                        <Button
-                                            @click="openEditDialog(dept)"
-                                            size="sm"
-                                            variant="outline"
-                                            class="gap-1"
-                                        >
-                                            <Pencil class="h-3 w-3" />
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            @click="confirmDelete(dept.id)"
-                                            size="sm"
-                                            variant="destructive"
-                                            class="gap-1"
-                                        >
-                                            <Trash2 class="h-3 w-3" />
-                                            Delete
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-
-                    <!-- Pagination -->
-                    <div class="border-t px-6 py-4">
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm">Showing 5 of 5 departments</p>
-                            <div class="flex gap-2">
-                                <Button variant="outline" size="sm" disabled
-                                    >Previous</Button
-                                >
-                                <Button variant="outline" size="sm" disabled
-                                    >Next</Button
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            
         </div>
     </AppLayout>
 </template>
