@@ -13,15 +13,14 @@ import { User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '../ui/badge';
 import { router } from '@inertiajs/vue3';
-import userLink from '@/routes/user';
+import EditUserForm from './EditUserForm.vue';
+import DeleteUserModal from './DeleteUserModal.vue';
+import { Department } from '@/types';
 
 const props = defineProps<{
     users: User[],
+    departments?: Department[],
 }>();
-
-const editUser = (id: string) => {
-    router.visit(userLink.show(id).url)
-}
 
 </script>
 <template>
@@ -30,7 +29,6 @@ const editUser = (id: string) => {
         <TableHeader>
             <TableRow>
                 <TableHead>
-
                 </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
@@ -59,9 +57,9 @@ const editUser = (id: string) => {
                 </TableCell>
                 <TableCell class="text-right">
                     <div class="space-x-2">
-                        <Button size="sm" variant="destructive">Delete</Button>
-                        <Button size="sm" variant="secondary">Edit</Button>
-                        <Button size="sm" variant="default" @click="editUser(user.id)">View</Button>
+                        <DeleteUserModal :user="user" />
+                        <EditUserForm :user="user" :departments="props.departments" />
+                        <Button size="sm" variant="default" @click="router.visit(`/user/${user.id}`)">View</Button>
                     </div>
                 </TableCell>
             </TableRow>

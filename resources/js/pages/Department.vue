@@ -237,25 +237,6 @@ const deleteDepartment = () => {
                                 />
                                 <Input class="pl-10" placeholder="Search..." />
                             </div>
-
-                            <!-- Status Select -->
-                            <Select>
-                                <SelectTrigger class="w-36">
-                                    <SelectValue placeholder="All Status" />
-                                </SelectTrigger>
-
-                                <SelectContent>
-                                    <SelectItem value="active"
-                                        >Active</SelectItem
-                                    >
-                                    <SelectItem value="inactive"
-                                        >Inactive</SelectItem
-                                    >
-                                </SelectContent>
-                            </Select>
-
-                            <!-- Filter Button -->
-                            <Button variant="outline"> Filter </Button>
                         </div>
                     </div>
                 </div>
@@ -271,7 +252,6 @@ const deleteDepartment = () => {
                             <TableRow>
                                 <TableHead>Department</TableHead>
                                 <TableHead>Employees</TableHead>
-                                <TableHead>Status</TableHead>
                                 <TableHead class="text-end">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -295,9 +275,6 @@ const deleteDepartment = () => {
                             >
                                 <TableCell>
                                     <div class="flex items-center gap-3">
-                                        <Building
-                                            class="h-4 w-4 text-primary"
-                                        />
                                         <p class="font-medium">
                                             {{ dept.name }}
                                         </p>
@@ -305,16 +282,9 @@ const deleteDepartment = () => {
                                 </TableCell>
                                 <TableCell>
                                     <div class="flex items-center gap-2">
-                                        <span class="font-medium">1</span>
-                                        <span class="text-sm">employees</span>
+                                        <span class="font-medium">{{ dept.users?.length ?? 0 }}</span>
+                                        <span class="text-sm">{{ dept.users?.length === 1 ? 'employee' : 'employees' }}</span>
                                     </div>
-                                </TableCell>
-                                <TableCell>
-                                    <span
-                                        class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
-                                    >
-                                        Active
-                                    </span>
                                 </TableCell>
                                 <TableCell>
                                     <div class="flex justify-end gap-2">

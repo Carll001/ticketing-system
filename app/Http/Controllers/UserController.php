@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Models\DepartmentUser;
 use App\Models\User;
+use App\Models\Task;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -79,9 +80,14 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        // return Inertia::render('User/Show', [
-        //     'user' => $user,
-        // ]);
+        // Get tasks assigned to departments this user belongs to
+        $departmentIds = $user->departments()->pluck('department_id');
+        $tasks = Task::whereIn('assigned_to', $departmentIds)->with('creator')->get();
+
+        return Inertia::render('User/Show', [
+            'user' => $user->load('departments'),
+            'tasks' => $tasks,
+        ]);
     }
 
     /**
@@ -89,7 +95,12 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        //
+        $departments = Department::all();
+        
+        return Inertia::render('User/Edit', [
+            'user' => $user->load('departments'),
+            'departments' => $departments,
+        ]);
     }
 
     /**
@@ -97,7 +108,36 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'min:4', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique(User::class)->ignore($user->id)
+            ],
+            'password' => [
+                'nullable',
+                'confirmed',
+                Password::defaults()
+            ],
+            'department_id' => ['required', 'array', 'min:1'],
+            'department_id.*' => ['exists:departments,id'],
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
+
+        if (!empty($validated['password'])) {
+            $user->update(['password' => Hash::make($validated['password'])]);
+        }
+
+        $user->departments()->sync($validated['department_id']);
+
+        return back();
     }
 
     /**
@@ -105,6 +145,9 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $user->departments()->detach();
+        $user->delete();
+
+        return back();
     }
 }

@@ -54,8 +54,10 @@ export interface Task {
 }
 
 export interface Department {
+    users: any;
     id: string
     name: string
+    users?: User[]
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

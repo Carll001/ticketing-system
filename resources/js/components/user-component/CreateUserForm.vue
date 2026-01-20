@@ -12,6 +12,8 @@ import InputError from '../InputError.vue';
 import { computed, ref } from 'vue';
 import userLink from '@/routes/user';
 import { Department } from '@/types';
+import { Toaster } from '../ui/sonner';
+import { toast } from 'vue-sonner';
 
 const openCreate = ref(false);
 const openCombo = ref(false);
@@ -32,6 +34,7 @@ const form = useForm({
 const createUser = () => {
     form.post(userLink.store().url, {
         onSuccess: () => {
+            toast.success('User created sucessfully!')
             form.reset();
             openCreate.value = false;
         }

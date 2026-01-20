@@ -17,4 +17,8 @@ class DepartmentUser extends Pivot // Extend Pivot
 
     // Allow mass assignment for when you use create() or sync()
     protected $fillable = ['user_id', 'department_id'];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

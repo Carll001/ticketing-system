@@ -13,7 +13,6 @@ const props = defineProps<{
 
 </script>
 <template>
-
     <Head title="Manage Users" />
     <AppLayout>
         <div class="flex flex-col flex-1 gap-4 p-4">
@@ -27,7 +26,7 @@ const props = defineProps<{
                 </div>
             </section>
             <section>
-                <UserTable :users="props.users"/>
+                <UserTable :users="props.users" :departments="props.departments"/>
             </section>
         </div>
     </AppLayout>
