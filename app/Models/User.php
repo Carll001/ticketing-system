@@ -26,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -52,5 +53,12 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    public function departments()
+    {
+        return $this->belongsToMany(Department::class, 'department_users')
+            ->using(DepartmentUser::class) // This tells sync() to use your UUID model
+            ->withTimestamps();
     }
 }
