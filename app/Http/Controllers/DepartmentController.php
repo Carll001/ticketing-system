@@ -8,6 +8,7 @@ use App\Http\Resources\DepartmentResource;
 use App\Http\Services\DepartmentService;
 use App\Models\Department;
 use Inertia\Inertia;
+use App\Models\Task;
 
 class DepartmentController extends Controller
 {
@@ -28,6 +29,7 @@ class DepartmentController extends Controller
         return Inertia::render('Department',[
             'departments'=> DepartmentResource::collection($departments),
         ]);
+
     }
 
     /**
@@ -53,7 +55,14 @@ class DepartmentController extends Controller
      */
     public function show(Department $department)
     {
-        //
+          $tasks = Task::where('assigned_to', $department->id)->get();
+
+    return inertia('Department/Show', [
+        'department' => [
+            'data' => $department
+        ],
+        'tasks' => $tasks, // ✅ dito
+    ]);
     }
 
     /**
@@ -82,4 +91,7 @@ class DepartmentController extends Controller
 
         return back()->with('success', 'Department deleted successfully!');
     }
+
+
+    
 }

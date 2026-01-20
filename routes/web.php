@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [DepartmentController::class, 'store']) ->name('department.store');
         Route::put('/{department}', [DepartmentController::class, 'update'])->name('department.update');
         Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('department.destroy');
+        Route::get('/{department}', [DepartmentController::class, 'show'])->name('department.show');
     });
 
 
