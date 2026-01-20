@@ -23,7 +23,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::latest()->get();
+        $departments = Department::with('users')->latest()->get();
 
         return Inertia::render('Department',[
             'departments'=> DepartmentResource::collection($departments),

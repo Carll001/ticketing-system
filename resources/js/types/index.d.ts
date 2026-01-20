@@ -35,6 +35,8 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+
+    departments?: Department[]
 }
 
 export interface Task {
@@ -66,8 +68,10 @@ export interface Step {
     fields?: Field[]
 }
 export interface Department {
+    users: any;
     id: string
     name: string
+    users?: User[]
 }
 
 export interface Field { 

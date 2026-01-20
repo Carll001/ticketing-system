@@ -40,6 +40,7 @@ import { BookOpen, Folder, LayoutGrid, Menu, Search , Building2} from 'lucide-vu
 import { computed } from 'vue';
 import task from '@/routes/task';
 import department from '@/routes/department';
+import user from '@/routes/user';
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -63,6 +64,11 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Users',
+        href: user.index(),
         icon: LayoutGrid,
     },
     {

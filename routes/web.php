@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -49,6 +50,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{department}', [DepartmentController::class, 'update'])->name('department.update');
         Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('department.destroy');
     });
+
+
+    Route::prefix('user')->group(function(){
+        Route::get('/', [UserController::class, 'index'])->name('user.index');
+        Route::post('/', [UserController::class, 'store'])->name('user.store');
+        Route::get('/{user}', [UserController::class, 'show'])->name('user.show');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('user.edit');
+        Route::patch('/{user}', [UserController::class, 'update'])->name('user.update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('user.destroy');
+    });
+
 });
 
 require __DIR__ . '/settings.php';
