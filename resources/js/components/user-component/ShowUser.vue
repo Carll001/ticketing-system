@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { User, Task } from '@/types';
-import { Badge } from '../ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -9,7 +8,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Task, User } from '@/types';
+import { Badge } from '../ui/badge';
+
+import { useInitials } from '@/composables/useInitials';
+const { getInitials } = useInitials();
+
 const props = defineProps<{
     user: User;
     tasks?: Task[];
@@ -17,73 +21,84 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="flex gap-6">
+    <div class="flex gap-6">
         <!-- Profile Aside -->
         <aside class="w-80 flex-shrink-0">
-             <Card class="w-80">
-        <CardHeader class="items-center text-center space-y-4">
-            <!-- Avatar -->
-            <div
-                class="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white"
-            >
-                <span class="text-3xl font-bold">
-                    {{ user.name.charAt(0).toUpperCase() }}
-                </span>
-            </div>
+            <Card class="w-80">
+                <CardHeader class="items-center space-y-4 text-center">
+                    <!-- Avatar -->
+                    <div class="flex justify-center">
+                        <div
+                            class="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white"
+                        >
+                            <span class="text-3xl font-bold">
+                                   {{ getInitials(user.name) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <CardTitle class="text-xl">{{ user.name }}</CardTitle>
+                        <p class="text-sm text-muted-foreground">
+                            {{ user.email }}
+                        </p>
+                    </div>
+                </CardHeader>
 
-            <div>
-                <CardTitle class="text-xl">{{ user.name }}</CardTitle>
-                <p class="text-sm text-muted-foreground">{{ user.email }}</p>
-            </div>
-        </CardHeader>
+                <CardContent class="space-y-6">
+                    <!-- Departments -->
+                    <div class="space-y-2 text-center">
+                        <h3 class="text-sm font-semibold">Departments</h3>
 
-        <CardContent class="space-y-6">
-            <!-- Departments -->
-            <div class="space-y-2 text-center">
-                <h3 class="text-sm font-semibold">Departments</h3>
+                        <div
+                            v-if="user.departments && user.departments.length"
+                            class="flex flex-wrap justify-center gap-2"
+                        >
+                            <Badge
+                                v-for="dept in user.departments"
+                                :key="dept.id"
+                                variant="outline"
+                                class="rounded-lg"
+                            >
+                                {{ dept.name }}
+                            </Badge>
+                        </div>
 
-                <div
-                    v-if="user.departments && user.departments.length"
-                    class="flex flex-wrap justify-center gap-2"
-                >
-                    <Badge
-                        v-for="dept in user.departments"
-                        :key="dept.id"
-                        variant="outline"
-                        class="rounded-lg"
-                    >
-                        {{ dept.name }}
-                    </Badge>
-                </div>
+                        <p v-else class="text-sm text-muted-foreground italic">
+                            No departments assigned
+                        </p>
+                    </div>
 
-                <p v-else class="text-sm text-muted-foreground italic">
-                    No departments assigned
-                </p>
-            </div>
+                    <!-- User Meta -->
+                    <div class="grid grid-cols-2 gap-4 border-t pt-4 text-sm">
+                        <div>
+                            <p class="text-xs text-muted-foreground">Created</p>
+                            <p class="font-medium">
+                                {{
+                                    new Date(
+                                        user.created_at,
+                                    ).toLocaleDateString()
+                                }}
+                            </p>
+                        </div>
 
-            <!-- User Meta -->
-            <div class="grid grid-cols-2 gap-4 border-t pt-4 text-sm">
-                <div>
-                    <p class="text-xs text-muted-foreground">Created</p>
-                    <p class="font-medium">
-                        {{ new Date(user.created_at).toLocaleDateString() }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-xs text-muted-foreground">Updated</p>
-                    <p class="font-medium">
-                        {{ new Date(user.updated_at).toLocaleDateString() }}
-                    </p>
-                </div>
-            </div>
-        </CardContent>
-    </Card>
+                        <div>
+                            <p class="text-xs text-muted-foreground">Updated</p>
+                            <p class="font-medium">
+                                {{
+                                    new Date(
+                                        user.updated_at,
+                                    ).toLocaleDateString()
+                                }}
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </aside>
 
         <!-- Tasks Section -->
         <div class="flex-1">
-            <div class="rounded-lg border  shadow-sm">
+            <div class="rounded-lg border shadow-sm">
                 <div class="border-b p-6">
                     <h3 class="text-lg font-semibold">Assigned Tasks</h3>
                 </div>
@@ -101,14 +116,22 @@ const props = defineProps<{
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="task in tasks" :key="task.id">
-                                <TableCell class="font-medium">{{ task.title }}</TableCell>
-                                <TableCell class="max-w-xs text-sm text-muted-foreground truncate">
+                                <TableCell class="font-medium">{{
+                                    task.title
+                                }}</TableCell>
+                                <TableCell
+                                    class="max-w-xs truncate text-sm text-muted-foreground"
+                                >
                                     {{ task.description || '-' }}
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="outline">{{ task.type }}</Badge>
+                                    <Badge variant="outline">{{
+                                        task.type
+                                    }}</Badge>
                                 </TableCell>
-                                <TableCell>{{ new Date(task.due_date).toLocaleDateString() }}</TableCell>
+                                <TableCell>{{
+                                    new Date(task.due_date).toLocaleDateString()
+                                }}</TableCell>
                                 <TableCell>
                                     <Badge variant="secondary">Assigned</Badge>
                                 </TableCell>
