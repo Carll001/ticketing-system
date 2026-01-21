@@ -110,39 +110,47 @@ const getGroupsForStep = (stepId: string) => {
                                 </Label>
 
                                 <div class="space-y-4 pl-2">
-                                    <div v-for="field in fields" :key="field.id" class="flex gap-3"
-                                        :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
+                                    <div v-for="field in fields" :key="field.id" class="space-y-4">
+                                        <div class="flex gap-3"
+                                            :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
+                                            <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
+                                                <Input v-if="type === 'Input'"
+                                                    :model-value="field.responses?.[0]?.response ?? ''" readonly disabled
+                                                    :placeholder="`Enter ${field.label.toLowerCase()}...`"
+                                                    class="h-8 text-xs bg-zinc-900/50" />
 
-                                        <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
-                                            <template v-if="type === 'Input'">
-                                                <input disabled :value="field.responses?.[0]?.response ?? ''"
-                                                    class="flex h-8 w-full rounded-md border border-zinc-800 bg-zinc-900/50 px-3 py-1 text-xs shadow-sm transition-colors text-zinc-100 opacity-100 cursor-not-allowed" />
-                                            </template>
+                                                <Textarea v-else-if="type === 'Description'"
+                                                    :model-value="field.responses?.[0]?.response ?? ''" readonly disabled
+                                                    :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
+                                                    class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
 
-                                            <template v-else-if="type === 'Description'">
-                                                <textarea disabled :value="field.responses?.[0]?.response ?? ''"
-                                                    class="flex min-h-[60px] w-full rounded-md border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-xs shadow-sm text-zinc-100 opacity-100 cursor-not-allowed resize-none"></textarea>
-                                            </template>
+                                                <div v-else-if="type === 'Checkbox'" class="flex items-center">
+                                                    <Checkbox :id="field.id"
+                                                        :model-value="field.responses?.[0]?.response === 'true'"  disabled/>
+                                                </div>
 
-                                            <div v-else-if="type === 'Checkbox'"
-                                                class="flex items-center justify-center">
-                                                <Checkbox :id="field.id" disabled
-                                                    :model-value="field.responses?.[0]?.response === 'true'"
-                                                    class="opacity-100 cursor-not-allowed" />
                                             </div>
-                                        </div>
 
-                                        <Label :class="[
-                                            'text-xs font-medium text-zinc-300',
-                                            type === 'Checkbox' ? 'order-2' : 'order-1'
-                                        ]">
-                                            {{ field.label }}
-                                        </Label>
-                                        <!-- <div class="mt-10 p-4 bg-zinc-900 rounded border border-zinc-800">
-                                            <p class="text-[10px] text-zinc-500 uppercase mb-2">Form Live Data Debug:
-                                            </p>
-                                            <pre class="text-xs text-green-400">{{ field.responses?.[0] }}</pre>
-                                        </div> -->
+                                            <Label :class="[
+                                                'text-xs font-medium text-zinc-300',
+                                                type === 'Checkbox' ? 'order-2' : 'order-1'
+                                            ]">
+                                                {{ field.label }}
+                                            </Label>
+                                        </div>
+                                        <p v-if="field.responses?.[0] !== null"
+                                            class="text-[10px] text-zinc-500 italic ">
+                                            Answered by <span class="text-zinc-400 font-medium">{{
+                                                field.responses?.[0].user?.name ??
+                                                'Someone' }}</span>
+                                            on {{ new Date(field.responses?.[0].created_at || '').toLocaleDateString()
+                                            }}
+                                            at {{ new Date(field.responses?.[0].created_at || '').toLocaleTimeString([],
+                                                {
+                                                    hour:
+                                                        '2-digit', minute: '2-digit'
+                                                }) }}
+                                        </p>
                                     </div>
 
                                 </div>

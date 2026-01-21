@@ -87,10 +87,8 @@ class TaskController extends Controller
             WHEN type = 'Input' THEN 2 
             WHEN type = 'Description' THEN 3 
             ELSE 4 END");
-        }, 'steps.fields.responses' => function ($query) {
-            // Load responses only for the current user
-            $query->where('user_id', Auth::id());
-        }]);
+        }, 'steps.fields.responses.user'
+        ]);
 
         $departments = Department::all();
 
