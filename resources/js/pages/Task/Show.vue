@@ -63,14 +63,17 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </div>
                     <div>
                         <p class="text-muted-foreground text-sm gap-2">
-                           Due: {{ props.task.data.due_date ? new Date(props.task.data.due_date).toDateString() : 'No due date' }}
+                           Due: 
+                           {{ props.task.data.due_date ? new Date(props.task.data.due_date).toDateString() : 'No due date' }}
                         </p>
                     </div>
                 </section>
             </div>
             <div class="flex justify-end gap-2">
                 <TaskDeleteDialog :id="props.task.data.id" />
-                <Button size="sm" @click="editTask" variant="secondary">Edit task</Button>
+                <Button size="sm" @click="editTask" variant="secondary">
+                    Edit task
+                </Button>
                 <!-- <AddStepDialog :task="task" /> -->
                 <Button size="sm" @click="addStep">Add Step</Button>
             </div>

@@ -79,8 +79,19 @@ export interface Field {
     step_id: string;
     type: 'Checkbox' | 'Input' | 'Description';
     label: string;
+    responses?: Response[]
     created_at?: string;
     updated_at?: string;
+}
+
+export interface Response {
+    id: string
+    response: string
+    user_id: string
+    created_at: string
+    updated_at: string
+
+    user: User
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

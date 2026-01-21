@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\StepController;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -60,6 +61,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{user}/edit', [UserController::class, 'edit'])->name('user.edit');
         Route::patch('/{user}', [UserController::class, 'update'])->name('user.update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('user.destroy');
+    });
+
+    Route::prefix('response')->group(function() {
+        Route::post('/', [ResponseController::class, 'store'])->name('response.store');
     });
 
 });

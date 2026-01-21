@@ -81,13 +81,17 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $task->load(['creator', 'steps.assigned', 'assigned', 'steps.fields' => function ($query) {
+        $task->load(['creator', 'assigned', 'steps.assigned', 'steps.fields' => function ($query) {
             $query->orderByRaw("CASE 
             WHEN type = 'Checkbox' THEN 1 
             WHEN type = 'Input' THEN 2 
             WHEN type = 'Description' THEN 3 
             ELSE 4 END");
+        }, 'steps.fields.responses' => function ($query) {
+            // Load responses only for the current user
+            $query->where('user_id', Auth::id());
         }]);
+
         $departments = Department::all();
 
         return Inertia::render('Task/Show', [
@@ -95,7 +99,7 @@ class TaskController extends Controller
             'departments' => $departments,
         ]);
     }
-    
+
     /**
      * Show the form for editing the specified resource.
      */

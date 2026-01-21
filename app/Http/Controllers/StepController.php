@@ -77,7 +77,12 @@ class StepController extends Controller
      */
     public function show(Task $task, Step $step)
     {
-        $step->load(['task', 'assigned', 'fields']);
+        $step->load([
+            'task',
+            'assigned',
+            'fields.responses.user'
+        ]);
+
         return Inertia::render('Step/Show', [
             'step' => StepResource::make($step),
         ]);
@@ -94,7 +99,12 @@ class StepController extends Controller
             WHEN type = 'Input' THEN 2 
             WHEN type = 'Description' THEN 3 
             ELSE 4 END");
+            // Load responses for the logged-in user so the form is pre-filled
+            $query->with(['responses' => function ($q) {
+                $q->where('user_id', Auth::id());
+            }]);
         }]);
+
         return Inertia::render('Step/Edit', [
             'users' => User::all(),
             'step' => $step,
