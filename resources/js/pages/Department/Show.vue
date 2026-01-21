@@ -2,10 +2,8 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Building } from 'lucide-vue-next'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Department } from '@/types'
-
 
 const props = defineProps<{
   department: { data: Department },
@@ -16,21 +14,30 @@ const props = defineProps<{
     due_date: string | null
   }>
 }>()
+
+const formatDate = (date: string | null) => {
+  if (!date) return ''
+  const d = new Date(date)
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(d)
+}
 </script>
 
 <template>
   <Head title="View Department" />
 
- <AppLayout>
+  <AppLayout>
     <div class="max-w-7xl mx-auto p-6 space-y-6">
 
       <!-- Header -->
-     <div class="flex justify-between items-center mb-6">
+      <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Department Details</h1>
 
         <Link href="/department">
-          <Button variant="outline" class="gap-2">
-            <ArrowLeft class="w-4 h-4" />
+          <Button variant="outline">
             Back
           </Button>
         </Link>
@@ -44,6 +51,7 @@ const props = defineProps<{
           <Card>
             <CardHeader>
               <CardTitle>Information</CardTitle>
+              <CardDescription>General details about this department.</CardDescription>
             </CardHeader>
 
             <CardContent class="space-y-4">
@@ -65,6 +73,7 @@ const props = defineProps<{
           <Card>
             <CardHeader>
               <CardTitle>Tasks Assigned</CardTitle>
+              <CardDescription>A list of all active tasks for this department.</CardDescription>
             </CardHeader>
 
             <CardContent class="space-y-4">
@@ -74,19 +83,18 @@ const props = defineProps<{
 
               <div v-else class="space-y-4">
                 <Card v-for="task in tasks" :key="task.id" class="border">
-                  <CardHeader class="flex justify-between items-start">
-                    <div class="flex items-center gap-2">
-                      <FileText class="w-5 h-5 text-primary" />
-                      <CardTitle class="text-lg font-medium">{{ task.title }}</CardTitle>
+                  <CardHeader>
+                    <div class="flex items-center justify-between">
+                      <CardTitle class="text-xl font-semibold">{{ task.title }}</CardTitle>
+                      <!-- Display Due Date text, no badge -->
+                      <p class="text-xs text-muted-foreground">
+                        {{ task.due_date ? `Due Date: ${formatDate(task.due_date)}` : 'No Due Date' }}
+                      </p>
                     </div>
-                    <span class="text-sm text-muted-foreground">
-                      <Calendar class="w-4 h-4 inline mr-1" />
-                      {{ task.due_date ?? 'No due date' }}
-                    </span>
+                    <CardDescription v-if="task.description">
+                      {{ task.description }}
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p>{{ task.description ?? '-' }}</p>
-                  </CardContent>
                 </Card>
               </div>
             </CardContent>
