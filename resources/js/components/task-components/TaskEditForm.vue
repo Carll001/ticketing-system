@@ -22,14 +22,10 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import taskLink from '@/routes/task';
 import { Form, router, useForm } from '@inertiajs/vue3';
-import { ChevronLeft } from 'lucide-vue-next';
 import InputError from '../InputError.vue';
 import Separator from '../ui/separator/Separator.vue';
-import { store } from '@/routes/login';
 import { Department, Task } from '@/types';
-import { computed, Ref, ref, watch } from 'vue';
-import task from '@/routes/task';
-import type { DateValue } from '@internationalized/date'
+import { ref, watch } from 'vue';
 import { getLocalTimeZone, parseDate } from '@internationalized/date'
 import { ChevronDownIcon } from 'lucide-vue-next'
 import { Calendar } from '@/components/ui/calendar'

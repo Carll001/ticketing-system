@@ -3,20 +3,29 @@ import taskLink from '@/routes/task';
 import { Button } from '../ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { router } from '@inertiajs/vue3';
+import { toast } from 'vue-sonner';
+import {ref } from 'vue'
 
-const props = defineProps<{
+ const props = defineProps<{
     id: string
 }>();
+
+const closeDeleteModal = ref(false);
 
 const deleteTask = () => {
     router.delete(taskLink.delete(props.id).url, {
       preserveScroll: true,
+
+      onSuccess: () => {
+        toast.success('Task deleted sucessfully!');
+        closeDeleteModal.value = false
+      }
     })  
 }
 
 </script>
 <template>
-    <Dialog>
+    <Dialog v-model="closeDeleteModal">
     <DialogTrigger as-child>
         <Button size="sm" variant="destructive">Delete</Button>
     </DialogTrigger>

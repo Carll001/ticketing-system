@@ -25,11 +25,12 @@ class DepartmentController extends Controller
     public function index()
     {
         $departments = Department::with('users')->latest()->get();
+        $users = \App\Models\User::with('departments')->get();
 
-        return Inertia::render('Department',[
-            'departments'=> DepartmentResource::collection($departments),
+        return Inertia::render('Department', [
+            'departments' => DepartmentResource::collection($departments),
+            'users' => \App\Http\Resources\UserResource::collection($users),
         ]);
-
     }
 
     /**
@@ -47,7 +48,7 @@ class DepartmentController extends Controller
     {
         $this->departmentService->store($request->validated());
 
-        return back()->with('success','department created successfully!');
+        return back()->with('success', 'department created successfully!');
     }
 
     /**
@@ -55,14 +56,14 @@ class DepartmentController extends Controller
      */
     public function show(Department $department)
     {
-          $tasks = Task::where('assigned_to', $department->id)->get();
+        $tasks = Task::where('assigned_to', $department->id)->get();
 
-    return inertia('Department/Show', [
-        'department' => [
-            'data' => $department
-        ],
-        'tasks' => $tasks, // ✅ dito
-    ]);
+        return inertia('Department/Show', [
+            'department' => [
+                'data' => $department
+            ],
+            'tasks' => $tasks, // ✅ dito
+        ]);
     }
 
     /**
@@ -78,8 +79,8 @@ class DepartmentController extends Controller
      */
     public function update(UpdateDepartmentRequest $request, Department $department)
     {
-      $this->departmentService->update($request->validated(), $department); 
-        return back()->with('success','Department created successfully!');
+        $this->departmentService->update($request->validated(), $department);
+        return back()->with('success', 'Department created successfully!');
     }
 
     /**
@@ -91,7 +92,4 @@ class DepartmentController extends Controller
 
         return back()->with('success', 'Department deleted successfully!');
     }
-
-
-    
 }

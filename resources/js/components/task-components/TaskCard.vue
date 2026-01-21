@@ -37,7 +37,8 @@ const completedStepsCount = (task: Task) => {
 
 </script>
 <template>
-    <Card v-for="task in props.tasks"  >
+   <div class="grid grid-cols-2 gap-3">
+        <Card v-for="task in props.tasks"  >
         <CardHeader>
             <div class="flex justify-between items-center">
                 <CardTitle @click="visitTask(task.id)" class="cursor-pointer text-lg">
@@ -70,6 +71,8 @@ const completedStepsCount = (task: Task) => {
             </CardDescription>
         </CardHeader>
     </Card>
+    </div>
+    
 
     <EmptyData :icon="NotebookText" title="no task yet" message="no task yet. be the first to create a task" :length="tasks.length === 0"/>
 </template>

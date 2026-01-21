@@ -21,30 +21,23 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
 import department from '@/routes/department';
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-
 import { Form, Head, useForm } from '@inertiajs/vue3';
 import { Building, Pencil, Plus, Search, Trash2 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { toast } from 'vue-sonner';
 import { Label } from '@/components/ui/label';
 import { Department } from '@/types';
+import { User } from '@/types';
 import InputError from '@/components/InputError.vue';
 import { Link } from '@inertiajs/vue3'
-
+import user from '@/routes/user';
 
 
 
 // Create function
 const props = defineProps<{
     departments: { data: Department[] };
+    users: { data: User[]}
 }>();
 
 const form = useForm({
@@ -63,6 +56,20 @@ const createDepartment = () => {
 
 const isOpen = ref(false);
 
+
+// Computed property to get employees per department
+const employeesPerDept = computed(() => {
+    const map = new Map<string, number>();
+    props.users.data.forEach(user => {
+        // Assuming users have a departments relationship
+        if (user.departments && Array.isArray(user.departments)) {
+            user.departments.forEach((dept: any) => {
+                map.set(dept.id, (map.get(dept.id) || 0) + 1);
+            });
+        }
+    });
+    return map;
+});
 
 
 // Edit functions
@@ -212,21 +219,6 @@ const deleteDepartment = () => {
                             <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input class="pl-10" placeholder="Search..." />
                         </div>
-
-                        <!-- Status Select -->
-                        <Select>
-                            <SelectTrigger class="w-36">
-                                <SelectValue placeholder="All Status" />
-                            </SelectTrigger>
-
-                            <SelectContent>
-                                <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        <!-- Filter Button -->
-                        <Button variant="outline"> Filter </Button>
                     </div>
                 </div>
             </div>
@@ -242,7 +234,6 @@ const deleteDepartment = () => {
                             <TableRow>
                                 <TableHead>Department</TableHead>
                                 <TableHead>Employees</TableHead>
-                                <TableHead>Status</TableHead>
                                 <TableHead class="text-end">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -257,6 +248,7 @@ const deleteDepartment = () => {
 
                         <!-- Otherwise, render all departments -->
                         <TableRow v-else v-for="dept in props.departments.data" :key="dept.id">
+
                             <TableCell>
                                 <div class="flex items-center gap-3">
                                     <Building class="h-4 w-4 text-primary" />
@@ -265,18 +257,14 @@ const deleteDepartment = () => {
                                     </p>
                                 </div>
                             </TableCell>
+
                             <TableCell>
                                 <div class="flex items-center gap-2">
-                                    <span class="font-medium">1</span>
+                                    <span class="font-medium">{{ employeesPerDept.get(dept.id) || 0 }}</span>
                                     <span class="text-sm">employees</span>
                                 </div>
                             </TableCell>
-                            <TableCell>
-                                <span
-                                    class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                                    Active
-                                </span>
-                            </TableCell>
+                           
                             <TableCell>
                                 <div class="flex justify-end gap-2">
                                     <Link :href="department.show(dept.id).url">
@@ -296,6 +284,7 @@ const deleteDepartment = () => {
                                     </Button>
                                 </div>
                             </TableCell>
+
                         </TableRow>
                     </TableBody>
                 </Table>
