@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PresetRequest;
 use App\Models\Preset;
+use App\Models\PresetField;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class PresetController extends Controller
@@ -30,9 +34,31 @@ class PresetController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PresetRequest $request)
     {
-        dd($request->all());
+        $data = $request->validated();
+
+        DB::transaction(function () use ($data) {
+            // 1. Create the Parent
+            $preset = Preset::create([
+                'user_id' => Auth::id(),
+                'name'        => $data['name'],
+                'description' => $data['description'],
+                'has_cost'    => $data['has_cost'] ?? false,
+            ]);
+
+            // 2. Create the Fields
+            if (!empty($data['fields'])) {
+                foreach ($data['fields'] as $field) {
+                    $preset->fields()->create([
+                        'type'  => $field['type'],
+                        'label' => $field['label'],
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('preset.index');
     }
 
     /**

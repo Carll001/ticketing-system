@@ -157,13 +157,15 @@ const submitResponse = () => {
                                     {{ field.label }}
                                 </Label>
                             </div>
-                            <p v-if="field.responses?.[0] !== null" class="text-[10px] text-zinc-500 italic ">
-                                Answered by <span class="text-zinc-400 font-medium">{{ field.responses?.[0].user?.name ??
+                            <p v-if="field.responses && field.responses[0]" class="text-[10px] text-zinc-500 italic ">
+                                Answered by <span class="text-zinc-400 font-medium">{{ field.responses?.[0].user?.name
+                                    ??
                                     'Someone' }}</span>
                                 on {{ new Date(field.responses?.[0].created_at || '').toLocaleDateString() }}
                                 at {{ new Date(field.responses?.[0].created_at || '').toLocaleTimeString([], {
                                     hour:
-                                '2-digit', minute: '2-digit' }) }}
+                                        '2-digit', minute: '2-digit'
+                                }) }}
                             </p>
                         </div>
                     </div>

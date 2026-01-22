@@ -115,18 +115,20 @@ const getGroupsForStep = (stepId: string) => {
                                             :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
                                             <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
                                                 <Input v-if="type === 'Input'"
-                                                    :model-value="field.responses?.[0]?.response ?? ''" readonly disabled
-                                                    :placeholder="`Enter ${field.label.toLowerCase()}...`"
+                                                    :model-value="field.responses?.[0]?.response ?? ''" readonly
+                                                    disabled :placeholder="`Enter ${field.label.toLowerCase()}...`"
                                                     class="h-8 text-xs bg-zinc-900/50" />
 
                                                 <Textarea v-else-if="type === 'Description'"
-                                                    :model-value="field.responses?.[0]?.response ?? ''" readonly disabled
+                                                    :model-value="field.responses?.[0]?.response ?? ''" readonly
+                                                    disabled
                                                     :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
                                                     class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
 
                                                 <div v-else-if="type === 'Checkbox'" class="flex items-center">
                                                     <Checkbox :id="field.id"
-                                                        :model-value="field.responses?.[0]?.response === 'true'"  disabled/>
+                                                        :model-value="field.responses?.[0]?.response === 'true'"
+                                                        disabled />
                                                 </div>
 
                                             </div>
@@ -138,9 +140,9 @@ const getGroupsForStep = (stepId: string) => {
                                                 {{ field.label }}
                                             </Label>
                                         </div>
-                                        <p v-if="field.responses?.[0] !== null"
-                                            class="text-[10px] text-zinc-500 italic ">
-                                            Answered by <span class="text-zinc-400 font-medium">{{
+                                        <p v-if="field.responses && field.responses[0]"
+                                            class=" text-[10px] text-zinc-500 italic ">
+                                            Answered by <span class=" text-zinc-400 font-medium">{{
                                                 field.responses?.[0].user?.name ??
                                                 'Someone' }}</span>
                                             on {{ new Date(field.responses?.[0].created_at || '').toLocaleDateString()

@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('presets', function (Blueprint $table) {
+        Schema::create('preset_fields', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->boolean('has_cost')->default(false);
+           
+            $table->foreignUuid('preset_id')->constrained()->onDelete('cascade');
+            $table->string('type'); // Checkbox, Input, etc.
+            $table->string('label');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('presets');
+        Schema::dropIfExists('preset_fields');
     }
 };

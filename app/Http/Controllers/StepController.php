@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use DB;
 use App\Models\Step;
 use App\Models\Task;
 use App\Models\User;
@@ -11,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StepRequest;
 use App\Http\Resources\StepResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB ;
 
 class StepController extends Controller
 {
