@@ -53,17 +53,34 @@ class DepartmentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Department $department)
-    {
-          $tasks = Task::where('assigned_to', $department->id)->get();
+   public function show(Department $department)
+{
+    // Eager load assigned users
+    $department->load('users');
+
+    // Fetch tasks assigned to this department
+    $tasks = Task::where('assigned_to', $department->id)->get();
 
     return inertia('Department/Show', [
         'department' => [
-            'data' => $department
+            'data' => [
+                'id' => $department->id,
+                'name' => $department->name,
+                'created_at' => $department->created_at,
+                'updated_at' => $department->updated_at,
+                'assigned_users' => $department->users->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                    ];
+                }),
+            ],
         ],
-        'tasks' => $tasks, // ✅ dito
+        'tasks' => $tasks,
     ]);
-    }
+}
+
 
     /**
      * Show the form for editing the specified resource.

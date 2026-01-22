@@ -14,6 +14,11 @@ const props = defineProps<{
     data: Department & { 
       labels?: { id: number; name: string }[]
       sub_departments?: { id: number; name: string }[]
+      assigned_users?: {
+        id: number
+        name: string
+        email?: string
+      }[]
     } 
   },
   tasks?: Array<{
@@ -56,11 +61,10 @@ const getInitials = (name: string) => {
       </section>
 
       <div class="flex gap-6">
-        <!-- Left Card: Department Info -->
+        <!-- Left Card -->
         <aside class="w-80 flex-shrink-0">
           <Card class="w-80">
             <CardHeader class="items-center space-y-4 text-center">
-              <!-- Gradient Avatar with Initials -->
               <div
                 class="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white mx-auto text-3xl font-bold"
               >
@@ -72,13 +76,11 @@ const getInitials = (name: string) => {
             </CardHeader>
 
             <CardContent class="space-y-4 text-center">
-              <!-- Department ID -->
               <div class="space-y-2">
                 <h3 class="text-sm font-semibold">Department ID</h3>
                 <p class="text-sm text-muted-foreground">{{ department?.id }}</p>
               </div>
 
-              <!-- Labels Badges -->
               <div v-if="department?.labels?.length" class="flex flex-wrap justify-center gap-2">
                 <Badge
                   v-for="label in department.labels"
@@ -90,7 +92,6 @@ const getInitials = (name: string) => {
                 </Badge>
               </div>
 
-              <!-- Sub-Departments Badges -->
               <div v-if="department?.sub_departments?.length" class="flex flex-wrap justify-center gap-2 mt-2">
                 <Badge
                   v-for="sub in department.sub_departments"
@@ -105,15 +106,48 @@ const getInitials = (name: string) => {
           </Card>
         </aside>
 
-        <!-- Right Section: Assigned Tasks -->
-        <div class="flex-1">
+        <!-- Right Section -->
+        <div class="flex-1 space-y-6">
+
+          <!-- USERS CARD -->
+<!-- USERS CARD -->
+<Card>
+  <CardHeader>
+    <CardTitle>Assigned Users</CardTitle>
+  </CardHeader>
+
+  <CardContent>
+    <div v-if="department?.assigned_users?.length" class="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          <TableRow v-for="user in department.assigned_users" :key="user.id">
+            <TableCell class="font-medium">{{ user.name }}</TableCell>
+            <TableCell>{{ user.email || '-' }}</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+
+    <div v-else class="text-sm text-muted-foreground text-center">
+      No users assigned to this department
+    </div>
+  </CardContent>
+</Card>
+
+
+          <!-- TASKS CARD -->
           <div class="rounded-lg border shadow-sm">
-            <!-- Tasks Header -->
             <div class="border-b p-6">
               <h3 class="text-lg font-semibold">Assigned Tasks</h3>
             </div>
 
-            <!-- Tasks Table -->
             <div v-if="tasks.length" class="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -136,11 +170,11 @@ const getInitials = (name: string) => {
               </Table>
             </div>
 
-            <!-- No Tasks Message -->
             <div v-else class="p-6 text-center text-muted-foreground">
               <p>No tasks assigned to this department</p>
             </div>
           </div>
+
         </div>
       </div>
     </div>
