@@ -94,4 +94,9 @@ export interface Response {
     user: User
 }
 
+export interface Preset {
+    id: string
+    
+}
+
 export type BreadcrumbItemType = BreadcrumbItem;

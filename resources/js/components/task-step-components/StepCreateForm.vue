@@ -144,80 +144,93 @@ const groupedFields = computed(() => {
                                 <InputError :message="form.errors.description" />
                             </section>
                         </div>
-                       <div class="space-y-6">
-    <div class="flex justify-between items-center border-b pb-2">
-        <div>
-            <Label class="text-base font-semibold">User Input Fields</Label>
-            <p class="text-xs text-zinc-500">Define what information the User must provide.</p>
-        </div>
-        <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-                <Button size="sm" variant="outline" class="gap-2">
-                    <Plus class="w-4 h-4" /> Add Field
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem @click="addField('Description')">Textarea (Description)</DropdownMenuItem>
-                <DropdownMenuItem @click="addField('Checkbox')">Checkbox (Confirmation)</DropdownMenuItem>
-                <DropdownMenuItem @click="addField('Input')">Small Input (Text/Number)</DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    </div>
+                        <div class="space-y-6">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div>
+                                    <Label class="text-base font-semibold">User Input Fields</Label>
+                                    <p class="text-xs text-zinc-500">Define what information the User must provide.</p>
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger as-child>
+                                        <Button size="sm" variant="outline" class="gap-2">
+                                            <Plus class="w-4 h-4" /> Add Field
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem @click="addField('Description')">Textarea (Description)
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="addField('Checkbox')">Checkbox (Confirmation)
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="addField('Input')">Small Input (Text/Number)
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
 
-    <div v-if="form.fields.length === 0"
-        class="border-2 border-dashed border-zinc-800 rounded-lg p-6 text-center">
-        <p class="text-sm text-zinc-500">No input fields added. The User will just mark this step as complete.</p>
-    </div>
+                            <div v-if="form.fields.length === 0"
+                                class="border-2 border-dashed border-zinc-800 rounded-lg p-6 text-center">
+                                <p class="text-sm text-zinc-500">No input fields added. The User will just mark this
+                                    step as complete.</p>
+                            </div>
 
-    <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
-        <Label class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800/50 pb-1 block">
-            {{ type }}{{  type === 'Checkbox' ? 'es' : 's' }}
-        </Label>
+                            <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
+                                <Label
+                                    class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800/50 pb-1 block">
+                                    {{ type }}{{ type === 'Checkbox' ? 'es' : 's' }}
+                                </Label>
 
-        <div class="space-y-4">
-            <section v-for="field in fields" :key="field.id"
-                class="relative p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-3 group">
+                                <div class="space-y-4">
+                                    <section v-for="field in fields" :key="field.id"
+                                        class="relative p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-3 group">
 
-                <div class="flex items-center justify-between">
-                    <div class="flex-1 mr-4">
-                        <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Field Label / Question</Label>
-                        <Input v-model="form.fields[form.fields.indexOf(field)].label"
-                            :placeholder="`e.g. ${type === 'Checkbox' ? 'Check if confirmed' : 'Enter detail name'}`" />
-                    </div>
-                    <Button variant="ghost" size="icon" class="h-8 w-8 text-zinc-500 hover:text-red-500 shrink-0"
-                        @click="removeField(form.fields.indexOf(field))">
-                        <Trash2Icon class="w-4 h-4" />
-                    </Button>
-                </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex-1 mr-4">
+                                                <Label
+                                                    class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Field
+                                                    Label / Question</Label>
+                                                <Input v-model="form.fields[form.fields.indexOf(field)].label"
+                                                    :placeholder="`e.g. ${type === 'Checkbox' ? 'Check if confirmed' : 'Enter detail name'}`" />
+                                            </div>
+                                            <Button variant="ghost" size="icon"
+                                                class="h-8 w-8 text-zinc-500 hover:text-red-500 shrink-0"
+                                                @click="removeField(form.fields.indexOf(field))">
+                                                <Trash2Icon class="w-4 h-4" />
+                                            </Button>
+                                        </div>
 
-                <div class="mt-4 pt-4 border-t border-zinc-800/50 opacity-40 grayscale pointer-events-none">
-                    <p class="text-[9px] uppercase font-bold text-zinc-600 mb-2">User Response Preview</p>
-                    
-                    <div :class="['flex gap-3', type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start']">
-                        
-                        <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
-                            <Checkbox v-if="type === 'Checkbox'" class="rounded-sm" />
-                            
-                            <Input v-if="type === 'Input'" disabled 
-                                :placeholder="`User will enter ${field.label || 'data'}...`" 
-                                class="h-8 text-xs bg-zinc-900/50" />
-                            
-                            <Textarea v-if="type === 'Description'" disabled 
-                                :placeholder="`User will provide ${field.label || 'details'}...`" 
-                                class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                        <div
+                                            class="mt-4 pt-4 border-t border-zinc-800/50 opacity-40 grayscale pointer-events-none">
+                                            <p class="text-[9px] uppercase font-bold text-zinc-600 mb-2">User Response
+                                                Preview</p>
+
+                                            <div
+                                                :class="['flex gap-3', type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start']">
+
+                                                <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
+                                                    <Checkbox v-if="type === 'Checkbox'" class="rounded-sm" />
+
+                                                    <Input v-if="type === 'Input'" disabled
+                                                        :placeholder="`User will enter ${field.label || 'data'}...`"
+                                                        class="h-8 text-xs bg-zinc-900/50" />
+
+                                                    <Textarea v-if="type === 'Description'" disabled
+                                                        :placeholder="`User will provide ${field.label || 'details'}...`"
+                                                        class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                                </div>
+
+                                                <span
+                                                    :class="['text-sm', type === 'Checkbox' ? 'order-2' : 'order-1 font-medium text-zinc-300']">
+                                                    {{ field.label || 'Field Label' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <InputError
+                                            :message="form.errors[`fields.${form.fields.indexOf(field)}.label` as keyof typeof form.errors]" />
+                                    </section>
+                                </div>
+                            </div>
                         </div>
-
-                        <span :class="['text-sm', type === 'Checkbox' ? 'order-2' : 'order-1 font-medium text-zinc-300']">
-                            {{ field.label || 'Field Label' }}
-                        </span>
-                    </div>
-                </div>
-
-                <InputError :message="form.errors[`fields.${form.fields.indexOf(field)}.label` as keyof typeof form.errors]" />
-            </section>
-        </div>
-    </div>
-</div>
                     </CardContent>
                 </Card>
                 <Card class="h-fit">

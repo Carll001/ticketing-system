@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\ResponseController;
-use App\Http\Controllers\StepController;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StepController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PresetController;
+use App\Http\Controllers\ResponseController;
+use App\Http\Controllers\DepartmentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -65,6 +66,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('response')->group(function() {
         Route::post('/', [ResponseController::class, 'store'])->name('response.store');
+    });
+
+    Route::prefix('preset')->group(function() {
+        Route::get('/', [PresetController::class, 'index'])->name('preset.index');
+        Route::get('/create', [PresetController::class, 'create'])->name('preset.create');
+        Route::post('/', [PresetController::class, 'store'])->name('preset.store');
     });
 
 });

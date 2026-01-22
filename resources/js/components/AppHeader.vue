@@ -41,6 +41,7 @@ import { computed } from 'vue';
 import task from '@/routes/task';
 import department from '@/routes/department';
 import user from '@/routes/user';
+import preset from '@/routes/preset';
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -79,6 +80,11 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Department',
         href: department.index(),
+        icon:  Building2,
+    },
+    {
+        title: 'Preset',
+        href: preset.index(),
         icon:  Building2,
     },
 ];
