@@ -21,16 +21,16 @@ const props = defineProps<{
 }>();
 
 const visitTask = (id: string) => {
-    router.get(taskLink.show(id).url)
+    router.visit(taskLink.show(id).url)
 }
 
 const editTask = (id: string) => {
-    router.get(taskLink.edit(id).url)
+    router.visit(taskLink.edit(id).url)
 }
 
 
 const visitDepartment = (id: string) => {
-    router.get(`/department/${id}`)
+    router.visit(`/department/${id}`)
 }
 
 
