@@ -41,8 +41,14 @@ class TaskController extends Controller
      */
     public function index()
     {
-        // FETCH ALL TASK DATA
-        $tasks = Task::with(['steps', 'assigned'])->get();
+        // Get current user's department IDs
+        $userDepartmentIds = Auth::user()->departments()->pluck('department_id');
+        
+        // FETCH TASK DATA - Filter by user's departments
+        $tasks = Task::with(['steps', 'assigned'])
+            ->whereIn('assigned_to', $userDepartmentIds)
+            ->orWhere('creator_id', Auth::id())
+            ->get();
         // $departments = Department::all();
 
         return Inertia::render('Task/Index', [

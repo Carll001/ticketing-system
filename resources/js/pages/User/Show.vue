@@ -11,6 +11,7 @@ const props = defineProps<{
     user: User;
     tasks?: Task[];
 }>();
+
 </script>
 
 <template>

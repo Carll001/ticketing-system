@@ -10,14 +10,23 @@ import {
 } from '@/components/ui/table';
 import { Task, User } from '@/types';
 import { Badge } from '../ui/badge';
-
 import { useInitials } from '@/composables/useInitials';
+
 const { getInitials } = useInitials();
 
 const props = defineProps<{
     user: User;
     tasks?: Task[];
 }>();
+
+// // Debug: Log the tasks to see if they have steps
+// console.log('ShowUser tasks:', props.tasks);
+// if (props.tasks) {
+//     props.tasks.forEach(task => {
+//         console.log(`Task: ${task.title}, Steps:`, task.steps);
+//     });
+// }
+
 </script>
 
 <template>
@@ -25,9 +34,9 @@ const props = defineProps<{
         <!-- Profile Aside -->
         <aside class="w-80 flex-shrink-0">
             <Card class="w-80">
-                <CardHeader class="items-center space-y-4 text-center">
-                    <!-- Avatar -->
-                    <div class="flex justify-center">
+                    <CardHeader class="items-center space-y-4 text-center">
+                        <!-- Avatar -->
+                        <div class="flex justify-center">
                         <div
                             class="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white"
                         >
@@ -69,24 +78,13 @@ const props = defineProps<{
                     </div>
 
                     <!-- User Meta -->
-                    <div class="grid grid-cols-2 gap-4 border-t pt-4 text-sm">
+                    <div class="grid gap-4 border-t pt-4 text-sm flex text-center">
                         <div>
                             <p class="text-xs text-muted-foreground">Created</p>
                             <p class="font-medium">
                                 {{
                                     new Date(
                                         user.created_at,
-                                    ).toLocaleDateString()
-                                }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-muted-foreground">Updated</p>
-                            <p class="font-medium">
-                                {{
-                                    new Date(
-                                        user.updated_at,
                                     ).toLocaleDateString()
                                 }}
                             </p>
@@ -100,18 +98,16 @@ const props = defineProps<{
         <div class="flex-1">
             <div class="rounded-lg border shadow-sm">
                 <div class="border-b p-6">
-                    <h3 class="text-lg font-semibold">Assigned Tasks</h3>
+                    <h3 class="text-lg font-semibold">Assigned Steps</h3>
                 </div>
 
                 <div v-if="tasks && tasks.length > 0" class="overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Task Title</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Due Date</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead class="font-bold">Task Title</TableHead>
+                                <TableHead class="font-bold">Steps Title</TableHead>
+                                <TableHead class="font-bold">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -119,21 +115,27 @@ const props = defineProps<{
                                 <TableCell class="font-medium">{{
                                     task.title
                                 }}</TableCell>
-                                <TableCell
-                                    class="max-w-xs truncate text-sm text-muted-foreground"
-                                >
-                                    {{ task.description || '-' }}
+                                <TableCell>
+                                    <div v-if="task.steps && task.steps.length" class="flex flex-wrap gap-2">
+                                        <RouterLink v-for="step in task.steps" :key="step.id" :to="`/steps/${step.id}`">
+                                                {{ step.title }}
+                                        </RouterLink>
+                                    </div>
+                                    <span v-else class="text-sm text-muted-foreground">-</span>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="outline">{{
-                                        task.type
-                                    }}</Badge>
-                                </TableCell>
-                                <TableCell>{{
-                                    new Date(task.due_date).toLocaleDateString()
-                                }}</TableCell>
-                                <TableCell>
-                                    <Badge variant="secondary">Assigned</Badge>
+                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-blue-600">
+                                               Assigned
+                                            </Badge>
+                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-yellow-600">
+                                               Pending
+                                            </Badge>
+                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-green-600">
+                                               Completed
+                                            </Badge>
+                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-red-600">
+                                               Cancelled
+                                            </Badge>
                                 </TableCell>
                             </TableRow>
                         </TableBody>

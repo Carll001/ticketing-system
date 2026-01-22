@@ -36,7 +36,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const createTask = () => {
     router.visit(taskLink.create(), {
-        preserveState: false
+        preserveState: false,
     })
 }
 

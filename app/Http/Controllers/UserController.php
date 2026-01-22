@@ -81,8 +81,8 @@ class UserController extends Controller
     public function show(User $user)
     {
         // Get tasks assigned to departments this user belongs to
-        $departmentIds = $user->departments()->pluck('department_id');
-        $tasks = Task::whereIn('assigned_to', $departmentIds)->with('creator')->get();
+        $departmentIds = $user->departments()->pluck('departments.id');
+        $tasks = Task::whereIn('assigned_to', $departmentIds)->with('creator', 'steps')->get();
 
         return Inertia::render('User/Show', [
             'user' => $user->load('departments'),
@@ -96,7 +96,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $departments = Department::all();
-        
+
         return Inertia::render('User/Edit', [
             'user' => $user->load('departments'),
             'departments' => $departments,

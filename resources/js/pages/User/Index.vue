@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { Department, User } from '@/types';
 import CreateUserForm from '@/components/user-component/CreateUserForm.vue';
 import UserTable from '@/components/user-component/UserTable.vue';
 
-const props = defineProps<{
+const props = defineProps<{ 
     users: User[],
     departments: Department[],
 }>();
