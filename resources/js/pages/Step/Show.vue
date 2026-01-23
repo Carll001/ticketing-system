@@ -15,14 +15,15 @@ import EmptyData from '@/components/EmptyData.vue';
 import StepDeleteDialog from '@/components/task-step-components/StepDeleteDialog.vue';
 import { FileQuestion, Plus } from 'lucide-vue-next';
 
-// --------------------- TOAST ---------------------
 interface Toast {
   id: number;
   message: string;
   type: 'success' | 'error';
 }
+
 const toastState = reactive<{ toasts: Toast[] }>({ toasts: [] });
 let toastCounter = 0;
+
 const addToast = (message: string, type: 'success' | 'error' = 'success', duration = 3000) => {
   const id = toastCounter++;
   toastState.toasts.push({ id, message, type });
@@ -32,25 +33,43 @@ const addToast = (message: string, type: 'success' | 'error' = 'success', durati
   }, duration);
 };
 
-// --------------------- PROPS & FORMS ---------------------
 interface FormState {
   step_field_id: string | number;
   response: Record<string, any>;
 }
+
 interface ProofForm {
   description: string;
   attachments: File[];
 }
+
 const props = defineProps<{ step: { data: Step } }>();
 
-// Breadcrumbs
+// -----------------------------
+// PROOFS STATE
+// -----------------------------
+const proofs = ref<any[]>(props.step.data.proofs ?? []);
+
+watch(
+  () => props.step.data.proofs,
+  (val) => {
+    if (val) proofs.value = val;
+  },
+  { immediate: true }
+);
+
+// -----------------------------
+// BREADCRUMBS
+// -----------------------------
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Task', href: taskLink.index().url },
   { title: props.step.data.task.title, href: taskLink.show(props.step.data.task_id).url },
   { title: props.step.data.title, href: stepLink.show({ task: props.step.data.task_id, step: props.step.data.id }).url },
 ];
 
-// Step response form
+// -----------------------------
+// STEP FIELDS
+// -----------------------------
 const groupedFields = computed(() => {
   const fields = props.step.data.fields || [];
   return fields.reduce((acc, field) => {
@@ -65,13 +84,12 @@ const form = useForm<FormState>({
   step_field_id: props.step.data.id,
   response: (props.step.data.fields || []).reduce((acc, field) => {
     const existingValue = field.responses?.[0]?.response;
-    if (field.type === 'Checkbox') acc[field.id] = existingValue !== undefined ? existingValue : "0";
+    if (field.type === 'Checkbox') acc[field.id] = existingValue ?? 'false';
     else acc[field.id] = existingValue || '';
     return acc;
   }, {} as Record<string, any>)
 });
 
-// Watch for backend updates
 watch(() => props.step.data.fields, (newFields) => {
   newFields?.forEach(field => {
     const freshValue = field.responses?.[0]?.response;
@@ -79,23 +97,30 @@ watch(() => props.step.data.fields, (newFields) => {
   });
 }, { deep: true });
 
-// Step actions
 const editStep = (task_id: string, step_id: string) => {
   router.visit(stepLink.edit({ task: task_id, step: step_id }).url, { preserveScroll: true });
 };
 
-// --------------------- PROOF FORM ---------------------
+// -----------------------------
+// PROOF FORM
+// -----------------------------
 const proofForm = reactive<ProofForm>({ description: '', attachments: [] });
 const fileInputRef = ref<HTMLInputElement | null>(null);
+
 const triggerFileInput = () => fileInputRef.value?.click();
+
 const handleFiles = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
-    for (let i = 0; i < target.files.length; i++) proofForm.attachments.push(target.files[i]);
+    proofForm.attachments.push(...Array.from(target.files));
     target.value = '';
   }
 };
-const removeAttachment = (index: number) => proofForm.attachments.splice(index, 1);
+
+const removeAttachment = (index: number) => {
+  proofForm.attachments.splice(index, 1);
+};
+
 const attachmentPreviews = computed(() =>
   proofForm.attachments.map(file => ({
     file,
@@ -103,27 +128,48 @@ const attachmentPreviews = computed(() =>
   }))
 );
 
-// Edit/Delete proofs
 const editProof = (proof: any) => {
   router.visit(`/task/${props.step.data.task_id}/step/${props.step.data.id}/proof/${proof.id}/edit`);
 };
-const deleteProof = (proofId: number) => {
-  router.delete(`/task/${props.step.data.task_id}/step/${props.step.data.id}/proof/${proofId}`, { preserveScroll: true });
+
+const deleteProof = (proofId: string) => {
+  const taskId = props.step.data.task_id;
+  const stepId = props.step.data.id;
+
+  if (!taskId || !stepId) {
+    console.error('Missing task or step ID!');
+    return;
+  }
+
+  router.delete(`/task/{task}/step/{step}/proof/{proof}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        proofs.value = proofs.value.filter(p => p.id !== proofId);
+        addToast('Proof deleted successfully', 'success');
+      },
+      onError: () => addToast('Failed to delete proof', 'error')
+    }
+  );
 };
 
-// --------------------- SUBMIT BOTH RESPONSE + PROOF ---------------------
+
+
+// -----------------------------
+// SUBMIT FUNCTION
+// -----------------------------
 const submitAll = () => {
   const formData = new FormData();
 
-  // Append step fields
   formData.append('step_field_id', String(props.step.data.id));
-  Object.keys(form.response).forEach(key => formData.append(`response[${key}]`, form.response[key]));
+  Object.keys(form.response).forEach(key => {
+    formData.append(`response[${key}]`, form.response[key]);
+  });
 
-  // Append proof
   formData.append('description', proofForm.description);
-  proofForm.attachments.forEach((file, idx) => formData.append(`attachments[${idx}]`, file));
+  proofForm.attachments.forEach((file, i) => {
+    formData.append(`attachments[${i}]`, file);
+  });
 
-  // Submit
   router.post(
     proofLink.store({ task: props.step.data.task_id, step: props.step.data.id }).url,
     formData,
@@ -131,19 +177,25 @@ const submitAll = () => {
       preserveScroll: true,
       forceFormData: true,
       onSuccess: (page) => {
+        // Clear the form
         proofForm.description = '';
         proofForm.attachments = [];
+
+        // ✅ Update proofs from backend
+        const updatedStep = page.props.step as Step;
+        proofs.value = updatedStep.proofs ?? [];
+
         addToast('Proof submitted successfully!', 'success');
-        console.log('Saved proof JSON:', page.props.proof ?? page.props); // debug JSON
       },
-      onError: (errors) => {
-        addToast('Failed to submit proof. Please try again.', 'error');
-        console.error('Submission errors:', errors);
+      onError: () => {
+        addToast('Failed to submit proof.', 'error');
       }
     }
   );
 };
+
 </script>
+
 
 <template>
   <Head :title="step.data.title ?? 'Undefined'" />
@@ -203,18 +255,18 @@ const submitAll = () => {
                      :length="props.step.data.fields?.length === 0" />
         </div>
 
-        <!-- Proof Section -->
+ 
         <div class="mt-10 p-4 bg-zinc-900 rounded border border-zinc-800 space-y-4">
           <h4 class="text-sm font-bold text-zinc-300 uppercase">Proofs</h4>
 
-          <!-- Add Proof Form -->
+        
           <div class="mt-4 space-y-2">
             <Label class="text-xs font-bold uppercase">Add New Proof</Label>
             <Textarea v-model="proofForm.description"
                       placeholder="Enter proof description..."
                       class="min-h-[50px] text-xs bg-zinc-900/50 resize-none" />
 
-            <!-- Selected attachments -->
+           
             <div v-if="attachmentPreviews.length" class="flex flex-wrap gap-2 mt-2">
               <div v-for="(item, idx) in attachmentPreviews" :key="idx"
                    class="relative w-20 h-20 border border-zinc-700 rounded overflow-hidden bg-zinc-900 group">
@@ -233,9 +285,46 @@ const submitAll = () => {
               <input type="file" multiple ref="fileInputRef" class="hidden" @change="handleFiles" />
             </div>
           </div>
+            <div>
+     
+    </div>
         </div>
       </div>
     </div>
+
+    <!-- Submitted Proofs -->
+<div v-if="proofs.length" class="mt-6 space-y-4">
+  <h5 class="text-xs uppercase text-zinc-500 font-bold">Submitted Proofs</h5>
+
+  <div
+    v-for="proof in proofs"
+    :key="proof.id"
+    class="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3"
+  >
+    <p class="text-xs text-zinc-300">
+      {{ proof.description || 'No description provided.' }}
+    </p>
+
+    <div class="flex flex-wrap gap-2">
+      <div
+        v-for="(file, i) in proof.attachments || []"
+
+        :key="i"
+        class="w-24 h-24 rounded overflow-hidden border border-zinc-800"
+      >
+        <img :src="file.url" class="w-full h-full object-cover" />
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <Button size="sm" variant="outline" @click="editProof(proof)">Edit</Button>
+      <Button size="sm" variant="destructive" @click="deleteProof(proof.id)">Delete</Button>
+    </div>
+
+  
+  </div>
+</div>
+
 
     <!-- Toast Container -->
     <div class="fixed bottom-4 right-4 flex flex-col gap-2 z-50">

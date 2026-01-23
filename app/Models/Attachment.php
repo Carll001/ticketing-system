@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\Storage;
+
 class Attachment extends Model
 {
     use SoftDeletes;
@@ -34,4 +36,11 @@ class Attachment extends Model
     {
         return $this->belongsTo(Proof::class);
     }
+
+    protected $appends = ['url'];
+
+public function getUrlAttribute()
+{
+    return Storage::url($this->path);
+}
 }

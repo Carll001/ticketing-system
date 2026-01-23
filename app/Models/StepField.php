@@ -40,4 +40,9 @@ class StepField extends Model
     {
         return $this->hasMany(Response::class, 'step_field_id');
     }
+
+    public function proofs()
+    {
+        return $this->hasMany(Proof::class)->with('attachments', 'user');
+    }
 }
