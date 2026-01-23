@@ -78,6 +78,7 @@ const completedStepsCount = (task: Task) => {
                     <p class="text-xs">
                         Steps completed: {{ completedStepsCount(task) }} / {{ task.steps?.length ?? 0 }}
                     </p>
+                    
                 </div>
             </CardDescription>
         </CardHeader>
