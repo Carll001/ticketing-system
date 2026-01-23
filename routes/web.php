@@ -90,7 +90,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{proof}', [ProofController::class, 'destroy'])->name('proof.delete');
     });
 
-    Route::prefix('')->group(function() {
+    Route::prefix('transaction')->group(function() {
        Route::get('/', [TransactionController::class, 'index'])->name('transaction.index'); 
     
     //    Route::get('/', [TransactionController::class, 'index'])->name('transaction.index'); 
