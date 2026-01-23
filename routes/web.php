@@ -11,6 +11,7 @@ use App\Http\Controllers\PresetController;
 use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProofController;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -87,6 +88,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [ProofController::class, 'store'])->name('proof.store');
         Route::patch('/{proof}', [ProofController::class, 'update'])->name('proof.update');
         Route::delete('/{proof}', [ProofController::class, 'destroy'])->name('proof.delete');
+    });
+
+    Route::prefix('')->group(function() {
+       Route::get('/', [TransactionController::class, 'index'])->name('transaction.index'); 
+    
+    //    Route::get('/', [TransactionController::class, 'index'])->name('transaction.index'); 
     });
 
 });

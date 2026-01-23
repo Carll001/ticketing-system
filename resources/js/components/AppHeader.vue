@@ -42,6 +42,7 @@ import task from '@/routes/task';
 import department from '@/routes/department';
 import user from '@/routes/user';
 import preset from '@/routes/preset';
+import transaction from '@/routes/transaction';
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -85,6 +86,11 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Preset',
         href: preset.index(),
+        icon:  Building2,
+    },
+    {
+        title: 'Transaction',
+        href: transaction.index(),
         icon:  Building2,
     },
 ];
