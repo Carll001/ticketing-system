@@ -170,7 +170,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                             class="space-y-5"
                         >
                             <div class="py-2">
-                                <Label for="dept-name">
+                                <Label for="dept-name" class="pb-2">
                                     Department Name
                                     <span class="text-red-500">*</span>
                                 </Label>
@@ -287,7 +287,6 @@ const breadcrumbs: BreadcrumbItem[] = [
                         >
                             <TableCell>
                                 <div class="flex items-center gap-3">
-                                    <Building class="h-4 w-4 text-primary" />
                                     <p class="font-medium">
                                         {{ dept.name }}
                                     </p>

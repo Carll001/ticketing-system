@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
+use App\Models\User;
+use Inertia\Inertia;
+use App\Models\Department;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\TaskResource;
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Services\DepartmentService;
+use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
-use App\Http\Resources\DepartmentResource;
-use App\Http\Services\DepartmentService;
-use App\Models\Department;
-use Inertia\Inertia;
-use App\Models\Task;
-use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\TaskResource;
 
 
 
@@ -51,39 +53,26 @@ class DepartmentController extends Controller
     // }
 
     public function index(Request $request)
-{
-    
-    $search = $request->input('search');
-    
-      /** @var \App\Models\User $user */
-    $user = Auth::user();
+    {
+        $search = $request->input('search');
 
-    
-    $userDepartmentIds = $user
-        ->departments()
-        ->pluck('department_id');
+        $departments = Department::with('users')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->get();
 
+        $users = User::with('departments')->get();
 
-    $tasks = Task::with(['steps', 'assigned'])
-        ->where(function ($query) use ($userDepartmentIds) {
-            $query->whereIn('assigned_to', $userDepartmentIds)
-                  ->orWhere('creator_id', Auth::id());
-        })
-        ->when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        })
-        ->get();
-
-    return Inertia::render('Task/Index', [
-        'tasks' => TaskResource::collection($tasks),
-        'filters' => [
-            'search' => $search,
-        ],
-    ]);
-}
+        return Inertia::render('Department', [
+            'departments' => DepartmentResource::collection($departments),
+            'users' => UserResource::collection($users),
+            'filters' => [
+                'search' => $search,
+            ],
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
