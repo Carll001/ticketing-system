@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,11 +17,28 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::create([
+        $user = User::create([
             'name' => 'Superadmin',
             'email' => 'superadmin@gmail.com',
             'password' => Hash::make('password'),
-            'role' => 'superadmin',
+            'role' => 'superadmin', // Note: Spatie usually uses roles table, not a column
         ]);
+
+        $permissions = [
+            'can create user',
+            'can edit user',
+            'can delete user',
+            'can view user',
+            'can view dashboard',
+            'can manage tasks'
+        ];
+
+        // Create all permissions
+        foreach ($permissions as $permission) {
+            Permission::create(['name' => $permission]);
+        }
+
+        // Assign ALL permissions to the user at once
+        $user->givePermissionTo($permissions);
     }
 }

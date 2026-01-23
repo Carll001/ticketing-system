@@ -26,9 +26,10 @@ import department from '@/routes/department';
 import { Department, User, type BreadcrumbItem } from '@/types';
 import { Form, Head, Link, useForm } from '@inertiajs/vue3';
 import { Building, Pencil, Search, Trash2 } from 'lucide-vue-next';
-import { computed, ref , watch} from 'vue';
+import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { router } from '@inertiajs/vue3';
+import PermissionGuard from '@/components/PermissionGuard.vue';
 
 // Create function
 const props = defineProps<{
@@ -135,6 +136,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 </script>
 
 <template>
+
     <Head title="Department" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -143,65 +145,52 @@ const breadcrumbs: BreadcrumbItem[] = [
             <div class="flex items-center justify-between gap-4">
                 <!-- Left: Search -->
                 <div class="relative w-120">
-                    <Search
-                        class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                    />
+                    <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input v-model="search" class="pl-10" placeholder="Search..." />
                 </div>
 
-                <!-- Right: Create Department -->
-                <Dialog v-model:open="isOpen">
-                    <DialogTrigger as-child>
-                        <Button size="sm" class="w-full lg:w-auto">
-                            Create Department
-                        </Button>
-                    </DialogTrigger>
+                <PermissionGuard permission="can create department">
+                    <!-- Right: Create Department -->
+                    <Dialog v-model:open="isOpen">
+                        <DialogTrigger as-child>
+                            <Button size="sm" class="w-full lg:w-auto">
+                                Create Department
+                            </Button>
+                        </DialogTrigger>
 
-                    <DialogContent class="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Create New Department</DialogTitle>
-                            <DialogDescription>
-                                Add a new department to your organization
-                            </DialogDescription>
-                        </DialogHeader>
+                        <DialogContent class="sm:max-w-md">
+                            <DialogHeader>
+                                <DialogTitle>Create New Department</DialogTitle>
+                                <DialogDescription>
+                                    Add a new department to your organization
+                                </DialogDescription>
+                            </DialogHeader>
 
-                        <Form
-                            @submit.prevent="createDepartment"
-                            class="space-y-5"
-                        >
-                            <div class="py-2">
-                                <Label for="dept-name" class="pb-2">
-                                    Department Name
-                                    <span class="text-red-500">*</span>
-                                </Label>
-                                <Input
-                                    id="dept-name"
-                                    v-model="form.name"
-                                    placeholder="e.g., Marketing Department"
-                                />
-                                <InputError :message="form.errors.name" />
-                            </div>
+                            <Form @submit.prevent="createDepartment" class="space-y-5">
+                                <div class="py-2">
+                                    <Label for="dept-name" class="pb-2">
+                                        Department Name
+                                        <span class="text-red-500">*</span>
+                                    </Label>
+                                    <Input id="dept-name" v-model="form.name"
+                                        placeholder="e.g., Marketing Department" />
+                                    <InputError :message="form.errors.name" />
+                                </div>
 
-                            <DialogFooter class="gap-2">
-                                <DialogClose as-child>
-                                    <Button
-                                        variant="outline"
-                                        class="flex-1 lg:flex-none"
-                                        @click="form.reset()"
-                                    >
-                                        Cancel
+                                <DialogFooter class="gap-2">
+                                    <DialogClose as-child>
+                                        <Button variant="outline" class="flex-1 lg:flex-none" @click="form.reset()">
+                                            Cancel
+                                        </Button>
+                                    </DialogClose>
+                                    <Button type="submit" class="flex-1 lg:flex-none">
+                                        Create Department
                                     </Button>
-                                </DialogClose>
-                                <Button
-                                    type="submit"
-                                    class="flex-1 lg:flex-none"
-                                >
-                                    Create Department
-                                </Button>
-                            </DialogFooter>
-                        </Form>
-                    </DialogContent>
-                </Dialog>
+                                </DialogFooter>
+                            </Form>
+                        </DialogContent>
+                    </Dialog>
+                </PermissionGuard>
             </div>
 
             <!-- Edit Dialog -->
@@ -212,14 +201,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <DialogTitle>Edit Department</DialogTitle>
                         </DialogHeader>
 
-                        <form
-                            @submit.prevent="updateDepartment"
-                            class="space-y-5"
-                        >
-                            <Input
-                                v-model="editForm.name"
-                                placeholder="Department Name"
-                            />
+                        <form @submit.prevent="updateDepartment" class="space-y-5">
+                            <Input v-model="editForm.name" placeholder="Department Name" />
                             <DialogFooter class="gap-2 border-t pt-4">
                                 <DialogClose as-child>
                                     <Button variant="outline">Cancel</Button>
@@ -271,20 +254,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <TableBody>
                         <!-- Show this row if no departments exist -->
                         <TableRow v-if="props.departments.data.length === 0">
-                            <TableCell
-                                colspan="4"
-                                class="text-center text-gray-500"
-                            >
+                            <TableCell colspan="4" class="text-center text-gray-500">
                                 No departments yet.
                             </TableCell>
                         </TableRow>
 
                         <!-- Otherwise, render all departments -->
-                        <TableRow
-                            v-else
-                            v-for="dept in props.departments.data"
-                            :key="dept.id"
-                        >
+                        <TableRow v-else v-for="dept in props.departments.data" :key="dept.id">
                             <TableCell>
                                 <div class="flex items-center gap-3">
                                     <p class="font-medium">
@@ -305,33 +281,23 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <TableCell>
                                 <div class="flex justify-end gap-2">
                                     <Link :href="department.show(dept.id).url">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            class="gap-1"
-                                        >
+                                        <Button size="sm" variant="outline" class="gap-1">
                                             View
                                         </Button>
                                     </Link>
-
-                                    <Button
-                                        @click="openEditDialog(dept)"
-                                        size="sm"
-                                        variant="outline"
-                                        class="gap-1"
-                                    >
-                                        <Pencil class="h-3 w-3" />
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        @click="confirmDelete(dept.id)"
-                                        size="sm"
-                                        variant="destructive"
-                                        class="gap-1"
-                                    >
-                                        <Trash2 class="h-3 w-3" />
-                                        Delete
-                                    </Button>
+                                    <PermissionGuard permission="can edit department">
+                                        <Button @click="openEditDialog(dept)" size="sm" variant="outline" class="gap-1">
+                                            <Pencil class="h-3 w-3" />
+                                            Edit
+                                        </Button>
+                                    </PermissionGuard>
+                                    <PermissionGuard permission="can delete department">
+                                        <Button @click="confirmDelete(dept.id)" size="sm" variant="destructive"
+                                            class="gap-1">
+                                            <Trash2 class="h-3 w-3" />
+                                            Delete
+                                        </Button>
+                                    </PermissionGuard>
                                 </div>
                             </TableCell>
                         </TableRow>
@@ -343,12 +309,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <div class="flex items-center justify-between">
                         <p class="text-sm">Showing 5 of 5 departments</p>
                         <div class="flex gap-2">
-                            <Button variant="outline" size="sm" disabled
-                                >Previous</Button
-                            >
-                            <Button variant="outline" size="sm" disabled
-                                >Next</Button
-                            >
+                            <Button variant="outline" size="sm" disabled>Previous</Button>
+                            <Button variant="outline" size="sm" disabled>Next</Button>
                         </div>
                     </div>
                 </div>

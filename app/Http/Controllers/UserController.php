@@ -74,7 +74,7 @@ class UserController extends Controller
                 Password::defaults() // Use the object directly in the array
             ],
             // Validate that department_id is an array and each UUID exists in the departments table
-            'department_id' => ['required', 'array', 'min:1'],
+            'department_id' => ['nullable', 'array'],
             'department_id.*' => ['exists:departments,id'],
         ]);
 

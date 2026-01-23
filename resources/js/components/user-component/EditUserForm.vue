@@ -230,7 +230,7 @@ const selectedLabel = computed(() => {
                         <InputError :message="form.errors.email" />
                     </div>
 
-                    <div class="grid grid-cols-2 items-start gap-4">
+                    <div class="grid items-start gap-4">
                         <div class="flex flex-col space-y-2">
                             <Label for="user-password" class="h-5">
                                 Password (leave blank to keep current)

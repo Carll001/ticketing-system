@@ -13,6 +13,7 @@ import { router } from '@inertiajs/vue3';
 import { Badge } from '../ui/badge';
 import DeleteUserModal from './DeleteUserModal.vue';
 import EditUserForm from './EditUserForm.vue';
+import PermissionGuard from '../PermissionGuard.vue';
 
 
 const props = defineProps<{
@@ -41,41 +42,29 @@ const props = defineProps<{
                     <TableCell>{{ user.name }}</TableCell>
                     <TableCell>{{ user.email }}</TableCell>
                     <TableCell>
-                        <div
-                            v-if="
-                                user.departments && user.departments?.length > 0
-                            "
-                            class="flex flex-wrap gap-1"
-                        >
-                            <Badge
-                                v-for="dept in user.departments"
-                                :key="dept.id"
-                                variant="outline"
-                                class="rounded-lg"
-                            >
+                        <div v-if="
+                            user.departments && user.departments?.length > 0
+                        " class="flex flex-wrap gap-1">
+                            <Badge v-for="dept in user.departments" :key="dept.id" variant="outline" class="rounded-lg">
                                 {{ dept.name }}
                             </Badge>
                         </div>
-                        <span
-                            v-else
-                            class="text-sm text-muted-foreground italic"
-                        >
+                        <span v-else class="text-sm text-muted-foreground italic">
                             No departments
                         </span>
                     </TableCell>
                     <TableCell class="text-right">
                         <div class="space-x-2">
-                            <DeleteUserModal :user="user" />
-                            <EditUserForm
-                                :user="user"
-                                :departments="props.departments"
-                            />
-                            <Button
-                                size="sm"
-                                variant="default"
-                                @click="router.visit(`/user/${user.id}`)"
-                                >View</Button
-                            >
+                            <PermissionGuard permission="can delete user">
+                                <DeleteUserModal :user="user" />
+                            </PermissionGuard>
+                            <PermissionGuard permission="can edit user">
+                                <EditUserForm :user="user" :departments="props.departments" />
+                            </PermissionGuard>
+                            <PermissionGuard permission="can view user">
+                                <Button size="sm" variant="default"
+                                    @click="router.visit(`/user/${user.id}`)">View</Button>
+                            </PermissionGuard>
                         </div>
                     </TableCell>
                 </TableRow>
