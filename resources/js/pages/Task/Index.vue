@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TaskCard from '@/components/task-components/TaskCard.vue';
+import Button from '@/components/ui/button/Button.vue';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/AppLayout.vue';
 import taskLink from '@/routes/task';
@@ -56,6 +57,9 @@ const createTask = () => {
     <Head title="Task" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-4 p-4">
+            <div class="flex justify-end">
+                <Button @click="createTask" class="cursor-pointer">Creat Task</Button>
+            </div>
             <div class="relative w-120">
                 <Search
                     class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
