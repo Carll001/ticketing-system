@@ -41,7 +41,7 @@ const completedStepsCount = (task: Task) => {
 </script>
 
 <template>
-   <div class="grid grid-cols-2 gap-3">
+   <div class="grid lg:grid-cols-2 gap-3">
         <Card v-for="task in props.tasks"  >
         <CardHeader>
             <div class="flex justify-between items-center">

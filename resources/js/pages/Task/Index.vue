@@ -1,20 +1,32 @@
 <script setup lang="ts">
-import Heading from '@/components/Heading.vue';
 import TaskCard from '@/components/task-components/TaskCard.vue';
-import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/AppLayout.vue';
 import taskLink from '@/routes/task';
 import { type BreadcrumbItem, Task } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { computed } from 'vue';
-
+import { Search } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 
 const props = defineProps<{
-    tasks: {data: Task[]},
-}>()
+    tasks:  {data: Task[]};
+    filters: {
+        search?: string;
+    };
+}>();
 
+const search = ref(props.filters.search ?? '');
+
+watch(search, (value) => {
+    router.get(
+        taskLink.index.url(),
+        { search: value },
+        {
+            preserveState: true,
+            replace: true,
+        },
+    );
+});
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,20 +49,21 @@ const breadcrumbs: BreadcrumbItem[] = [
 const createTask = () => {
     router.visit(taskLink.create(), {
         preserveState: false,
-    })
-}
-
+    });
+};
 </script>
 <template>
     <Head title="Task" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="p-4 flex flex-col flex-1 gap-4">
-            <div class="flex items-start justify-between">
-                <Input class="max-w-lg"/>
-                <Button size="sm" @click="createTask">Create task</Button>
+        <div class="flex flex-1 flex-col gap-4 p-4">
+            <div class="relative w-120">
+                <Search
+                    class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input v-model="search" class="pl-10" placeholder="Search..." />
             </div>
             <div class="flex flex-col gap-4">
-                <TaskCard :tasks="props.tasks.data"/>
+                <TaskCard :tasks="props.tasks.data" />
             </div>
         </div>
     </AppLayout>
