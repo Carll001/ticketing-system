@@ -8,6 +8,7 @@ use Laravel\Fortify\Features;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProofController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -65,6 +66,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('response')->group(function() {
         Route::post('/', [ResponseController::class, 'store'])->name('response.store');
+    });
+
+     // PROOF
+    Route::prefix('{task}/step/{step}/proof')->group(function () {
+        Route::get('/', [ProofController::class, 'index'])->name('proof.index'); // list proofs for this step
+        Route::get('/create', [ProofController::class, 'create'])->name('proof.create');
+        Route::get('/{proof}', [ProofController::class, 'show'])->name('proof.show');
+        Route::get('/{proof}/edit', [ProofController::class, 'edit'])->name('proof.edit');
+
+        Route::post('/', [ProofController::class, 'store'])->name('proof.store');
+        Route::patch('/{proof}', [ProofController::class, 'update'])->name('proof.update');
+        Route::delete('/{proof}', [ProofController::class, 'destroy'])->name('proof.delete');
     });
 
 });

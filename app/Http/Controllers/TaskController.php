@@ -14,8 +14,6 @@ use App\Http\Resources\TaskResource;
 use App\Http\Resources\TaskStepResource;
 use App\Models\Department;
 use App\Models\Step;
-use App\Models\TaskStep;
-use App\Models\TaskSteps;
 use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
