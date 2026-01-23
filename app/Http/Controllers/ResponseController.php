@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Response;
+use App\Models\Proof;
+use App\Models\Attachment;
+use App\Models\StepField;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ResponseController extends Controller
 {
@@ -29,28 +33,83 @@ class ResponseController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'step_field_id' => 'required|uuid', // This is actually the Step ID
-            'response'      => 'required|array',
-        ]);
+{
+    $validated = $request->validate([
+        'step_field_id' => ['required', 'uuid'], 
+        'response'      => ['nullable', 'array'],
+        'description'   => ['nullable', 'string'],
+        'attachments.*' => ['file', 'max:20480'], 
+    ]);
 
-        foreach ($validated['response'] as $fieldId => $value) {
-            // Only save if the value isn't null (optional, depending on your needs)
-            \App\Models\Response::updateOrCreate(
-                [
-                    'step_field_id' => $fieldId, // The ID of the specific field
-                    'user_id'       => Auth::id(),
-                ],
-                [
-                    'id'       => Str::uuid(),
-                    'response' => is_bool($value) ? ($value ? 'true' : 'false') : $value,
-                ]
-            );
+    DB::transaction(function () use ($validated, $request) {
+
+        // =========================
+        // GET STEP FIELD
+        // =========================
+        $stepField = StepField::find($validated['step_field_id']);
+
+        if (!$stepField) {
+            // Fail gracefully if invalid
+            return back()->withErrors([
+                'step_field_id' => 'Invalid Step Field ID. Please select a valid field.'
+            ])->throwResponse(); // Laravel will stop execution here
         }
 
-        return back()->with('success', 'Form submitted successfully!');
-    }
+        $stepId = $stepField->step_id; // Get the actual step_id
+
+        // =========================
+        // SAVE STEP FIELD RESPONSES
+        // =========================
+        if (!empty($validated['response'])) {
+            foreach ($validated['response'] as $fieldId => $value) {
+                Response::updateOrCreate(
+                    [
+                        'step_field_id' => $fieldId,
+                        'user_id'       => Auth::id(),
+                    ],
+                    [
+                        'id'       => Str::uuid(),
+                        'response' => is_bool($value) ? ($value ? 'true' : 'false') : $value,
+                    ]
+                );
+            }
+        }
+
+        // =========================
+        // SAVE PROOF (if any)
+        // =========================
+        if ($request->filled('description') || $request->hasFile('attachments')) {
+
+            $proof = Proof::create([
+                'id'          => Str::uuid(),
+                'step_id'     => $stepId,  // always valid
+                'user_id'     => Auth::id(),
+                'description' => $request->description,
+            ]);
+
+            // =========================
+            // SAVE ATTACHMENTS
+            // =========================
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $path = $file->store('proofs', 'public');
+
+                    Attachment::create([
+                        'id'            => Str::uuid(),
+                        'proof_id'      => $proof->id,
+                        'original_name' => $file->getClientOriginalName(),
+                        'path'          => $path,
+                        'mime'          => $file->getMimeType(),
+                        'size'          => $file->getSize(),
+                    ]);
+                }
+            }
+        }
+    });
+
+    return back()->with('success', 'Form submitted successfully!');
+}
+
 
     /**
      * Display the specified resource.

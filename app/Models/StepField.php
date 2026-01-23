@@ -11,16 +11,18 @@ class StepField extends Model
 {
     use HasUuids;
 
+    // UUID primary key
     public $incrementing = false;
     protected $keyType = 'string';
+
     /**
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        'step_id',
-        'type',
-        'label',
-        'required', // Highly recommended to include this
+        'step_id',    // links to the step
+        'type',       // field type: text, file, checkbox, etc.
+        'label',      // display label
+        'required',   // true/false if required
     ];
 
     /**
@@ -31,6 +33,9 @@ class StepField extends Model
         return $this->belongsTo(Step::class);
     }
 
+    /**
+     * Get the responses associated with this field.
+     */
     public function responses(): HasMany
     {
         return $this->hasMany(Response::class, 'step_field_id');

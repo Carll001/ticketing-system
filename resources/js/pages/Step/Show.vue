@@ -1,185 +1,251 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input'; // Added missing imports
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/AppLayout.vue';
 import stepLink from '@/routes/step';
 import taskLink from '@/routes/task';
-import { BreadcrumbItem, Step, Field } from '@/types'; // Ensure Field type is available
+import proofLink from '@/routes/proof';
+import { BreadcrumbItem, Step, Field } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, watch, ref } from 'vue';
 import EmptyData from '@/components/EmptyData.vue';
-import { FileQuestion, Plus } from 'lucide-vue-next';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import StepDeleteDialog from '@/components/task-step-components/StepDeleteDialog.vue';
-import { Checkbox } from '@/components/ui/checkbox';
-import response from '@/routes/response';
-interface FormState {
-    step_field_id: string | number;
-    response: Record<string, any>; // Flexible index signature
+import { FileQuestion, Plus } from 'lucide-vue-next';
+
+// --------------------- TOAST ---------------------
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error';
 }
+const toastState = reactive<{ toasts: Toast[] }>({ toasts: [] });
+let toastCounter = 0;
+const addToast = (message: string, type: 'success' | 'error' = 'success', duration = 3000) => {
+  const id = toastCounter++;
+  toastState.toasts.push({ id, message, type });
+  setTimeout(() => {
+    const index = toastState.toasts.findIndex(t => t.id === id);
+    if (index !== -1) toastState.toasts.splice(index, 1);
+  }, duration);
+};
 
-// 2. Define your Props
-const props = defineProps<{
-    step: { data: Step }
-}>();
+// --------------------- PROPS & FORMS ---------------------
+interface FormState {
+  step_field_id: string | number;
+  response: Record<string, any>;
+}
+interface ProofForm {
+  description: string;
+  attachments: File[];
+}
+const props = defineProps<{ step: { data: Step } }>();
 
-
+// Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Task',
-        href: taskLink.index().url,
-    },
-    {
-        title: props.step.data.task.title,
-        href: taskLink.show(props.step.data.task_id).url,
-    },
-    {
-        title: props.step.data.title,
-        href: stepLink.show({ task: props.step.data.task_id, step: props.step.data.id }).url,
-    },
+  { title: 'Task', href: taskLink.index().url },
+  { title: props.step.data.task.title, href: taskLink.show(props.step.data.task_id).url },
+  { title: props.step.data.title, href: stepLink.show({ task: props.step.data.task_id, step: props.step.data.id }).url },
 ];
 
-// Simplified grouping: only group fields for the current step
+// Step response form
 const groupedFields = computed(() => {
-    const fields = props.step.data.fields || [];
-
-    return fields.reduce((acc, field) => {
-        const type = field.type;
-        if (!acc[type]) acc[type] = [];
-        acc[type].push(field);
-        return acc;
-    }, {} as Record<string, Field[]>);
+  const fields = props.step.data.fields || [];
+  return fields.reduce((acc, field) => {
+    const type = field.type;
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(field);
+    return acc;
+  }, {} as Record<string, Field[]>);
 });
 
-const form = useForm<{
-    step_field_id: string | number;
-    response: Record<string, any>;
-}>({
-    step_field_id: props.step.data.id,
-    response: (props.step.data.fields || []).reduce((acc, field) => {
-        // Grab the first response for the current user
-        const existingValue = field.responses?.[0]?.response;
-
-        if (field.type === 'Checkbox') {
-            acc[field.id] = existingValue !== undefined ? existingValue : "0";
-        } else {
-            acc[field.id] = existingValue || '';
-        }
-        return acc;
-    }, {} as Record<string, any>)
+const form = useForm<FormState>({
+  step_field_id: props.step.data.id,
+  response: (props.step.data.fields || []).reduce((acc, field) => {
+    const existingValue = field.responses?.[0]?.response;
+    if (field.type === 'Checkbox') acc[field.id] = existingValue !== undefined ? existingValue : "0";
+    else acc[field.id] = existingValue || '';
+    return acc;
+  }, {} as Record<string, any>)
 });
 
-// IMPORTANT: This watch updates the form inputs when Laravel sends back fresh data
+// Watch for backend updates
 watch(() => props.step.data.fields, (newFields) => {
-    newFields?.forEach(field => {
-        const freshValue = field.responses?.[0]?.response;
-        if (freshValue !== undefined) {
-            form.response[field.id] = freshValue;
-        }
-    });
+  newFields?.forEach(field => {
+    const freshValue = field.responses?.[0]?.response;
+    if (freshValue !== undefined) form.response[field.id] = freshValue;
+  });
 }, { deep: true });
 
+// Step actions
 const editStep = (task_id: string, step_id: string) => {
-    router.visit(stepLink.edit({ task: task_id, step: step_id }).url, {
-        preserveScroll: true,
-    });
+  router.visit(stepLink.edit({ task: task_id, step: step_id }).url, { preserveScroll: true });
 };
 
-const submitResponse = () => {
-    // form.post is now available because we used useForm
-    form.post(response.store().url, {
-        preserveScroll: true,
-        onSuccess: () => {
-            // Optional: clear or handle success
-        },
-    });
+// --------------------- PROOF FORM ---------------------
+const proofForm = reactive<ProofForm>({ description: '', attachments: [] });
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const triggerFileInput = () => fileInputRef.value?.click();
+const handleFiles = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files) {
+    for (let i = 0; i < target.files.length; i++) proofForm.attachments.push(target.files[i]);
+    target.value = '';
+  }
+};
+const removeAttachment = (index: number) => proofForm.attachments.splice(index, 1);
+const attachmentPreviews = computed(() =>
+  proofForm.attachments.map(file => ({
+    file,
+    url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+  }))
+);
+
+// Edit/Delete proofs
+const editProof = (proof: any) => {
+  router.visit(`/task/${props.step.data.task_id}/step/${props.step.data.id}/proof/${proof.id}/edit`);
+};
+const deleteProof = (proofId: number) => {
+  router.delete(`/task/${props.step.data.task_id}/step/${props.step.data.id}/proof/${proofId}`, { preserveScroll: true });
+};
+
+// --------------------- SUBMIT BOTH RESPONSE + PROOF ---------------------
+const submitAll = () => {
+  const formData = new FormData();
+
+  // Append step fields
+  formData.append('step_field_id', String(props.step.data.id));
+  Object.keys(form.response).forEach(key => formData.append(`response[${key}]`, form.response[key]));
+
+  // Append proof
+  formData.append('description', proofForm.description);
+  proofForm.attachments.forEach((file, idx) => formData.append(`attachments[${idx}]`, file));
+
+  // Submit
+  router.post(
+    proofLink.store({ task: props.step.data.task_id, step: props.step.data.id }).url,
+    formData,
+    {
+      preserveScroll: true,
+      forceFormData: true,
+      onSuccess: (page) => {
+        proofForm.description = '';
+        proofForm.attachments = [];
+        addToast('Proof submitted successfully!', 'success');
+        console.log('Saved proof JSON:', page.props.proof ?? page.props); // debug JSON
+      },
+      onError: (errors) => {
+        addToast('Failed to submit proof. Please try again.', 'error');
+        console.error('Submission errors:', errors);
+      }
+    }
+  );
 };
 </script>
+
 <template>
+  <Head :title="step.data.title ?? 'Undefined'" />
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="flex flex-col flex-1 gap-4 p-4">
 
-    <Head :title="step.data.title ?? 'Undefined'" />
-    <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex flex-col flex-1 gap-4 p-4">
-            <div class="flex items-start justify-between">
-                <section>
-                    <h3 class="text-3xl font-bold">{{ props.step.data.title }}</h3>
-                    <p class="text-muted-foreground">{{ props.step.data.description ?? 'No description' }}</p>
-                </section>
+      <!-- Step Header -->
+      <div class="flex items-start justify-between">
+        <section>
+          <h3 class="text-3xl font-bold">{{ props.step.data.title }}</h3>
+          <p class="text-muted-foreground">{{ props.step.data.description ?? 'No description' }}</p>
+        </section>
+        <section class="flex gap-2 flex-col items-end mb-6">
+          <div class="flex gap-2 items-center">
+            <p class="text-muted-foreground text-sm">Assigned to:</p>
+            <Button class="text-xs p-2 h-8" variant="outline">{{ props.step.data.assigned?.name ?? 'Anyone' }}</Button>
+          </div>
+          <div class="space-x-2">
+            <StepDeleteDialog :step="props.step.data" />
+            <Button size="sm" @click="editStep(props.step.data.task_id, props.step.data.id)">Edit</Button>
+            <Button @click="submitAll">Submit Response</Button>
+          </div>
+        </section>
+      </div>
 
-                <section class="flex gap-2 flex-col items-end mb-6">
-                    <div class="flex gap-2 items-center">
-                        <p class="text-muted-foreground text-sm">Assigned to:</p>
-                        <Button class="text-xs p-2 h-8" variant="outline">
-                            {{ props.step.data.assigned?.name ?? 'Anyone' }}
-                        </Button>
-                    </div>
-                    <div class="space-x-2">
-                        <StepDeleteDialog :step="props.step.data" />
-                        <Button size="sm" @click="editStep(props.step.data.task_id, props.step.data.id)">Edit</Button>
-                        <Button @click="submitResponse">Submit Response</Button>
-                    </div>
-                </section>
-
-            </div>
-            <div class="space-y-8">
-                <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
-                    <Label
-                        class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800 pb-1 block">
-                        {{ type }}{{ type === 'Checkbox' ? 'es' : 's' }}
-                    </Label>
-
-                    <div class="space-y-4 pl-2">
-                        <div v-for="field in fields" :key="field.id" class="space-y-4">
-                            <div class="flex gap-3"
-                                :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
-                                <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
-                                    <Input v-if="type === 'Input'" v-model="form.response[field.id]"
-                                        :placeholder="`Enter ${field.label.toLowerCase()}...`"
-                                        class="h-8 text-xs bg-zinc-900/50" />
-
-                                    <Textarea v-else-if="type === 'Description'" v-model="form.response[field.id]"
-                                        :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
-                                        class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
-
-                                    <div v-else-if="type === 'Checkbox'" class="flex items-center">
-                                        <Checkbox :id="field.id" :model-value="form.response[field.id] === 'true'"
-                                            @update:model-value="(val) => form.response[field.id] = val ? 'true' : 'false'" />
-                                    </div>
-
-                                </div>
-
-                                <Label :class="[
-                                    'text-xs font-medium text-zinc-300',
-                                    type === 'Checkbox' ? 'order-2' : 'order-1'
-                                ]">
-                                    {{ field.label }}
-                                </Label>
-                            </div>
-                            <p v-if="field.responses?.[0] !== null" class="text-[10px] text-zinc-500 italic ">
-                                Answered by <span class="text-zinc-400 font-medium">{{ field.responses?.[0].user?.name ??
-                                    'Someone' }}</span>
-                                on {{ new Date(field.responses?.[0].created_at || '').toLocaleDateString() }}
-                                at {{ new Date(field.responses?.[0].created_at || '').toLocaleTimeString([], {
-                                    hour:
-                                '2-digit', minute: '2-digit' }) }}
-                            </p>
-                        </div>
-                    </div>
-
+      <!-- Step Fields -->
+      <div class="space-y-8">
+        <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
+          <Label class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800 pb-1 block">
+            {{ type }}{{ type === 'Checkbox' ? 'es' : 's' }}
+          </Label>
+          <div class="space-y-4 pl-2">
+            <div v-for="field in fields" :key="field.id" class="space-y-4">
+              <div class="flex gap-3" :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
+                <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
+                  <Input v-if="type === 'Input'" v-model="form.response[field.id]"
+                         :placeholder="`Enter ${field.label.toLowerCase()}...`"
+                         class="h-8 text-xs bg-zinc-900/50" />
+                  <Textarea v-else-if="type === 'Description'" v-model="form.response[field.id]"
+                            :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
+                            class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                  <div v-else-if="type === 'Checkbox'" class="flex items-center">
+                    <Checkbox :id="field.id" :model-value="form.response[field.id] === 'true'"
+                              @update:model-value="(val) => form.response[field.id] = val ? 'true' : 'false'" />
+                  </div>
                 </div>
-                <!-- <div class="mt-10 p-4 bg-zinc-900 rounded border border-zinc-800">
-                    <p class="text-[10px] text-zinc-500 uppercase mb-2">Form Live Data Debug:</p>
-                    <pre class="text-xs text-green-400">{{ form.response }}</pre>
-                </div> -->
-
-                <div class="text-xs text-zinc-600 text-center mx-auto">
-                    <EmptyData :icon="FileQuestion" title="no fields yet" message="No fields configured for this step."
-                        :length="props.step.data.fields?.length === 0" />
-                </div>
-
+                <Label :class="['text-xs font-medium text-zinc-300', type === 'Checkbox' ? 'order-2' : 'order-1']">
+                  {{ field.label }}
+                </Label>
+              </div>
             </div>
+          </div>
         </div>
-    </AppLayout>
+
+        <div class="text-xs text-zinc-600 text-center mx-auto">
+          <EmptyData :icon="FileQuestion" title="no fields yet" message="No fields configured for this step."
+                     :length="props.step.data.fields?.length === 0" />
+        </div>
+
+        <!-- Proof Section -->
+        <div class="mt-10 p-4 bg-zinc-900 rounded border border-zinc-800 space-y-4">
+          <h4 class="text-sm font-bold text-zinc-300 uppercase">Proofs</h4>
+
+          <!-- Add Proof Form -->
+          <div class="mt-4 space-y-2">
+            <Label class="text-xs font-bold uppercase">Add New Proof</Label>
+            <Textarea v-model="proofForm.description"
+                      placeholder="Enter proof description..."
+                      class="min-h-[50px] text-xs bg-zinc-900/50 resize-none" />
+
+            <!-- Selected attachments -->
+            <div v-if="attachmentPreviews.length" class="flex flex-wrap gap-2 mt-2">
+              <div v-for="(item, idx) in attachmentPreviews" :key="idx"
+                   class="relative w-20 h-20 border border-zinc-700 rounded overflow-hidden bg-zinc-900 group">
+                <img v-if="item.url" :src="item.url" class="w-full h-full object-cover" />
+                <p v-else class="text-[10px] text-center p-1 break-words">{{ item.file.name }}</p>
+                <button @click="removeAttachment(idx)"
+                        class="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center text-xs"
+                        type="button">×</button>
+              </div>
+            </div>
+
+            <div class="flex gap-2 mt-2">
+              <Button size="sm" variant="ghost" @click="triggerFileInput">
+                <Plus class="w-3 h-3 mr-1 inline" /> Add Attachments
+              </Button>
+              <input type="file" multiple ref="fileInputRef" class="hidden" @change="handleFiles" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+      <div v-for="toast in toastState.toasts" :key="toast.id"
+           :class="[
+             'px-4 py-2 rounded shadow text-white text-sm',
+             toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+           ]">
+        {{ toast.message }}
+      </div>
+    </div>
+  </AppLayout>
 </template>
