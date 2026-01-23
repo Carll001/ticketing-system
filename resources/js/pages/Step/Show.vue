@@ -131,10 +131,10 @@ const submitResponse = () => {
                     </Label>
 
                     <div class="space-y-4 pl-2">
-                        <div v-for="field in fields" :key="field.id" class="space-y-4">
+                        <section v-for="field in fields" :key="field.id" class="space-y-4">
                             <div class="flex gap-3"
                                 :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
-                                <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
+                                <section :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
                                     <Input v-if="type === 'Input'" v-model="form.response[field.id]"
                                         :placeholder="`Enter ${field.label.toLowerCase()}...`"
                                         class="h-8 text-xs bg-zinc-900/50" />
@@ -148,7 +148,7 @@ const submitResponse = () => {
                                             @update:model-value="(val) => form.response[field.id] = val ? 'true' : 'false'" />
                                     </div>
 
-                                </div>
+                                </section>
 
                                 <Label :class="[
                                     'text-xs font-medium text-zinc-300',
@@ -167,7 +167,7 @@ const submitResponse = () => {
                                         '2-digit', minute: '2-digit'
                                 }) }}
                             </p>
-                        </div>
+                        </section>
                     </div>
 
                 </div>

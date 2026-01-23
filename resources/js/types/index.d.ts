@@ -96,7 +96,10 @@ export interface Response {
 
 export interface Preset {
     id: string
-    
+    name: string
+    description: string
+
+    fields: Field[]
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;

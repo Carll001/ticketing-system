@@ -13,13 +13,26 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import preset from '@/routes/preset';
+import { Preset } from '@/types';
 
 const props = defineProps<{
-    // presets: Preset[],
+    presets: Preset[],
 }>();
 
 const createPreset = () => {
     router.visit(preset.create().url)
+}
+
+const deletePreset = (id: string) => {
+    router.delete(preset.delete(id).url)
+}
+
+const editPreset = (id: string) => {
+    router.visit(preset.edit(id).url)
+}
+
+const viewPreset = (id: string) => {
+    router.visit(preset.show(id).url)
 }
 
 </script>
@@ -50,19 +63,19 @@ const createPreset = () => {
                             </TableHead>
                         </TableRow>
                     </TableHeader>
-                    <!-- <TableBody>
-                        <TableRow v-for="value in source" >
+                    <TableBody>
+                        <TableRow v-for="preset in presets">
                             <TableCell class="font-medium">
-                                
+                                {{ preset.name }}
                             </TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell class="text-right">
-                                
+                            <TableCell class="text-right space-x-2">
+                                <Button size="sm" variant="destructive" @click="deletePreset(preset.id)">Delete</Button>
+                                <Button size="sm" variant="secondary" @click="editPreset(preset.id)">Edit</Button>
+                                <Button size="sm" variant="default" @click="viewPreset(preset.id)">View</Button>
                             </TableCell>
                         </TableRow>
-                    </TableBody> -->
-                    <TableBody>
+                    </TableBody>
+                    <!-- <TableBody>
                         <TableRow  >
                             <TableCell class="font-medium">
                                 ads
@@ -73,7 +86,7 @@ const createPreset = () => {
                                 <Button size="sm" variant="default">View</Button>
                             </TableCell>
                         </TableRow>
-                    </TableBody>
+                    </TableBody> -->
                     <TableFooter>
                         <!-- <TableRow>
                             <TableCell colspan="">

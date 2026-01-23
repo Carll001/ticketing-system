@@ -23,9 +23,9 @@ Route::get('dashboard', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
 
-    Route::prefix('task')->group(function(){
-        
-    // TASK 
+    Route::prefix('task')->group(function () {
+
+        // TASK 
         Route::get('/', [TaskController::class, 'index'])->name('task.index');
         Route::get('/create', [TaskController::class, 'create'])->name('task.create');
         Route::get('/{task}', [TaskController::class, 'show'])->name('task.show');
@@ -35,8 +35,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/{task}',  [TaskController::class, 'update'])->name('task.update');
         Route::delete('/{task}', [TaskController::class, 'destroy'])->name('task.delete');
 
-    // STEP
-        Route::get('{task}/step/create', [StepController::class, 'create'])->name('step.create'); 
+        // STEP
+        Route::get('{task}/step/create', [StepController::class, 'create'])->name('step.create');
         Route::get('{task}/step/{step}', [StepController::class, 'show'])->name('step.show');
         Route::get('/{task}/step/{step}/edit', [StepController::class, 'edit'])->name('step.edit');
 
@@ -48,14 +48,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //department routes
     Route::prefix('department')->group(function () {
         Route::get('/', [DepartmentController::class, 'index'])->name('department.index');
-        Route::post('/', [DepartmentController::class, 'store']) ->name('department.store');
+        Route::post('/', [DepartmentController::class, 'store'])->name('department.store');
         Route::put('/{department}', [DepartmentController::class, 'update'])->name('department.update');
         Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('department.destroy');
         Route::get('/{department}', [DepartmentController::class, 'show'])->name('department.show');
     });
 
 
-    Route::prefix('user')->group(function(){
+    Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('user.index');
         Route::post('/', [UserController::class, 'store'])->name('user.store');
         Route::get('/{user}', [UserController::class, 'show'])->name('user.show');
@@ -64,16 +64,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('user.destroy');
     });
 
-    Route::prefix('response')->group(function() {
+    Route::prefix('response')->group(function () {
         Route::post('/', [ResponseController::class, 'store'])->name('response.store');
     });
 
-    Route::prefix('preset')->group(function() {
+    Route::prefix('preset')->group(function () {
         Route::get('/', [PresetController::class, 'index'])->name('preset.index');
         Route::get('/create', [PresetController::class, 'create'])->name('preset.create');
+        Route::get('/{preset}', [PresetController::class, 'show'])->name('preset.show');
+        Route::get('/{preset}/edit', [PresetController::class, 'edit'])->name('preset.edit');
         Route::post('/', [PresetController::class, 'store'])->name('preset.store');
+        Route::patch('/{preset}', [PresetController::class, 'update'])->name('preset.update');
+        Route::delete('/{preset}', [PresetController::class, 'destroy'])->name('preset.delete');
     });
-
 });
 
 require __DIR__ . '/settings.php';
