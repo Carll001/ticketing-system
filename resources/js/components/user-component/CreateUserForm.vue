@@ -61,7 +61,7 @@ const selectedLabel = computed(() => {
 <template>
     <Dialog v-model:open="openCreate">
         <DialogTrigger as-child>
-            <Button>Create User</Button>
+            <Button size="sm">Create User</Button>
         </DialogTrigger>
         <DialogContent>
             <form @submit.prevent="createUser" class="space-y-6">

@@ -18,18 +18,32 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
         $users = User::where('role', 'staff')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
             ->with('departments')
             ->get();
+
         $departments = Department::all();
 
         return Inertia::render('User/Index', [
             'users' => $users,
             'departments' => $departments,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
+
+
 
     /**
      * Show the form for creating a new resource.

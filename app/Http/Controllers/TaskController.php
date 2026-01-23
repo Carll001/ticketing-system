@@ -17,6 +17,7 @@ use App\Models\Step;
 use App\Models\TaskStep;
 use App\Models\TaskSteps;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
@@ -39,8 +40,10 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
         // Get current user's department IDs
         $userDepartmentIds = Auth::user()->departments()->pluck('department_id');
         
@@ -48,12 +51,21 @@ class TaskController extends Controller
         $tasks = Task::with(['steps', 'assigned'])
             ->whereIn('assigned_to', $userDepartmentIds)
             ->orWhere('creator_id', Auth::id())
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
             ->get();
         // $departments = Department::all();
 
         return Inertia::render('Task/Index', [
             'tasks' => TaskResource::collection($tasks),
             'departments' => DepartmentResource::collection(Department::all()),
+            'filters' => [
+            'search' => $search,
+        ],
         ]);
     }
 
