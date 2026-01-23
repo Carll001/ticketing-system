@@ -26,47 +26,52 @@ class ProofController extends Controller
         ]);
     }
 
-    public function store(Request $request, Task $task, Step $step)
-    {
-        $request->validate([
-            'description'   => ['nullable', 'string'],
-            'attachments.*' => [ 'max:20480'],
-        ]);
+   public function store(Request $request, Task $task, Step $step)
+{
+    $request->validate([
+        'description'   => ['nullable', 'string'],
+        'attachments.*' => ['max:20480'],
+    ]);
 
-        if (!$request->filled('description') && !$request->hasFile('attachments')) {
-            return back()->withErrors(['proof' => 'Nothing to submit.']);
+    if (!$request->filled('description') && !$request->hasFile('attachments')) {
+        return back()->withErrors(['proof' => 'Nothing to submit.']);
+    }
+
+    $proof = DB::transaction(function () use ($request, $step) {
+
+        if (!$step) {
+            throw new \Exception('Invalid step.');
         }
 
-        DB::transaction(function () use ($request, $step) {
+        $proof = Proof::create([
+            'step_id'     => $step->id,
+            'user_id'     => Auth::id(),
+            'description' => $request->description,
+        ]);
 
-            // ✅ Make sure step exists
-            if (!$step) {
-                throw new \Exception('Invalid step.');
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $path = $file->store('proofs', 'public');
+
+                Attachment::create([
+                    'proof_id'      => $proof->id,
+                    'original_name' => $file->getClientOriginalName(),
+                    'path'          => $path,
+                    'mime'          => $file->getMimeType(),
+                    'size'          => $file->getSize(),
+                ]);
             }
+        }
 
-            $proof = Proof::create([
-                'step_id'     => $step->id,  // required
-                'user_id'     => Auth::id(),
-                'description' => $request->description,
-            ]);
+        return $proof;
+    });
 
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('proofs', 'public');
-
-                    Attachment::create([
-                        'proof_id'      => $proof->id,
-                        'original_name' => $file->getClientOriginalName(),
-                        'path'          => $path,
-                        'mime'          => $file->getMimeType(),
-                        'size'          => $file->getSize(),
-                    ]);
-                }
-            }
-        });
-
-        return back()->with('success', 'Proof submitted successfully.');
-    }
+    // ✅ CRITICAL FIX: ibalik natin ang proof na may attachments
+    return back()->with([
+        'success' => 'Proof submitted successfully.',
+        'proof'   => $proof->load('attachments', 'user'),
+    ]);
+}
 
     public function show(Task $task, Step $step, Proof $proof)
     {
@@ -101,10 +106,17 @@ class ProofController extends Controller
         return back()->with('success', 'Proof updated successfully.');
     }
 
-    public function destroy(Task $task, Step $step, Proof $proof)
-    {
-        $proof->delete();
-
-        return back()->with('success', 'Proof deleted successfully.');
+   public function destroy(Task $task, Step $step, Proof $proof)
+{
+    if ($proof->step_id !== $step->id) {
+        return response()->json(['message' => 'Proof does not belong to this step'], 403);
     }
+
+    $proof->delete();
+
+    return response()->json(['message' => 'Proof deleted']);
+}
+
+
+
 }

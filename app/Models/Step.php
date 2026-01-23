@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\Proof;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Step extends Model
 {
@@ -29,4 +30,11 @@ class Step extends Model
     public function fields() {
         return $this->hasMany(StepField::class);
     }
+
+    public function proofs()
+{
+    return $this->hasMany(Proof::class)->with('attachments', 'user');
+}
+
+
 }

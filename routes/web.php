@@ -77,9 +77,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::post('/', [ProofController::class, 'store'])->name('proof.store');
         Route::patch('/{proof}', [ProofController::class, 'update'])->name('proof.update');
-        Route::delete('/{proof}', [ProofController::class, 'destroy'])->name('proof.delete');
-    });
-
+       Route::delete('/{proof}', [ProofController::class, 'destroy'])->name('proof.destroy');
 });
+
+
+
+
+
+    });
 
 require __DIR__ . '/settings.php';

@@ -80,7 +80,8 @@ class StepController extends Controller
         $step->load([
             'task',
             'assigned',
-            'fields.responses.user'
+            'fields.responses.user',
+            'proofs',
         ]);
 
         return Inertia::render('Step/Show', [
