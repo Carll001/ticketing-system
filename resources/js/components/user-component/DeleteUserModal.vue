@@ -6,26 +6,27 @@ import { ref } from 'vue';
 import { AlertTriangle } from 'lucide-vue-next';
 import { User } from '@/types';
 import { toast, Toaster } from 'vue-sonner';
-const openDelete = ref(false);
-const isDeleting = ref(false);
+import user from '@/routes/user';
+
+const closeDeleteModal = ref(false);
+const loadingDelete = ref(false);
 
 const props = defineProps<{
     user: User;
 }>();
 
 const deleteUser = () => {
-    isDeleting.value = true;
-    router.delete(`/user/${props.user.id}`, {
-        onFinish: () => {
-            toast.success('User deleted sucessfully!')
-            isDeleting.value = false;
-            openDelete.value = false;
+    router.delete(user.destroy.url(props.user.id),{
+        onSuccess: ()=>{
+            toast.success('User deleted successfulyy!')
+            loadingDelete.value = false
+            closeDeleteModal.value = false
         }
-    });
+    })
 }
 </script>
 <template>
-    <Dialog v-model:open="openDelete">
+    <Dialog v-model:open="closeDeleteModal">
         <DialogTrigger as-child>
             <Button size="sm" variant="destructive">Delete</Button>
         </DialogTrigger>
@@ -45,8 +46,8 @@ const deleteUser = () => {
                         Cancel
                     </Button>
                 </DialogClose>
-                <Button variant="destructive" @click="deleteUser" :disabled="isDeleting">
-                    {{ isDeleting ? 'Deleting...' : 'Delete' }}
+                <Button variant="destructive" @click="deleteUser" :disabled="loadingDelete">
+                    {{ loadingDelete ? 'Deleting...' : 'Delete' }}
                 </Button>
             </DialogFooter>
         </DialogContent>
