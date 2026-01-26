@@ -121,4 +121,18 @@ export interface Preset {
     fields: Field[]
 }
 
+export interface Transaction {
+  id: string
+  content: string
+  transaction_number: string
+
+  user?: User
+  task?: Task
+  step?: Step
+  department?: Department
+
+  created_at: string
+  updated_at: string
+}
+
 export type BreadcrumbItemType = BreadcrumbItem;

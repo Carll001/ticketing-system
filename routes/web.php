@@ -1,16 +1,17 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StepController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProofController;
 use App\Http\Controllers\PresetController;
 use App\Http\Controllers\ResponseController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\ProofController;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -83,15 +84,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
      // PROOF
     Route::prefix('{task}/step/{step}/proof')->group(function () {
-        Route::get('/', [ProofController::class, 'index'])->name('proof.index'); // list proofs for this step
-        Route::get('/create', [ProofController::class, 'create'])->name('proof.create');
-        Route::get('/{proof}', [ProofController::class, 'show'])->name('proof.show');
-        Route::get('/{proof}/edit', [ProofController::class, 'edit'])->name('proof.edit');
+            Route::get('/', [ProofController::class, 'index'])->name('proof.index'); // list proofs for this step
+            Route::get('/create', [ProofController::class, 'create'])->name('proof.create');
+            Route::get('/{proof}', [ProofController::class, 'show'])->name('proof.show');
+            Route::get('/{proof}/edit', [ProofController::class, 'edit'])->name('proof.edit');
 
-        Route::post('/', [ProofController::class, 'store'])->name('proof.store');
-        Route::patch('/{proof}', [ProofController::class, 'update'])->name('proof.update');
-       Route::delete('/{proof}', [ProofController::class, 'destroy'])->name('proof.destroy');
-});
+            Route::post('/', [ProofController::class, 'store'])->name('proof.store');
+            Route::patch('/{proof}', [ProofController::class, 'update'])->name('proof.update');
+        Route::delete('/{proof}', [ProofController::class, 'destroy'])->name('proof.destroy');
+    });
+    
+     // PROOF
+    Route::prefix('transaction')->group(function () {
+            Route::get('/', [TransactionController::class, 'index'])->name('transaction.index'); // list proofs for this step
+            Route::get('/create', [TransactionController::class, 'create'])->name('transaction.create');
+            Route::get('/{transaction}', [TransactionController::class, 'show'])->name('transaction.show');
+            Route::get('/{transaction}/edit', [TransactionController::class, 'edit'])->name('transaction.edit');
+
+            Route::post('/', [TransactionController::class, 'store'])->name('transaction.store');
+            Route::patch('/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
+        Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('transaction.destroy');
+    });
 
 
 
