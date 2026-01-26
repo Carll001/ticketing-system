@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
+import userLink from '@/routes/user';
 import { Department, User } from '@/types';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import { Check, ChevronsUpDown } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import InputError from '../InputError.vue';
 import { Button } from '../ui/button';
 import {
     Command,
-    CommandEmpty,
     CommandGroup,
     CommandInput,
     CommandItem,
@@ -27,20 +28,14 @@ import {
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Toaster } from '../ui/sonner';
-import { toast } from 'vue-sonner';
 
 const openEdit = ref(false);
 const openCombo = ref(false);
-const departments = ref<Department[]>([]);
-const isLoadingDepartments = ref(false);
 
 const props = defineProps<{
     user: User;
     departments?: Department[];
 }>();
-
-const page = usePage();
 
 const form = useForm({
     name: '',
@@ -50,59 +45,23 @@ const form = useForm({
     department_id: [] as string[],
 });
 
-// Initialize form with user data when component mounts or user changes
-watch(
-    () => props.user,
-    (newUser) => {
-        form.name = newUser.name;
-        form.email = newUser.email;
-        form.password = '';
-        form.password_confirmation = '';
-        form.department_id = newUser.departments?.map((d) => d.id) || [];
-    },
-    { immediate: true },
-);
+const createFormValue = () => {
+    form.name = props.user.name;
+    form.email = props.user.email;
+    form.password = '';
+    form.password_confirmation = '';
+    form.department_id = props.user.departments?.map((d) => d.id) ?? [];
+};
 
-// Fetch departments from page props when opening the dialog
-watch(openEdit, async (isOpen) => {
-    if (isOpen && departments.value.length === 0) {
-        isLoadingDepartments.value = true;
-        try {
-            // Use prop departments if provided
-            if (props.departments && Array.isArray(props.departments)) {
-                departments.value = props.departments;
-            } else {
-                // Get departments from Inertia page props
-                const pageDepts = page.props.departments as Department[];
-                if (pageDepts && Array.isArray(pageDepts)) {
-                    departments.value = pageDepts;
-                } else {
-                    // Fallback to fetch if not in props or page
-                    const response = await fetch('/api/departments');
-                    const data = await response.json();
-                    departments.value = Array.isArray(data)
-                        ? data
-                        : data.data || [];
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch departments:', error);
-        } finally {
-            isLoadingDepartments.value = false;
-        }
-    }
-});
+const toggleEdit = () => {
+    createFormValue();
+    openEdit.value = true;
+};
 
-const editUser = () => {
-    // Prevent submission if already processing or if there are errors
-    if (form.processing || Object.keys(form.errors).length > 0) {
-        return;
-    }
-
-    form.patch(`/user/${props.user.id}`, {
+const updateUser = () => {
+    form.patch(userLink.update(props.user.id).url, {
         onSuccess: () => {
-            form.reset();
-            toast.success('User updated sucessfully!')
+            toast.success('User updated successfully!');
             openEdit.value = false;
         },
     });
@@ -110,31 +69,28 @@ const editUser = () => {
 
 const toggleDepartment = (id: string) => {
     const index = form.department_id.indexOf(id);
-    if (index > -1) {
-        form.department_id.splice(index, 1); // Remove if exists
-    } else {
-        form.department_id.push(id); // Add if not exists
-    }
+    index > -1
+        ? form.department_id.splice(index, 1)
+        : form.department_id.push(id);
 };
 
 const selectedLabel = computed(() => {
     if (form.department_id.length === 0) return 'Select departments...';
     if (form.department_id.length === 1) {
-        return departments.value?.find((d) => d.id === form.department_id[0])
+        return props.departments?.find((d) => d.id === form.department_id[0])
             ?.name;
     }
     return `${form.department_id.length} departments selected`;
 });
 </script>
+
 <template>
     <Dialog v-model:open="openEdit">
         <DialogTrigger as-child>
-            <slot name="trigger">
-                <Button variant="secondary">Edit</Button>
-            </slot>
+            <Button @click="toggleEdit" variant="secondary">Edit</Button>
         </DialogTrigger>
         <DialogContent>
-            <form @submit.prevent="editUser" class="space-y-6">
+            <form @submit.prevent="updateUser" class="space-y-6">
                 <DialogHeader>
                     <DialogTitle>Edit User</DialogTitle>
                     <DialogDescription
@@ -180,11 +136,6 @@ const selectedLabel = computed(() => {
                                         <CommandInput
                                             placeholder="Search department..."
                                         />
-                                        <CommandEmpty>{{
-                                            isLoadingDepartments
-                                                ? 'Loading...'
-                                                : 'No department found.'
-                                        }}</CommandEmpty>
                                         <CommandList>
                                             <CommandGroup>
                                                 <CommandItem
