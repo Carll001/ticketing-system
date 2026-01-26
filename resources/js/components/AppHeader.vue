@@ -36,8 +36,12 @@ import { dashboard } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import type { InertiaLinkProps } from '@inertiajs/vue3';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Menu, Search , Building2} from 'lucide-vue-next';
 import { computed } from 'vue';
+import task from '@/routes/task';
+import department from '@/routes/department';
+import user from '@/routes/user';
+import preset from '@/routes/preset';
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -62,6 +66,26 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Users',
+        href: user.index(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Task',
+        href: task.index(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Department',
+        href: department.index(),
+        icon:  Building2,
+    },
+    {
+        title: 'Preset',
+        href: preset.index(),
+        icon:  Building2,
     },
 ];
 
@@ -266,8 +290,8 @@ const rightNavItems: NavItem[] = [
         </div>
 
         <div
-            v-if="props.breadcrumbs.length > 1"
-            class="flex w-full border-b border-sidebar-border/70"
+            v-if="props.breadcrumbs.length > 0"
+            class="flex w-full border-sidebar-border/70"
         >
             <div
                 class="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl"

@@ -2,18 +2,76 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
+use App\Models\User;
+use Inertia\Inertia;
+use App\Models\Department;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\TaskResource;
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Services\DepartmentService;
+use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
-use App\Models\Department;
+
+
 
 class DepartmentController extends Controller
 {
+
+    protected DepartmentService $departmentService;
+
+    public function __construct(DepartmentService $departmentService)
+    {
+        $this->departmentService = $departmentService;
+    }
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // public function index(Request $request)
+    // {
+    //     $search = $request->input('search');
+
+    //     $departments = Department::with('users')
+    //         ->when($search, function ($query, $search) {
+    //             $query->where('name', 'like', "%{$search}%");
+    //         })
+    //         ->latest()
+    //         ->get();
+
+    //     $users = User::with('departments')->get();
+
+    //     return Inertia::render('Department', [
+    //         'departments' => DepartmentResource::collection($departments),
+    //         'users' => UserResource::collection($users),
+    //         'filters' => [
+    //             'search' => $search,
+    //         ],
+    //     ]);
+    // }
+
+    public function index(Request $request)
     {
-        //
+        $search = $request->input('search');
+
+        $departments = Department::with('users')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->get();
+
+        $users = User::with('departments')->get();
+
+        return Inertia::render('Department', [
+            'departments' => DepartmentResource::collection($departments),
+            'users' => UserResource::collection($users),
+            'filters' => [
+                'search' => $search,
+            ],
+        ]);
     }
 
     /**
@@ -29,16 +87,42 @@ class DepartmentController extends Controller
      */
     public function store(StoreDepartmentRequest $request)
     {
-        //
+        $this->departmentService->store($request->validated());
+
+        return back()->with('success', 'department created successfully!');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Department $department)
-    {
-        //
-    }
+   public function show(Department $department)
+{
+    // Eager load assigned users
+    $department->load('users');
+
+    // Fetch tasks assigned to this department
+    $tasks = Task::where('assigned_to', $department->id)->get();
+
+    return inertia('Department/Show', [
+        'department' => [
+            'data' => [
+                'id' => $department->id,
+                'name' => $department->name,
+                'created_at' => $department->created_at,
+                'updated_at' => $department->updated_at,
+                'assigned_users' => $department->users->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                    ];
+                }),
+            ],
+        ],
+        'tasks' => $tasks,
+    ]);
+}
+
 
     /**
      * Show the form for editing the specified resource.
@@ -53,7 +137,8 @@ class DepartmentController extends Controller
      */
     public function update(UpdateDepartmentRequest $request, Department $department)
     {
-        //
+        $this->departmentService->update($request->validated(), $department);
+        return back()->with('success', 'Department created successfully!');
     }
 
     /**
@@ -61,6 +146,8 @@ class DepartmentController extends Controller
      */
     public function destroy(Department $department)
     {
-        //
+        $department->delete();
+
+        return back()->with('success', 'Department deleted successfully!');
     }
 }
