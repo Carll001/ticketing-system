@@ -46,6 +46,41 @@ interface ProofForm {
 const props = defineProps<{ step: { data: Step } }>();
 
 // -----------------------------
+// STEP COMMENTS (with backend)
+// -----------------------------
+interface StepComment {
+  id: number;
+  content: string;
+  created_at: string;
+  user: {
+    name: string;
+  };
+}
+
+const commentInput = ref('');
+const stepComments = ref<StepComment[]>(props.step.data.comments ?? []); // load existing comments
+
+const addStepComment = () => {
+  if (!commentInput.value.trim()) return;
+
+  router.post(
+    `/task/${props.step.data.task_id}/step/${props.step.data.id}/comment`, // adjust to your route
+    { content: commentInput.value },
+    {
+      preserveScroll: true,
+      onSuccess: (page) => {
+        // update comments from backend
+        stepComments.value = page.props.step.data.comments ?? [];
+        commentInput.value = '';
+        addToast('Comment posted successfully!', 'success');
+      },
+      onError: () => addToast('Failed to post comment.', 'error'),
+    }
+  );
+};
+
+
+// -----------------------------
 // PROOFS STATE
 // -----------------------------
 const proofs = ref<any[]>(props.step.data.proofs ?? []);
@@ -324,6 +359,51 @@ const submitAll = () => {
   
   </div>
 </div>
+
+
+
+<!-- STEP COMMENTS UI -->
+<div class="mt-10 bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-4">
+
+  <h4 class="text-sm font-bold text-zinc-300 uppercase">Comments</h4>
+
+  <!-- Comment list -->
+  <div v-if="stepComments.length" class="space-y-3">
+    <div
+      v-for="comment in stepComments"
+      :key="comment.id"
+      class="bg-zinc-900 border border-zinc-800 rounded p-3 space-y-1"
+    >
+      <div class="flex justify-between text-xs text-zinc-500">
+        <span class="font-medium text-zinc-300">{{ comment.user.name }}</span>
+        <span>{{ new Date(comment.created_at).toLocaleString() }}</span>
+      </div>
+
+      <p class="text-sm text-zinc-200">
+        {{ comment.content }}
+      </p>
+    </div>
+  </div>
+
+  <p v-else class="text-xs text-zinc-600">No comments yet.</p>
+
+  <!-- Add comment -->
+  <div class="space-y-2 pt-2 border-t border-zinc-800">
+    <Textarea
+      v-model="commentInput"
+      placeholder="Write a comment..."
+      class="min-h-[60px] text-xs bg-zinc-900/50 resize-none"
+    />
+
+    <div class="flex justify-end">
+      <Button size="sm" @click="addStepComment">
+        Post Comment
+      </Button>
+    </div>
+  </div>
+
+</div>
+
 
 
     <!-- Toast Container -->

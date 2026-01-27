@@ -82,6 +82,7 @@ class StepController extends Controller
             'assigned',
             'fields.responses.user',
             'proofs',
+             'comments.user',
         ]);
 
         return Inertia::render('Step/Show', [
@@ -161,4 +162,6 @@ class StepController extends Controller
 
         return back();
     }
+
+    
 }

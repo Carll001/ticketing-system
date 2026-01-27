@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Proof;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Models\StepComment;
 
 class Step extends Model
 {
@@ -35,6 +36,12 @@ class Step extends Model
 {
     return $this->hasMany(Proof::class)->with('attachments', 'user');
 }
+
+public function comments()
+{
+    return $this->hasMany(StepComment::class)->latest();
+}
+
 
 
 }
