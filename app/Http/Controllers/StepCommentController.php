@@ -6,6 +6,7 @@ use App\Models\Step;
 use App\Models\Task;
 use App\Models\StepComment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StepCommentController extends Controller
 {
@@ -18,7 +19,7 @@ class StepCommentController extends Controller
         StepComment::create([
             'content' => $request->content,
             'step_id' => $step->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
         ]);
 
         return back();

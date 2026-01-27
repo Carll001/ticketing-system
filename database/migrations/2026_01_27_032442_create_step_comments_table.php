@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('step_comments', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->text('content');
-            $table->foreignId('step_id')->constrained('steps')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('step_id')->constrained('steps')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
