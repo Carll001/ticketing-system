@@ -1,5 +1,6 @@
 import { InertiaLinkProps } from '@inertiajs/vue3';
 import type { LucideIcon } from 'lucide-vue-next';
+import comment from './../routes/step/comment/index';
 
 export interface Auth {
   user: User;
@@ -78,7 +79,7 @@ export interface Step {
   description?: string;
   assigned_to?: string;
   status: string;
-
+  comments: [];
   task: Task;
   assigned: User;
   fields?: Field[];

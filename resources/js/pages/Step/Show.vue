@@ -14,24 +14,7 @@ import { computed, reactive, watch, ref } from 'vue';
 import EmptyData from '@/components/EmptyData.vue';
 import StepDeleteDialog from '@/components/task-step-components/StepDeleteDialog.vue';
 import { FileQuestion, Plus } from 'lucide-vue-next';
-
-interface Toast {
-  id: number;
-  message: string;
-  type: 'success' | 'error';
-}
-
-const toastState = reactive<{ toasts: Toast[] }>({ toasts: [] });
-let toastCounter = 0;
-
-const addToast = (message: string, type: 'success' | 'error' = 'success', duration = 3000) => {
-  const id = toastCounter++;
-  toastState.toasts.push({ id, message, type });
-  setTimeout(() => {
-    const index = toastState.toasts.findIndex(t => t.id === id);
-    if (index !== -1) toastState.toasts.splice(index, 1);
-  }, duration);
-};
+import { toast, Toaster } from 'vue-sonner';
 
 interface FormState {
   step_field_id: string | number;
@@ -68,13 +51,12 @@ const addStepComment = () => {
     { content: commentInput.value },
     {
       preserveScroll: true,
-      onSuccess: (page) => {
+      onSuccess: () => {
         // update comments from backend
-        stepComments.value = page.props.step.data.comments ?? [];
+        stepComments.value = props.step.data.comments ?? [];
         commentInput.value = '';
-        addToast('Comment posted successfully!', 'success');
-      },
-      onError: () => addToast('Failed to post comment.', 'error'),
+        toast.success('step comment success!')
+         },
     }
   );
 };
@@ -180,9 +162,8 @@ const deleteProof = (proofId: string) => {
       preserveScroll: true,
       onSuccess: () => {
         proofs.value = proofs.value.filter(p => p.id !== proofId);
-        addToast('Proof deleted successfully', 'success');
+        toast.success('Proof deleted successfully');
       },
-      onError: () => addToast('Failed to delete proof', 'error')
     }
   );
 };
@@ -219,12 +200,8 @@ const submitAll = () => {
         // ✅ Update proofs from backend
         const updatedStep = page.props.step as Step;
         proofs.value = updatedStep.proofs ?? [];
-
-        addToast('Proof submitted successfully!', 'success');
+        toast.success('Proof submitted successfully!');
       },
-      onError: () => {
-        addToast('Failed to submit proof.', 'error');
-      }
     }
   );
 };
@@ -374,8 +351,8 @@ const submitAll = () => {
       :key="comment.id"
       class="bg-zinc-900 border border-zinc-800 rounded p-3 space-y-1"
     >
-      <div class="flex justify-between text-xs text-zinc-500">
-        <span class="font-medium text-zinc-300">{{ comment.user.name }}</span>
+      <div class="flex justify-between text-xs text-zinc-500 break-all">
+        <span class="font-medium truncate max-w-[120px]">{{ comment.user.name }}</span>
         <span>{{ new Date(comment.created_at).toLocaleString() }}</span>
       </div>
 
@@ -407,7 +384,7 @@ const submitAll = () => {
 
 
     <!-- Toast Container -->
-    <div class="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+    <!-- <div class="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
       <div v-for="toast in toastState.toasts" :key="toast.id"
            :class="[
              'px-4 py-2 rounded shadow text-white text-sm',
@@ -415,6 +392,6 @@ const submitAll = () => {
            ]">
         {{ toast.message }}
       </div>
-    </div>
+    </div> -->
   </AppLayout>
 </template>
