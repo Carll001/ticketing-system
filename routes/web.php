@@ -12,6 +12,9 @@ use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\StepCommentController;
+
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -53,6 +56,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/{task}/step/{step}', [StepController::class, 'update'])->name('step.update');
         Route::delete('/{task}/step/{step}', [StepController::class, 'destroy'])->name('step.delete');
     });
+
+    Route::prefix('task/{task}/step/{step}')->group(function () {
+    Route::post('/comment', [StepCommentController::class, 'store'])->name('step.comment.store');
+    Route::delete('/comment/{comment}', [StepCommentController::class, 'destroy'])->name('step.comment.destroy');
+});
+
+
+
 
     //department routes
     Route::prefix('department')->group(function () {
