@@ -10,26 +10,26 @@ import taskLink from '@/routes/task';
 import proofLink from '@/routes/proof';
 import { BreadcrumbItem, Step, Field } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, reactive, watch, ref } from 'vue';
+import { computed, watch, ref } from 'vue';
 import EmptyData from '@/components/EmptyData.vue';
 import StepDeleteDialog from '@/components/task-step-components/StepDeleteDialog.vue';
 import { FileQuestion, Plus } from 'lucide-vue-next';
-import { toast, Toaster } from 'vue-sonner';
+import { toast } from 'vue-sonner';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+const viewProofs = ref(false);
+const viewComments = ref(false);
 
 interface FormState {
   step_field_id: string | number;
   response: Record<string, any>;
 }
 
-interface ProofForm {
-  description: string;
-  attachments: File[];
-}
-
 const props = defineProps<{ step: { data: Step } }>();
 
 // -----------------------------
-// STEP COMMENTS (with backend)
+// STEP COMMENTS (with useForm)
 // -----------------------------
 interface StepComment {
   id: number;
@@ -40,27 +40,27 @@ interface StepComment {
   };
 }
 
-const commentInput = ref('');
-const stepComments = ref<StepComment[]>(props.step.data.comments ?? []); // load existing comments
+const stepComments = ref<StepComment[]>(props.step.data.comments ?? []);
+
+const commentForm = useForm({
+  content: '',
+});
 
 const addStepComment = () => {
-  if (!commentInput.value.trim()) return;
+  if (!commentForm.content.trim()) return;
 
-  router.post(
-    `/task/${props.step.data.task_id}/step/${props.step.data.id}/comment`, // adjust to your route
-    { content: commentInput.value },
+  commentForm.post(
+    `/task/${props.step.data.task_id}/step/${props.step.data.id}/comment`,
     {
       preserveScroll: true,
       onSuccess: () => {
-        // update comments from backend
         stepComments.value = props.step.data.comments ?? [];
-        commentInput.value = '';
-        toast.success('step comment success!')
-         },
+        commentForm.reset();
+        toast.success('Step comment added successfully!');
+      },
     }
   );
 };
-
 
 // -----------------------------
 // PROOFS STATE
@@ -119,9 +119,13 @@ const editStep = (task_id: string, step_id: string) => {
 };
 
 // -----------------------------
-// PROOF FORM
+// PROOF FORM (with useForm)
 // -----------------------------
-const proofForm = reactive<ProofForm>({ description: '', attachments: [] });
+const proofForm = useForm({
+  description: '',
+  attachments: [] as File[],
+});
+
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
 const triggerFileInput = () => fileInputRef.value?.click();
@@ -158,17 +162,14 @@ const deleteProof = (proofId: string) => {
     return;
   }
 
-  router.delete(`/task/{task}/step/{step}/proof/{proof}`, {
-      preserveScroll: true,
-      onSuccess: () => {
-        proofs.value = proofs.value.filter(p => p.id !== proofId);
-        toast.success('Proof deleted successfully');
-      },
-    }
-  );
+  router.delete(`/task/${taskId}/step/${stepId}/proof/${proofId}`, {
+    preserveScroll: true,
+    onSuccess: () => {
+      proofs.value = proofs.value.filter(p => p.id !== proofId);
+      toast.success('Proof deleted successfully');
+    },
+  });
 };
-
-
 
 // -----------------------------
 // SUBMIT FUNCTION
@@ -193,11 +194,10 @@ const submitAll = () => {
       preserveScroll: true,
       forceFormData: true,
       onSuccess: (page) => {
-        // Clear the form
-        proofForm.description = '';
-        proofForm.attachments = [];
+        // Reset proof form
+        proofForm.reset();
 
-        // ✅ Update proofs from backend
+        // Update proofs from backend
         const updatedStep = page.props.step as Step;
         proofs.value = updatedStep.proofs ?? [];
         toast.success('Proof submitted successfully!');
@@ -210,6 +210,7 @@ const submitAll = () => {
 
 
 <template>
+
   <Head :title="step.data.title ?? 'Undefined'" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col flex-1 gap-4 p-4">
@@ -228,7 +229,9 @@ const submitAll = () => {
           <div class="space-x-2">
             <StepDeleteDialog :step="props.step.data" />
             <Button size="sm" @click="editStep(props.step.data.task_id, props.step.data.id)">Edit</Button>
-            <Button @click="submitAll">Submit Response</Button>
+            <Button @click="submitAll" :disabled="form.processing">
+              {{ form.processing ? 'Submitting...' : 'Submit Response' }}
+            </Button>
           </div>
         </section>
       </div>
@@ -236,7 +239,8 @@ const submitAll = () => {
       <!-- Step Fields -->
       <div class="space-y-8">
         <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
-          <Label class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800 pb-1 block">
+          <Label
+            class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800 pb-1 block">
             {{ type }}{{ type === 'Checkbox' ? 'es' : 's' }}
           </Label>
           <div class="space-y-4 pl-2">
@@ -244,14 +248,13 @@ const submitAll = () => {
               <div class="flex gap-3" :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
                 <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
                   <Input v-if="type === 'Input'" v-model="form.response[field.id]"
-                         :placeholder="`Enter ${field.label.toLowerCase()}...`"
-                         class="h-8 text-xs bg-zinc-900/50" />
+                    :placeholder="`Enter ${field.label.toLowerCase()}...`" class="h-8 text-xs bg-zinc-900/50" />
                   <Textarea v-else-if="type === 'Description'" v-model="form.response[field.id]"
-                            :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
-                            class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                    :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
+                    class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
                   <div v-else-if="type === 'Checkbox'" class="flex items-center">
                     <Checkbox :id="field.id" :model-value="form.response[field.id] === 'true'"
-                              @update:model-value="(val) => form.response[field.id] = val ? 'true' : 'false'" />
+                      @update:model-value="(val) => form.response[field.id] = val ? 'true' : 'false'" />
                   </div>
                 </div>
                 <Label :class="['text-xs font-medium text-zinc-300', type === 'Checkbox' ? 'order-2' : 'order-1']">
@@ -264,134 +267,126 @@ const submitAll = () => {
 
         <div class="text-xs text-zinc-600 text-center mx-auto">
           <EmptyData :icon="FileQuestion" title="no fields yet" message="No fields configured for this step."
-                     :length="props.step.data.fields?.length === 0" />
+            :length="props.step.data.fields?.length === 0" />
         </div>
 
- 
-        <div class="mt-10 p-4 bg-zinc-900 rounded border border-zinc-800 space-y-4">
-          <h4 class="text-sm font-bold text-zinc-300 uppercase">Proofs</h4>
 
-        
-          <div class="mt-4 space-y-2">
-            <Label class="text-xs font-bold uppercase">Add New Proof</Label>
-            <Textarea v-model="proofForm.description"
-                      placeholder="Enter proof description..."
-                      class="min-h-[50px] text-xs bg-zinc-900/50 resize-none" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Proofs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="space-y-2">
+              <Label class="text-xs font-bold uppercase">Add New Proof</Label>
+              <Textarea v-model="proofForm.description" placeholder="Enter proof description..."
+                class="min-h-[50px] text-xs bg-zinc-900/50 resize-none" />
 
-           
-            <div v-if="attachmentPreviews.length" class="flex flex-wrap gap-2 mt-2">
-              <div v-for="(item, idx) in attachmentPreviews" :key="idx"
-                   class="relative w-20 h-20 border border-zinc-700 rounded overflow-hidden bg-zinc-900 group">
-                <img v-if="item.url" :src="item.url" class="w-full h-full object-cover" />
-                <p v-else class="text-[10px] text-center p-1 break-words">{{ item.file.name }}</p>
-                <button @click="removeAttachment(idx)"
-                        class="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center text-xs"
-                        type="button">×</button>
+
+              <div v-if="attachmentPreviews.length" class="flex flex-wrap gap-2 mt-2">
+                <div v-for="(item, idx) in attachmentPreviews" :key="idx"
+                  class="relative w-20 h-20 border border-zinc-700 rounded overflow-hidden bg-zinc-900 group">
+                  <img v-if="item.url" :src="item.url" class="w-full h-full object-cover" />
+                  <p v-else class="text-[10px] text-center p-1 break-words">{{ item.file.name }}</p>
+                  <button @click="removeAttachment(idx)"
+                    class="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center text-xs"
+                    type="button">×</button>
+                </div>
+              </div>
+
+              <div class="flex gap-2 mt-2">
+                <Button size="sm" variant="ghost" @click="triggerFileInput">
+                  <Plus class="w-3 h-3 mr-1 inline" /> Add Attachments
+                </Button>
+                <input type="file" multiple ref="fileInputRef" class="hidden" @change="handleFiles" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card class="p-3 gap-0">
+          <CardHeader class="p-3">
+            <CardTitle>Proof / Comment</CardTitle>
+            <CardDescription>Proof / Comment</CardDescription>
+          </CardHeader>
+          <CardFooter class="p-3 space-x-2">
+            <Button variant="outline" @click="viewProofs = true" size="sm">Proofs</Button>
+            <Button variant="outline" @click="viewComments = true" size="sm">Comments</Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+
+    <!-- Submitted Proofs Dialog -->
+    <Dialog v-model:open="viewProofs">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Submitted Proofs</DialogTitle>
+          <DialogDescription>View all submitted proofs</DialogDescription>
+        </DialogHeader>
+
+        <div v-if="proofs.length" class="mt-6 space-y-4">
+          <div v-for="proof in proofs" :key="proof.id"
+            class="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">
+            <p class="text-xs text-zinc-300">
+              {{ proof.description || 'No description provided.' }}
+            </p>
+
+            <div class="flex flex-wrap gap-2">
+              <div v-for="(file, i) in proof.attachments || []" :key="i"
+                class="w-24 h-24 rounded overflow-hidden border border-zinc-800">
+                <img :src="file.url" class="w-full h-full object-cover" />
               </div>
             </div>
 
-            <div class="flex gap-2 mt-2">
-              <Button size="sm" variant="ghost" @click="triggerFileInput">
-                <Plus class="w-3 h-3 mr-1 inline" /> Add Attachments
-              </Button>
-              <input type="file" multiple ref="fileInputRef" class="hidden" @change="handleFiles" />
+            <div class="flex justify-end gap-2">
+              <Button size="sm" variant="outline" @click="editProof(proof)">Edit</Button>
+              <Button size="sm" variant="destructive" @click="deleteProof(proof.id)">Delete</Button>
             </div>
           </div>
-            <div>
-     
-    </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Submitted Proofs -->
-<div v-if="proofs.length" class="mt-6 space-y-4">
-  <h5 class="text-xs uppercase text-zinc-500 font-bold">Submitted Proofs</h5>
+        <p v-else class="text-xs text-zinc-600 text-center py-4">No proofs submitted yet.</p>
+      </DialogContent>
+    </Dialog>
 
-  <div
-    v-for="proof in proofs"
-    :key="proof.id"
-    class="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3"
-  >
-    <p class="text-xs text-zinc-300">
-      {{ proof.description || 'No description provided.' }}
-    </p>
+    <!-- Comments Dialog -->
+    <Dialog v-model:open="viewComments">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Comments</DialogTitle>
+          <DialogDescription>Step comments and discussions</DialogDescription>
+        </DialogHeader>
 
-    <div class="flex flex-wrap gap-2">
-      <div
-        v-for="(file, i) in proof.attachments || []"
+        <!-- Comment list -->
+        <div v-if="stepComments.length" class="space-y-3 max-h-96 overflow-y-auto">
+          <div v-for="comment in stepComments" :key="comment.id"
+            class="bg-zinc-900 border border-zinc-800 rounded p-3 space-y-1">
+            <div class="flex justify-between text-xs text-zinc-500">
+              <span class="font-medium truncate max-w-[120px]">{{ comment.user.name }}</span>
+              <span>{{ new Date(comment.created_at).toLocaleString() }}</span>
+            </div>
+            <p class="text-sm text-zinc-200">
+              {{ comment.content }}
+            </p>
+          </div>
+        </div>
 
-        :key="i"
-        class="w-24 h-24 rounded overflow-hidden border border-zinc-800"
-      >
-        <img :src="file.url" class="w-full h-full object-cover" />
-      </div>
-    </div>
+        <p v-else class="text-xs text-zinc-600 text-center py-4">No comments yet.</p>
 
-    <div class="flex justify-end gap-2">
-      <Button size="sm" variant="outline" @click="editProof(proof)">Edit</Button>
-      <Button size="sm" variant="destructive" @click="deleteProof(proof.id)">Delete</Button>
-    </div>
+        <!-- Add comment -->
+        <div class="space-y-2 pt-2 border-t border-zinc-800">
+          <Textarea v-model="commentForm.content" placeholder="Write a comment..."
+            class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
 
-  
-  </div>
-</div>
+          <div class="flex justify-end">
+            <Button size="sm" @click="addStepComment" :disabled="commentForm.processing">
+              {{ commentForm.processing ? 'Posting...' : 'Post Comment' }}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
 
-
-
-<!-- STEP COMMENTS UI -->
-<div class="mt-10 bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-4">
-
-  <h4 class="text-sm font-bold text-zinc-300 uppercase">Comments</h4>
-
-  <!-- Comment list -->
-  <div v-if="stepComments.length" class="space-y-3">
-    <div
-      v-for="comment in stepComments"
-      :key="comment.id"
-      class="bg-zinc-900 border border-zinc-800 rounded p-3 space-y-1"
-    >
-      <div class="flex justify-between text-xs text-zinc-500 break-all">
-        <span class="font-medium truncate max-w-[120px]">{{ comment.user.name }}</span>
-        <span>{{ new Date(comment.created_at).toLocaleString() }}</span>
-      </div>
-
-      <p class="text-sm text-zinc-200">
-        {{ comment.content }}
-      </p>
-    </div>
-  </div>
-
-  <p v-else class="text-xs text-zinc-600">No comments yet.</p>
-
-  <!-- Add comment -->
-  <div class="space-y-2 pt-2 border-t border-zinc-800">
-    <Textarea
-      v-model="commentInput"
-      placeholder="Write a comment..."
-      class="min-h-[60px] text-xs bg-zinc-900/50 resize-none"
-    />
-
-    <div class="flex justify-end">
-      <Button size="sm" @click="addStepComment">
-        Post Comment
-      </Button>
-    </div>
-  </div>
-
-</div>
-
-
-
-    <!-- Toast Container -->
-    <!-- <div class="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
-      <div v-for="toast in toastState.toasts" :key="toast.id"
-           :class="[
-             'px-4 py-2 rounded shadow text-white text-sm',
-             toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-           ]">
-        {{ toast.message }}
-      </div>
-    </div> -->
+    <pre>{{ form }}</pre>
   </AppLayout>
 </template>
