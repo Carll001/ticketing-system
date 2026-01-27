@@ -46,7 +46,7 @@ const form = useForm({
     title: '',
     description: '',
     assigned_to: null as string | null,
-    step_order: '',
+    order: '',
     is_billable: false,
     expenses_total: 0,
     type: '',
@@ -178,7 +178,7 @@ const discardCreate = () => {
                         <CardDescription>additional details</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div class="space-y-4">
+                        <!-- <div class="space-y-4">
                             <Label for="tast-type"
                                 >Task type
                                 <span class="text-lg text-red-500"
@@ -204,7 +204,7 @@ const discardCreate = () => {
                             <InputError :message="form.errors.type" />
                         </div>
 
-                        <Separator class="my-4" />
+                        <Separator class="my-4" /> -->
 
                         <div class="space-y-4">
                             <Label for="tast-type"
@@ -213,7 +213,7 @@ const discardCreate = () => {
                                     >*</span
                                 ></Label
                             >
-                            <Select id="step-order" v-model="form.step_order">
+                            <Select id="step-order" v-model="form.order">
                                 <SelectTrigger class="w-full">
                                     <SelectValue placeholder="Select a order" />
                                 </SelectTrigger>
@@ -229,7 +229,7 @@ const discardCreate = () => {
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
-                            <InputError :message="form.errors.type" />
+                            <InputError :message="form.errors.order" />
                         </div>
 
                         <Separator class="my-4" />
@@ -261,5 +261,7 @@ const discardCreate = () => {
                 </Card>
             </section>
         </Form>
+
+        <pre>{{ form }}</pre>
     </div>
 </template>

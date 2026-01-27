@@ -32,7 +32,8 @@ import {
 const form = useForm({
     name: '',
     description: '',
-    has_cost: false,
+    has_cost: null as boolean | null,
+    step_cost: null as number | null,
 
     fields: [] as {
         id: string;
@@ -206,6 +207,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                             </section>
                                         </div>
                                     </section>
+                                    <!-- <div class="space-y-4" v-if="form.has_cost">
+                                        <Label for="cost">Cost</Label>
+                                        <Input id="cost" placeholder="0.00"/>
+                                    </div> -->
                                 </div>
                             </section>
                         </CardContent>

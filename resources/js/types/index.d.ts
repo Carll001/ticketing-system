@@ -117,6 +117,7 @@ export interface Preset {
     id: string
     name: string
     description: string
+    has_cost: boolean
 
     fields: Field[]
 }

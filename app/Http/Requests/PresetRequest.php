@@ -24,6 +24,8 @@ class PresetRequest extends FormRequest
         return [
             'name'       => 'required|string|min:4|max:255',
             'description' => 'nullable|string',
+            'has_cost'   => 'nullable|boolean',
+            
             // Add validation for dynamic fields
             'fields'      => 'array',
             'fields.*.type'  => 'required|in:Checkbox,Input,Description',

@@ -13,6 +13,7 @@ use App\Http\Resources\DepartmentResource;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\TaskStepResource;
 use App\Models\Department;
+use App\Models\Preset;
 use App\Models\Step;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -44,7 +45,7 @@ class TaskController extends Controller
 
         // Get current user's department IDs
         $userDepartmentIds = Auth::user()->departments()->pluck('department_id');
-        
+
         // FETCH TASK DATA - Filter by user's departments
         $tasks = Task::with(['steps', 'assigned'])
             ->whereIn('assigned_to', $userDepartmentIds)
@@ -52,7 +53,7 @@ class TaskController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+                        ->orWhere('description', 'like', "%{$search}%");
                 });
             })
             ->get();
@@ -62,8 +63,8 @@ class TaskController extends Controller
             'tasks' => TaskResource::collection($tasks),
             'departments' => DepartmentResource::collection(Department::all()),
             'filters' => [
-            'search' => $search,
-        ],
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -97,13 +98,18 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $task->load(['creator', 'assigned', 'steps.assigned', 'steps.fields' => function ($query) {
-            $query->orderByRaw("CASE 
+        $task->load([
+            'creator',
+            'assigned',
+            'steps.assigned',
+            'steps.fields' => function ($query) {
+                $query->orderByRaw("CASE 
             WHEN type = 'Checkbox' THEN 1 
             WHEN type = 'Input' THEN 2 
             WHEN type = 'Description' THEN 3 
             ELSE 4 END");
-        }, 'steps.fields.responses.user'
+            },
+            'steps.fields.responses.user'
         ]);
 
         $departments = Department::all();
@@ -111,6 +117,7 @@ class TaskController extends Controller
         return Inertia::render('Task/Show', [
             'task' => TaskResource::make($task),
             'departments' => $departments,
+            'presets' => Preset::with(['fields'])->get(),
         ]);
     }
 

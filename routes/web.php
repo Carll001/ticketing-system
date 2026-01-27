@@ -20,7 +20,11 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/homepage', function () {
-
+    if(auth()->user()->can('can view dashboard')){
+        return redirect()->route('dashboard');
+    } else {
+        return redirect()->route('task.index');
+    }
 })->name('homepage');
 
 Route::get('dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified', 'permission:can view dashboard'])->name('dashboard');
@@ -105,10 +109,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::patch('/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
         Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('transaction.destroy');
     });
-
-
-
-
 
     });
 

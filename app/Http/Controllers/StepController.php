@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Requests\StepRequest;
 use App\Http\Resources\StepResource;
+use App\Models\Preset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB ;
 
@@ -28,10 +29,13 @@ class StepController extends Controller
     public function create(Task $task)
     {
         $users = User::all();
+    
         return Inertia::render('Step/Create', [
             'task' => $task,
             'users' => $users,
+            'presets' => Preset::with(['fields'])->get(),
         ]);
+
     }
 
     /**
@@ -40,13 +44,15 @@ class StepController extends Controller
     public function store(StepRequest $request)
     {
         $data = $request->validated();
-
+        dd($data['again']);
         // Wrap in a transaction for safety
         $step = DB::transaction(function () use ($data) {
             // 1. Create the Step
             $step = Step::create([
                 'task_id'     => $data['task_id'],
+                'preset_id' => $data['preset_id'] ?? null,
                 'title'       => $data['title'],
+                // 'type'       => $data['type'],
                 'description' => $data['description'],
                 'assigned_to' => $data['assigned_to'],
                 'status'      => $data['assigned_to'] ? 'assigned' : 'pending',

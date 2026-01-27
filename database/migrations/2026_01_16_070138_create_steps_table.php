@@ -19,6 +19,9 @@ return new class extends Migration
             $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->enum('status', ['assigned', 'receive', 'pending', 'accepted', 'in_progress', 'cancelled', 'completed'])->default('pending');
             // $table->foreignUuid('proof_id')->nullable()->constrained('task_step_attachments');
+            $table->foreignUuid('preset_id')->nullable()->constrained()->nullOnDelete();
+            $table->boolean('has_cost')->default(false);
+            $table->decimal('cost', 10, 2)->nullable();
             $table->timestamps();
         });
     }

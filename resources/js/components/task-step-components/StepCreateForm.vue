@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import taskLink from '@/routes/task';
-import { Task, User } from '@/types';
+import { Preset, Task, User } from '@/types';
 import { Form, router, useForm } from '@inertiajs/vue3';
 import { CheckIcon, ChevronsUpDownIcon, Plus, Trash2Icon } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -44,19 +44,24 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 const openCombobox = ref(false);
 
 const props = defineProps<{
     users: User[];
     task: Task;
+    presets: Preset[];
 }>();
 
 const form = useForm({
     task_id: props.task.id,
+    preset_id: null as string | null,
     title: '',
     description: '',
+    type: '',
     assigned_to: null as string | null,
     status: '',
+    has_cost: null as boolean | null,
     again: null as boolean | null,
 
     fields: [] as {
@@ -77,7 +82,7 @@ const addField = (type: 'Checkbox' | 'Input' | 'Description') => {
 const removeField = (index: number) => {
     form.fields.splice(index, 1);
 };
-
+const selectedPresetId = ref<string | null>(null);
 const assignedUser = computed(() => {
     if (!form.assigned_to) return 'Anyone';
     const user = props.users.find(
@@ -109,7 +114,33 @@ const groupedFields = computed(() => {
         return acc;
     }, {} as Record<string, typeof form.fields>);
 });
+const applyPreset = (presetId: string | null) => {
+    // 1. Handle clearing the selection
+    if (!presetId) {
+        form.preset_id = null;
+        selectedPresetId.value = null;
+        return;
+    }
 
+    const preset = props.presets.find(p => p.id === presetId);
+    if (!preset) return;
+
+    // 2. Assign the ID to the form so the backend sees it
+    form.preset_id = preset.id;
+    selectedPresetId.value = presetId;
+
+    // 3. Populate title and description if they are currently empty
+    if (!form.title) form.title = preset.name;
+    if (!form.description) form.description = preset.description;
+    if (!form.has_cost) form.has_cost = preset.has_cost;
+
+    // 4. Map the preset fields
+    form.fields = preset.fields.map(field => ({
+        id: crypto.randomUUID(),
+        type: field.type as 'Checkbox' | 'Input' | 'Description',
+        label: field.label
+    }));
+};
 </script>
 <template>
     <div class="">
@@ -239,6 +270,38 @@ const groupedFields = computed(() => {
                         <CardDescription>additional details</CardDescription>
                     </CardHeader>
                     <CardContent>
+                        <div class="space-y-4">
+                            <Label for="task-type">Task type <span class="text-red-500">*</span></Label>
+                            <Select id="task-type" v-model="form.type">
+                                <SelectTrigger class="w-full">
+                                    <SelectValue placeholder="Select a Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="preset">Preset</SelectItem>
+                                    <SelectItem value="custom">Custom</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div v-if="form.type === 'preset'"
+                            class="space-y-4 mt-4 animate-in fade-in slide-in-from-top-1">
+                            <Label for="preset-selection">Choose Preset</Label>
+                            <Select @update:modelValue="(val) => applyPreset(val as string)" class="w-full" :disabled="presets.length === 0">
+                                <SelectTrigger class="w-full">
+                                    <SelectValue class="w-full" placeholder="Select a template..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="preset in presets" :key="preset.id" :value="preset.id"
+                                        :disabled="presets.length === 0">
+                                        {{ preset.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p class="text-[10px] text-zinc-500 italic">Selecting a preset will populate the input
+                                fields automatically.</p>
+                        </div>
+
+                        <Separator class="my-4" />
                         <section class="space-y-4">
                             <Label for="step-type">Assign to </Label>
                             <Popover v-model:open="openCombobox">
@@ -297,11 +360,12 @@ const groupedFields = computed(() => {
                             <InputError :message="form.errors.assigned_to" />
                         </section>
 
+
                         <Separator class="my-4" />
                         <section class="space-y-4">
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3">
-                                    <Checkbox id="has-cost" />
+                                    <Checkbox id="has-cost"  v-model="form.has_cost"/>
                                     <Label for="has-cost">has cost</Label>
                                 </div>
                                 <p class="text-sm text-zinc-500">
@@ -311,7 +375,7 @@ const groupedFields = computed(() => {
 
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3">
-                                    <Checkbox id="add-new" v-model="form.again" />
+                                    <Checkbox id="add-new" v-model="form.again"  />
                                     <Label for="add-new">Add another</Label>
                                 </div>
                                 <p class="text-sm text-zinc-500">
@@ -323,5 +387,7 @@ const groupedFields = computed(() => {
                 </Card>
             </section>
         </Form>
+        <!-- <pre>{{ props.presets }}</pre> -->
+        <pre>{{ form }}</pre>
     </div>
 </template>

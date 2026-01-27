@@ -6,7 +6,7 @@ import { ChevronLeft } from 'lucide-vue-next';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'vue-sonner'
 import TaskCreateForm from '@/components/task-components/TaskCreateForm.vue'
-import { BreadcrumbItem, Department, Task, User } from '@/types';
+import { BreadcrumbItem, Department, Preset, Task, User } from '@/types';
 import taskLink from '@/routes/task';
 import StepCreateForm from '@/components/task-step-components/StepCreateForm.vue';
 import stepLink from '@/routes/step';
@@ -15,6 +15,7 @@ const props = defineProps<{
     // departments: Department[],
     users: User[],
     task: Task
+    presets: Preset[]
 }>()
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -38,7 +39,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         
         <div class="p-4 flex flex-col flex-1">
-            <StepCreateForm :users="props.users" :task="props.task"/>
+            <StepCreateForm :users="props.users" :task="props.task" :presets="presets"/>
             
         </div>
     </AppLayout>

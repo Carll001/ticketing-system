@@ -21,7 +21,7 @@ class StoreTaskRequest extends FormRequest
      */
     public function rules(): array
     {
-        $required = $this->isMethod('post')
+     $required = $this->isMethod('post')
             ? 'required'
             : 'sometimes|required';
 
@@ -30,7 +30,7 @@ class StoreTaskRequest extends FormRequest
             'description' => 'sometimes|nullable',
             'assigned_to' => 'sometimes|nullable|uuid|exists:departments,id',
             'due_date' => 'nullable|date',
-            'type' => $required,
+    
         ];
     }
 
