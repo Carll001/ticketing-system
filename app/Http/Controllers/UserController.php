@@ -3,32 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Department;
-use App\Models\DepartmentUser;
-use App\Models\User;
 use App\Models\Task;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
+use App\Http\Services\UserService;
 
 class UserController extends Controller
 {
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
-     * Display a listing of the resource.
+     * Display a listing of users.
      */
     public function index(Request $request)
     {
         $search = $request->input('search');
 
         $users = User::where('role', 'staff')
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                });
-            })
+            ->when($search, fn($query) => $query->where(fn($q) => 
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+            ))
             ->with('departments')
             ->get();
 
@@ -37,66 +38,41 @@ class UserController extends Controller
         return Inertia::render('User/Index', [
             'users' => $users,
             'departments' => $departments,
-            'filters' => [
-                'search' => $search,
-            ],
+            'filters' => ['search' => $search],
         ]);
     }
 
-
-
     /**
-     * Show the form for creating a new resource.
+     * Show form for creating a new user.
      */
     public function create()
     {
-        //
+        return Inertia::render('User/Create', [
+            'departments' => Department::all(),
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a new user.
      */
     public function store(Request $request)
     {
+        $validated = $this->userService->validateCreate($request);
+        $this->userService->store($validated);
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min:4', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique(User::class) // No dot concatenation here
-            ],
-            'password' => [
-                'required',
-                'confirmed',
-                Password::defaults() // Use the object directly in the array
-            ],
-            // Validate that department_id is an array and each UUID exists in the departments table
-            'department_id' => ['nullable', 'array'],
-            'department_id.*' => ['exists:departments,id'],
-        ]);
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
-
-        $user->departments()->sync($validated['department_id']);
-
-        return back();
+        return back()->with('success', 'User created successfully.');
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified user and their tasks.
      */
     public function show(User $user)
     {
-        // Get tasks assigned to departments this user belongs to
         $departmentIds = $user->departments()->pluck('departments.id');
-        $tasks = Task::whereIn('assigned_to', $departmentIds)->with('creator', 'steps')->get();
+
+        $tasks = Task::whereIn('assigned_to', $departmentIds)
+            ->with(['creator', 'steps'])
+            ->get();
 
         return Inertia::render('User/Show', [
             'user' => $user->load('departments'),
@@ -105,63 +81,35 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show form for editing a user.
      */
     public function edit(User $user)
     {
-        $departments = Department::all();
-
         return Inertia::render('User/Edit', [
             'user' => $user->load('departments'),
-            'departments' => $departments,
+            'departments' => Department::all(),
         ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified user.
      */
     public function update(Request $request, User $user)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min:4', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($user->id)
-            ],
-            'password' => [
-                'nullable',
-                'confirmed',
-                Password::defaults()
-            ],
-            'department_id' => ['required', 'array', 'min:1'],
-            'department_id.*' => ['exists:departments,id'],
-        ]);
+        $validated = $this->userService->validateUpdate($request, $user);
+        $this->userService->update($user, $validated);
 
-        $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ]);
-
-        if (!empty($validated['password'])) {
-            $user->update(['password' => Hash::make($validated['password'])]);
-        }
-
-        $user->departments()->sync($validated['department_id']);
-
-        return back();
+        return back()->with('success', 'User updated successfully.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified user.
      */
     public function destroy(User $user)
     {
         $user->departments()->detach();
         $user->delete();
 
-        return back();
+        return back()->with('success', 'User deleted successfully.');
     }
 }

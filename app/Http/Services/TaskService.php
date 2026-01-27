@@ -8,32 +8,67 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskService
 {
-
-    public function store(array $data)
+    /**
+     * Store a new task and create a transaction log
+     *
+     * @param array $data
+     * @return Task
+     */
+    public function store(array $data): Task
     {
-        // 1. Create the Task
+        // 1. Create the task
         $task = Task::create([
             ...$data,
             'creator_id' => Auth::id(),
         ]);
 
-        // 2. Create the Transaction (The boot logic above handles the ID and TSK number)
+        // 2. Log transaction
         Transaction::create([
-            'content' => 'created task',
+            'content' => 'Created task',
             'user_id' => Auth::id(),
             'task_id' => $task->id,
         ]);
 
-        // 3. Return the TASK object so the controller can redirect correctly
+        // 3. Return the task object
         return $task;
     }
 
-
-    public function update($task, array $data)
+    /**
+     * Update an existing task and optionally create a transaction log
+     *
+     * @param Task $task
+     * @param array $data
+     * @return Task
+     */
+    public function update(Task $task, array $data): Task
     {
-
         $task->update($data);
 
+        // Optional: Log transaction for update
+        Transaction::create([
+            'content' => 'Updated task',
+            'user_id' => Auth::id(),
+            'task_id' => $task->id,
+        ]);
+
         return $task;
+    }
+
+    /**
+     * Delete a task and optionally create a transaction log
+     *
+     * @param Task $task
+     * @return void
+     */
+    public function delete(Task $task): void
+    {
+        // Optional: Log transaction before deletion
+        Transaction::create([
+            'content' => 'Deleted task',
+            'user_id' => Auth::id(),
+            'task_id' => $task->id,
+        ]);
+
+        $task->delete();
     }
 }
