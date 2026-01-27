@@ -28,6 +28,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Textarea } from '@/components/ui/textarea';
 
 const form = useForm({
     name: '',
@@ -211,6 +212,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         <Label for="cost">Cost</Label>
                                         <Input id="cost" placeholder="0.00"/>
                                     </div> -->
+                                    <div v-if="form.has_cost" class="space-y-4 my-4">
+                                        <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost
+                                            Field Preview</Label>
+                                        <Input disabled placeholder="User will enter cost amount..."
+                                            class="h-8 text-xs bg-zinc-900/50 " />
+
+                                    </div>
                                 </div>
                             </section>
                         </CardContent>

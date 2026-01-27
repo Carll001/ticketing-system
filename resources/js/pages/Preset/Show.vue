@@ -147,6 +147,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         </section>
                                     </div>
                                 </section>
+                                <div v-if="props.preset.has_cost" class="space-y-4 my-4">
+                                        <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost
+                                            Field Preview</Label>
+                                        <Input disabled placeholder="User will enter cost amount..."
+                                            class="h-8 text-xs bg-zinc-900/50 " />
+
+                                    </div>
                             </div>
                         </section>
                     </CardContent>
@@ -181,7 +188,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                             <div class="space-y-2">
                                 <div class="flex gap-2">
-                                    <Checkbox id="has-cost" disabled />
+                                    <Checkbox id="has-cost" disabled v-model="props.preset.has_cost" />
                                     <Label for="has-cost">Has cost</Label>
                                 </div>
                                 <p class="text-sm text-zinc-500">Check this if the step has a cost; you can enter an

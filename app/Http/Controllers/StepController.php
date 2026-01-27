@@ -44,7 +44,6 @@ class StepController extends Controller
     public function store(StepRequest $request)
     {
         $data = $request->validated();
-        dd($data['again']);
         // Wrap in a transaction for safety
         $step = DB::transaction(function () use ($data) {
             // 1. Create the Step

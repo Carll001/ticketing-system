@@ -260,6 +260,12 @@ const applyPreset = (presetId: string | null) => {
                                             :message="form.errors[`fields.${form.fields.indexOf(field)}.label` as keyof typeof form.errors]" />
                                     </section>
                                 </div>
+                                <div v-if="form.has_cost" class="space-y-4 my-4">
+                                    <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field Preview</Label>
+                                    <Input disabled placeholder="User will enter cost amount..."
+                                        class="h-8 text-xs bg-zinc-900/50 " />
+
+                                </div>
                             </div>
                         </div>
                     </CardContent>
