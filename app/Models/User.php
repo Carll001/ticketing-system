@@ -64,4 +64,14 @@ class User extends Authenticatable
             ->using(DepartmentUser::class) // This tells sync() to use your UUID model
             ->withTimestamps();
     }
+
+    /**
+     * Get user permissions as array of permission names
+     */
+    // protected function permissions(): \Illuminate\Database\Eloquent\Casts\Attribute
+    // {
+    //     return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+    //         get: fn() => $this->getPermissionNames()->toArray()
+    //     );
+    // }
 }
