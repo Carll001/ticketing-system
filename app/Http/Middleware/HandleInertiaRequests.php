@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                     'id' => $request->user()->id,
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
+                    'role' => $request->user()->role,
                     // Add this line to share permissions
                     'can' => $request->user()->getAllPermissions()->pluck('name'),
                     // Optional: add roles if you need them too

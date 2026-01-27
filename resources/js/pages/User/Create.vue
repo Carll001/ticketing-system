@@ -10,9 +10,14 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import user from '@/routes/user';
 import { BreadcrumbItem, Department } from '@/types';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import InputError from '@/components/InputError.vue';
+
+const page = usePage();
+const auth = computed(() => page.props.auth);
 const openCreate = ref(false);
 const openCombo = ref(false);
 const props = defineProps<{
@@ -35,6 +40,7 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    role: '',
     // THIS IS MULTIPLE SECLECTION. IM USING UUID SO I USED STRING NOT ID 
     department_id: [] as string[],
     permissions: [] as string[],
@@ -158,9 +164,27 @@ const createUser = () => {
                                         <InputError :message="form.errors.department_id" />
                                     </div>
                                 </section>
-                                <section class="space-y-2">
-                                    <Label for="email">Email</Label>
-                                    <Input id="email" type="email" v-model="form.email" />
+                                <section :class="['gap-4', auth.user.role === 'superadmin' ? 'grid grid-cols-[2fr_1fr]' : 'w-full']">
+                                    <div class="space-y-2">
+                                        <Label for="email">Email</Label>
+                                        <Input id="email" type="email" v-model="form.email" />
+                                    </div>
+                                    <div class="space-y-2" v-if="auth.user.role === 'superadmin'">
+                                        <Label for="email">Role</Label>
+                                        <Select v-model="form.role">
+                                            <SelectTrigger class="w-full">
+                                                <SelectValue placeholder="Select a role for user" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="admin">
+                                                    Admin
+                                                </SelectItem>
+                                                <SelectItem value="staff">
+                                                    Staff
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </section>
                                 <section class="grid grid-cols-2 gap-4">
                                     <div class="space-y-2">

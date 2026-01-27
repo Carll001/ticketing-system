@@ -21,16 +21,29 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $user = auth()->user();
 
-        $users = User::where('role', 'staff')
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                });
+        // Determine which roles the user is allowed to see
+        $rolesAllowed = match ($user->role) {
+            'superadmin' => ['!=', 'superadmin'], // can see everyone except superadmins
+            'admin' => ['=', 'staff'],            // can see only staff
+            'staff' => abort(403, 'Unauthorized action.'),
+            default => abort(403, 'Unauthorized action.'),
+        };
+
+        $usersQuery = User::query()
+            ->when($rolesAllowed[0] === '!=', fn($q) => $q->where('role', '!=', $rolesAllowed[1]))
+            ->when($rolesAllowed[0] === '=', fn($q) => $q->where('role', $rolesAllowed[1]))
+            ->when($search, function ($q) use ($search) {
+                $q->where(
+                    fn($query) => $query
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                );
             })
-            ->with('departments')
-            ->get();
+            ->with('departments');
+
+        $users = $usersQuery->get();
 
         $departments = Department::all();
 
@@ -42,6 +55,7 @@ class UserController extends Controller
             ],
         ]);
     }
+
 
 
 
@@ -78,13 +92,12 @@ class UserController extends Controller
                 Password::defaults() // Use the object directly in the array
             ],
             // Validate that department_id is an array and each UUID exists in the departments table
+            'role' => 'nullable|in:superadmin,admin,staff',
             'department_id' => ['nullable', 'array'],
             'department_id.*' => ['exists:departments,id'],
         ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+        $user = User::create($validated + [
             'password' => Hash::make($validated['password']),
         ]);
 

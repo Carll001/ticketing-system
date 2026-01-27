@@ -30,6 +30,7 @@ const props = defineProps<{
                     <TableHead>ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead>Department</TableHead>
                     <TableHead class="text-right"> Action </TableHead>
                 </TableRow>
@@ -41,6 +42,7 @@ const props = defineProps<{
                     </TableCell>
                     <TableCell>{{ user.name }}</TableCell>
                     <TableCell>{{ user.email }}</TableCell>
+                    <TableCell>{{ user.role }}</TableCell>
                     <TableCell>
                         <div v-if="
                             user.departments && user.departments?.length > 0
