@@ -32,13 +32,7 @@ const form = useForm({
 })
 
 const createUser = () => {
-    form.post(userLink.store().url, {
-        onSuccess: () => {
-            toast.success('User created sucessfully!')
-            form.reset();
-            openCreate.value = false;
-        }
-    })
+    form.post(userLink.store().url)
 }
 
 const toggleDepartment = (id: string) => {

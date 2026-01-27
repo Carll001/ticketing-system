@@ -23,7 +23,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/homepage', function () {
-    if(auth()->user()->can('can view dashboard')){
+    if (auth()->user()->can('can view dashboard')) {
         return redirect()->route('dashboard');
     } else {
         return redirect()->route('task.index');
@@ -58,9 +58,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::prefix('task/{task}/step/{step}')->group(function () {
-    Route::post('/comment', [StepCommentController::class, 'store'])->name('step.comment.store');
-    Route::delete('/comment/{comment}', [StepCommentController::class, 'destroy'])->name('step.comment.destroy');
-});
+        Route::post('/comment', [StepCommentController::class, 'store'])->name('step.comment.store');
+        Route::delete('/comment/{comment}', [StepCommentController::class, 'destroy'])->name('step.comment.destroy');
+    });
 
 
 
@@ -77,6 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('user.index');
+        Route::get('/create', [UserController::class, 'create'])->name('user.create');
         Route::post('/', [UserController::class, 'store'])->name('user.store');
         Route::get('/{user}', [UserController::class, 'show'])->name('user.show');
         Route::get('/{user}/edit', [UserController::class, 'edit'])->name('user.edit');
@@ -97,30 +98,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/{preset}', [PresetController::class, 'update'])->name('preset.update');
         Route::delete('/{preset}', [PresetController::class, 'destroy'])->name('preset.delete');
     });
-     // PROOF
+    // PROOF
     Route::prefix('{task}/step/{step}/proof')->group(function () {
-            Route::get('/', [ProofController::class, 'index'])->name('proof.index'); // list proofs for this step
-            Route::get('/create', [ProofController::class, 'create'])->name('proof.create');
-            Route::get('/{proof}', [ProofController::class, 'show'])->name('proof.show');
-            Route::get('/{proof}/edit', [ProofController::class, 'edit'])->name('proof.edit');
+        Route::get('/', [ProofController::class, 'index'])->name('proof.index'); // list proofs for this step
+        Route::get('/create', [ProofController::class, 'create'])->name('proof.create');
+        Route::get('/{proof}', [ProofController::class, 'show'])->name('proof.show');
+        Route::get('/{proof}/edit', [ProofController::class, 'edit'])->name('proof.edit');
 
-            Route::post('/', [ProofController::class, 'store'])->name('proof.store');
-            Route::patch('/{proof}', [ProofController::class, 'update'])->name('proof.update');
+        Route::post('/', [ProofController::class, 'store'])->name('proof.store');
+        Route::patch('/{proof}', [ProofController::class, 'update'])->name('proof.update');
         Route::delete('/{proof}', [ProofController::class, 'destroy'])->name('proof.destroy');
     });
-    
-     // PROOF
-    Route::prefix('transaction')->group(function () {
-            Route::get('/', [TransactionController::class, 'index'])->name('transaction.index'); // list proofs for this step
-            Route::get('/create', [TransactionController::class, 'create'])->name('transaction.create');
-            Route::get('/{transaction}', [TransactionController::class, 'show'])->name('transaction.show');
-            Route::get('/{transaction}/edit', [TransactionController::class, 'edit'])->name('transaction.edit');
 
-            Route::post('/', [TransactionController::class, 'store'])->name('transaction.store');
-            Route::patch('/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
+    // PROOF
+    Route::prefix('transaction')->group(function () {
+        Route::get('/', [TransactionController::class, 'index'])->name('transaction.index'); // list proofs for this step
+        Route::get('/create', [TransactionController::class, 'create'])->name('transaction.create');
+        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('transaction.show');
+        Route::get('/{transaction}/edit', [TransactionController::class, 'edit'])->name('transaction.edit');
+
+        Route::post('/', [TransactionController::class, 'store'])->name('transaction.store');
+        Route::patch('/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
         Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('transaction.destroy');
     });
-
-    });
+});
 
 require __DIR__ . '/settings.php';

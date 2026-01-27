@@ -50,7 +50,11 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        $departments = Department::all();
+
+        return Inertia::render('User/Create', [
+            'departments' => $departments,
+        ]);
     }
 
     /**
@@ -84,9 +88,13 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        if ($request->has('permissions')) {
+            $user->givePermissionTo($request->permissions);
+        }
+
         $user->departments()->sync($validated['department_id']);
 
-        return back();
+        return redirect()->route('user.index');
     }
 
     /**
@@ -101,6 +109,7 @@ class UserController extends Controller
         return Inertia::render('User/Show', [
             'user' => $user->load('departments'),
             'tasks' => $tasks,
+            'userPermissions' => $user->permissions->pluck('name'),
         ]);
     }
 
@@ -112,10 +121,12 @@ class UserController extends Controller
         $departments = Department::all();
 
         return Inertia::render('User/Edit', [
-            'user' => $user->load('departments'),
+            'user' => $user->load('departments', 'permissions'),
             'departments' => $departments,
+            'userPermissions' => $user->permissions->pluck('name'),
         ]);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -129,28 +140,32 @@ class UserController extends Controller
                 'string',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($user->id)
+                Rule::unique(User::class)->ignore($user->id),
             ],
-            'password' => [
-                'nullable',
-                'confirmed',
-                Password::defaults()
-            ],
-            'department_id' => ['required', 'array', 'min:1'],
+            'password' => ['nullable', 'confirmed', Password::defaults()],
+            'department_id' => ['nullable', 'array'],
             'department_id.*' => ['exists:departments,id'],
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['string'],
         ]);
+
 
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
         ]);
 
+
+
         if (!empty($validated['password'])) {
             $user->update(['password' => Hash::make($validated['password'])]);
         }
 
+        $user->syncPermissions($validated['permissions'] ?? []);
+
         $user->departments()->sync($validated['department_id']);
 
+        // return redirect()->route('user.index');
         return back();
     }
 

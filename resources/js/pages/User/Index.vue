@@ -10,6 +10,7 @@ import { type BreadcrumbItem } from '@/types';
 import { ref, watch } from 'vue';
 import user from '@/routes/user';
 import PermissionGuard from '@/components/PermissionGuard.vue';
+import { Button } from '@/components/ui/button';
 
 const props = defineProps<{
     users: User[];
@@ -39,6 +40,10 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+const createUser = () => {
+    router.visit(user.create().url);
+}
+
 </script>
 <template>
     <Head title="Manage Users" />
@@ -51,7 +56,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </div>
                 <div>
                     <PermissionGuard permission="can create user">
-                        <CreateUserForm :departments="props.departments" />
+                        <!-- <CreateUserForm :departments="props.departments" /> -->
+                        <Button size="sm" @click="createUser">Create User</Button>
                     </PermissionGuard>
                 </div>
             </section>

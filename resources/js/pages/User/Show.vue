@@ -10,6 +10,7 @@ import { router } from '@inertiajs/vue3';
 const props = defineProps<{
     user: User;
     tasks?: Task[];
+    userPermissions: string[];
 }>();
 
 </script>
@@ -31,7 +32,7 @@ const props = defineProps<{
 
             <!-- User Profile and Tasks -->
             <section>
-                <ShowUser :user="props.user" :tasks="props.tasks" />
+                <ShowUser :user="props.user" :tasks="props.tasks" :user-permissions="userPermissions"/>
             </section>
         </div>
     </AppLayout>

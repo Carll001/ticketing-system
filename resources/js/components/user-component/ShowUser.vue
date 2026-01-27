@@ -11,12 +11,18 @@ import {
 import { Task, User } from '@/types';
 import { Badge } from '../ui/badge';
 import { useInitials } from '@/composables/useInitials';
+import { Separator } from '../ui/separator';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
+const page = usePage();
+const auth = computed(() => page.props.auth);
 const { getInitials } = useInitials();
 
 const props = defineProps<{
     user: User;
     tasks?: Task[];
+    userPermissions?: string[];
 }>();
 
 // // Debug: Log the tasks to see if they have steps
@@ -34,14 +40,13 @@ const props = defineProps<{
         <!-- Profile Aside -->
         <aside class="w-80 flex-shrink-0">
             <Card class="w-80">
-                    <CardHeader class="items-center space-y-4 text-center">
-                        <!-- Avatar -->
-                        <div class="flex justify-center">
+                <CardHeader class="items-center space-y-4 text-center">
+                    <!-- Avatar -->
+                    <div class="flex justify-center">
                         <div
-                            class="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white"
-                        >
+                            class="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white">
                             <span class="text-3xl font-bold">
-                                   {{ getInitials(user.name) }}
+                                {{ getInitials(user.name) }}
                             </span>
                         </div>
                     </div>
@@ -58,16 +63,9 @@ const props = defineProps<{
                     <div class="space-y-2 text-center">
                         <h3 class="text-sm font-semibold">Departments</h3>
 
-                        <div
-                            v-if="user.departments && user.departments.length"
-                            class="flex flex-wrap justify-center gap-2"
-                        >
-                            <Badge
-                                v-for="dept in user.departments"
-                                :key="dept.id"
-                                variant="outline"
-                                class="rounded-lg"
-                            >
+                        <div v-if="user.departments && user.departments.length"
+                            class="flex flex-wrap justify-center gap-2">
+                            <Badge v-for="dept in user.departments" :key="dept.id" variant="outline" class="rounded-lg">
                                 {{ dept.name }}
                             </Badge>
                         </div>
@@ -77,8 +75,24 @@ const props = defineProps<{
                         </p>
                     </div>
 
+                    <div>
+                        <Separator class="my-4" />
+                        <h3 class="text-sm font-semibold text-center">Permissions</h3>
+
+                        <div v-if="userPermissions && userPermissions.length"
+                            class="flex flex-wrap justify-center gap-2 mt-2">
+                            <Badge v-for="perm in userPermissions" :key="perm" variant="outline" class="rounded-lg">
+                                {{ perm }}
+                            </Badge>
+                        </div>
+
+                        <p v-else class="text-sm text-muted-foreground italic text-center mt-2">
+                            No permissions assigned
+                        </p>
+                    </div>
+                    <Separator class="my-4" />
                     <!-- User Meta -->
-                    <div class="grid gap-4 border-t pt-4 text-sm flex text-center">
+                    <div class="grid gap-4 text-sm flex text-center">
                         <div>
                             <p class="text-xs text-muted-foreground">Created</p>
                             <p class="font-medium">
@@ -118,24 +132,24 @@ const props = defineProps<{
                                 <TableCell>
                                     <div v-if="task.steps && task.steps.length" class="flex flex-wrap gap-2">
                                         <RouterLink v-for="step in task.steps" :key="step.id" :to="`/steps/${step.id}`">
-                                                {{ step.title }}
+                                            {{ step.title }}
                                         </RouterLink>
                                     </div>
                                     <span v-else class="text-sm text-muted-foreground">-</span>
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="outline" class="cursor-pointer hover:bg-accent text-blue-600">
-                                               Assigned
-                                            </Badge>
+                                        Assigned
+                                    </Badge>
                                     <Badge variant="outline" class="cursor-pointer hover:bg-accent text-yellow-600">
-                                               Pending
-                                            </Badge>
+                                        Pending
+                                    </Badge>
                                     <Badge variant="outline" class="cursor-pointer hover:bg-accent text-green-600">
-                                               Completed
-                                            </Badge>
+                                        Completed
+                                    </Badge>
                                     <Badge variant="outline" class="cursor-pointer hover:bg-accent text-red-600">
-                                               Cancelled
-                                            </Badge>
+                                        Cancelled
+                                    </Badge>
                                 </TableCell>
                             </TableRow>
                         </TableBody>
@@ -147,4 +161,5 @@ const props = defineProps<{
             </div>
         </div>
     </div>
+    <pre>{{ props }}</pre>
 </template>

@@ -29,10 +29,20 @@ class DatabaseSeeder extends Seeder
             'can edit user',
             'can delete user',
             'can view user',
+
             'can view dashboard',
+
+            'can manage preset',
+
             'can create department',
+            'can edit department',
             'can view department',
             'can delete department',
+            
+            'can create task',
+            'can edit task',
+            'can view task',
+            'can delete task',
         ];
 
         // Create all permissions

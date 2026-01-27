@@ -2,14 +2,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Check, ChevronsUpDown } from 'lucide-vue-next';
+import { ChevronsUpDown } from 'lucide-vue-next';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import user from '@/routes/user';
-import { BreadcrumbItem, Department, User } from '@/types';
+import { BreadcrumbItem, Department } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { cn } from '@/lib/utils';
@@ -17,8 +17,6 @@ const openCreate = ref(false);
 const openCombo = ref(false);
 const props = defineProps<{
     departments: Department[];
-    user: User
-    userPermissions: string[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -33,13 +31,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const form = useForm({
-    name: props.user.name,
-    email: props.user.email,
+    name: '',
+    email: '',
     password: '',
     password_confirmation: '',
     // THIS IS MULTIPLE SECLECTION. IM USING UUID SO I USED STRING NOT ID 
-    department_id: props.user.departments ? props.user.departments.map(d => d.id) : [] as string[],
-    permissions: [...props.userPermissions],
+    department_id: [] as string[],
+    permissions: [] as string[],
 })
 
 const permissions = [
@@ -90,23 +88,19 @@ const selectedLabel = computed(() => {
     }
     return `${form.department_id.length} departments selected`;
 });
-const editUser = () => {
-    form.patch(user.update(props.user.id).url, {
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-            // form.reset();
-        }
+const createUser = () => {
+    form.post(user.store().url, {
+        onSuccess: () => form.reset()
     });
 };
 </script>
 
 <template>
 
-    <Head title="Edit User" />
+    <Head title="Create User" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-4 p-4">
-            <form @submit.prevent="editUser">
+            <form @submit.prevent="createUser">
                 <section class="flex justify-between items-center mb-4">
                     <div>
                         <h3>Create New User</h3>

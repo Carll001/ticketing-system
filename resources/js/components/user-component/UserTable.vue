@@ -14,7 +14,7 @@ import { Badge } from '../ui/badge';
 import DeleteUserModal from './DeleteUserModal.vue';
 import EditUserForm from './EditUserForm.vue';
 import PermissionGuard from '../PermissionGuard.vue';
-
+import userLink from '@/routes/user';
 
 const props = defineProps<{
     users: User[];
@@ -59,7 +59,8 @@ const props = defineProps<{
                                 <DeleteUserModal :user="user" />
                             </PermissionGuard>
                             <PermissionGuard permission="can edit user">
-                                <EditUserForm :user="user" :departments="props.departments" />
+                                <!-- <EditUserForm :user="user" :departments="props.departments" /> -->
+                                <Button @click="router.visit(userLink.edit(user.id).url)" size="sm">Edit</Button>
                             </PermissionGuard>
                             <PermissionGuard permission="can view user">
                                 <Button size="sm" variant="default"
