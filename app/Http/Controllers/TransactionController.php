@@ -11,21 +11,51 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $transactions = Transaction::with(['user', 'task'])->paginate(15);
-        return Inertia::render('Transaction/Index',[
-            'transactions' => [
-                'data' => $transactions->items(),
-                'current_page' => $transactions->currentPage(),
-                'last_page' => $transactions->lastPage(),
-                'per_page' => $transactions->perPage(),
-                'total' => $transactions->total(),
-                'from' => $transactions->firstItem(),
-                'to' => $transactions->lastItem(),
-            ]
-        ]);
-    }
+
+    public function index(Request $request)
+{
+    $search = $request->input('search');
+
+    $transactions = Transaction::with(['user', 'task'])
+        ->when($search, function ($query, $search) {
+            $search = strtolower($search);
+            // Use the actual column names in your table, e.g., 'content' and 'transaction_number'
+            $query->whereRaw('LOWER(content) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(transaction_number) LIKE ?', ["%{$search}%"]);
+        })
+        ->paginate(15);
+
+    return Inertia::render('Transaction/Index', [
+        'transactions' => [
+            'data' => $transactions->items(),
+            'current_page' => $transactions->currentPage(),
+            'last_page' => $transactions->lastPage(),
+            'per_page' => $transactions->perPage(),
+            'total' => $transactions->total(),
+            'from' => $transactions->firstItem(),
+            'to' => $transactions->lastItem(),
+        ],
+        'filters' => [
+            'search' => $search,
+        ],
+    ]);
+}
+
+    // public function index()
+    // {
+    //     $transactions = Transaction::with(['user', 'task'])->paginate(15);
+    //     return Inertia::render('Transaction/Index',[
+    //         'transactions' => [
+    //             'data' => $transactions->items(),
+    //             'current_page' => $transactions->currentPage(),
+    //             'last_page' => $transactions->lastPage(),
+    //             'per_page' => $transactions->perPage(),
+    //             'total' => $transactions->total(),
+    //             'from' => $transactions->firstItem(),
+    //             'to' => $transactions->lastItem(),
+    //         ]
+    //     ]);
+    // }
 
     /**
      * Show the form for creating a new resource.

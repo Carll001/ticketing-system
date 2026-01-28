@@ -65,14 +65,26 @@ const goToPage = (page: number) => {
 
 watch(search, (value) => {
     router.get(
-        department.index.url(),
-        { search: value },
+        department.index.url(),   
+        { search: value ?? '' },  
         {
-            preserveState: true,
-            replace: true,
+            preserveState: true,  
+            replace: true,        
         }
     );
 });
+
+
+// watch(search, (value) => {
+//     router.get(
+//         department.index.url(),
+//         { search: value },
+//         {
+//             preserveState: true,
+//             replace: true,
+//         }
+//     );
+// });
 
 const form = useForm({
     name: '',

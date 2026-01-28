@@ -57,11 +57,11 @@ class TaskController extends Controller
                     ->orWhereIn('assigned_to', $userDepartmentIds);
             })
             ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                });
-            })
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'ILIKE', "%{$search}%")
+                  ->orWhere('description', 'ILIKE', "%{$search}%");
+            });
+        })
             ->paginate(8);
 
         return Inertia::render('Task/Index', [

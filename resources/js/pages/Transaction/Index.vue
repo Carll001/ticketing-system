@@ -7,6 +7,9 @@ import { Head, router } from '@inertiajs/vue3';
 import { Search } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import transaction from '@/routes/transaction';
+import { ref, watch } from 'vue';
+
+
 
 const props = defineProps<{
     transactions: {
@@ -33,6 +36,16 @@ const goToPage = (page: number) => {
     }
 };
 
+const search = ref('');
+
+watch(search, (value) => {
+    router.get(
+        transaction.index.url(), // siguraduhing tama ang route
+        { search: value ?? '' },
+        { preserveState: true, replace: true }
+    );
+});
+
 </script>
 <template>
 
@@ -42,7 +55,8 @@ const goToPage = (page: number) => {
             <section class="flex items-center justify-between">
                 <div class="relative w-120">
                     <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input  class="pl-10" placeholder="Search..." />
+                    <Input v-model="search" class="pl-10" placeholder="Search..." />
+
                 </div>
                 <!-- <div>
                     <PermissionGuard permission="can create user">
