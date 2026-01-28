@@ -5,19 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Step;
 use App\Models\Task;
 use App\Models\StepComment;
-use Illuminate\Http\Request;
+use App\Http\Requests\StepCommentRequest;
 use Illuminate\Support\Facades\Auth;
 
 class StepCommentController extends Controller
 {
-    public function store(Request $request, Task $task, Step $step)
+    /**
+     * Store a new comment for a step.
+     */
+    public function store(StepCommentRequest $request, Task $task, Step $step)
     {
-        $request->validate([
-            'content' => 'required|string|max:2000',
-        ]);
-
         StepComment::create([
-            'content' => $request->content,
+            'content' => $request->validated()['content'],
             'step_id' => $step->id,
             'user_id' => Auth::id(),
         ]);
@@ -25,11 +24,14 @@ class StepCommentController extends Controller
         return back();
     }
 
+    /**
+     * Delete a comment.
+     */
     public function destroy(Task $task, Step $step, StepComment $comment)
     {
-        // optional safety check
-        if ($comment->user_id !== auth()->id()) {
-            abort(403);
+        // Safety check: only owner can delete
+        if ($comment->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
         }
 
         $comment->delete();

@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PresetRequest;
 use App\Models\Preset;
-use App\Models\PresetField;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -18,6 +16,7 @@ class PresetController extends Controller
     public function index()
     {
         $presets = Preset::all();
+
         return Inertia::render('Preset/Index', [
             'presets' => $presets,
         ]);
@@ -39,19 +38,17 @@ class PresetController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($data) {
-            // 1. Create the Parent
             $preset = Preset::create([
                 'user_id' => Auth::id(),
-                'name'        => $data['name'],
-                'description' => $data['description'],
-                'has_cost'    => $data['has_cost'] ?? false,
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'has_cost' => $data['has_cost'] ?? false,
             ]);
 
-            // 2. Create the Fields
             if (!empty($data['fields'])) {
                 foreach ($data['fields'] as $field) {
                     $preset->fields()->create([
-                        'type'  => $field['type'],
+                        'type' => $field['type'],
                         'label' => $field['label'],
                     ]);
                 }
@@ -66,7 +63,8 @@ class PresetController extends Controller
      */
     public function show(Preset $preset)
     {
-        $preset->load(['fields']);
+        $preset->load('fields');
+
         return Inertia::render('Preset/Show', [
             'preset' => $preset,
         ]);
@@ -77,7 +75,8 @@ class PresetController extends Controller
      */
     public function edit(Preset $preset)
     {
-        $preset->load(['fields']);
+        $preset->load('fields');
+
         return Inertia::render('Preset/Edit', [
             'preset' => $preset,
         ]);
@@ -86,46 +85,37 @@ class PresetController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Preset $preset)
+    public function update(PresetRequest $request, Preset $preset)
     {
-        // 1. Validate the incoming data
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'fields' => 'array',
-            'fields.*.id' => 'required', // This is the UUID from the frontend
-            'fields.*.type' => 'required|in:Checkbox,Input,Description',
-            'fields.*.label' => 'required|string|max:255',
-        ]);
+        $data = $request->validated();
 
-        DB::transaction(function () use ($preset, $validated) {
-            // 2. Update the parent Preset
+        DB::transaction(function () use ($preset, $data) {
+            // Update parent preset
             $preset->update([
-                'name' => $validated['name'],
-                'description' => $validated['description'],
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'has_cost' => $data['has_cost'] ?? false,
             ]);
 
-            // 3. Handle the Fields (Syncing)
-            $incomingFields = collect($validated['fields']);
-            $incomingIds = $incomingFields->pluck('id')->toArray();
+            $fields = collect($data['fields'] ?? []);
+            $incomingIds = $fields->pluck('id')->filter()->toArray();
 
-            // Delete fields that are no longer present in the form
+            // Delete removed fields
             $preset->fields()->whereNotIn('id', $incomingIds)->delete();
 
-            // Update existing fields or Create new ones
-            foreach ($incomingFields as $fieldData) {
+            // Update existing or create new fields
+            foreach ($fields as $field) {
                 $preset->fields()->updateOrCreate(
-                    ['id' => $fieldData['id']], // Unique identifier
+                    ['id' => $field['id'] ?? null],
                     [
-                        'type' => $fieldData['type'],
-                        'label' => $fieldData['label'],
+                        'type' => $field['type'],
+                        'label' => $field['label'],
                     ]
                 );
             }
         });
 
-        // return redirect()->back()->with('success', 'Preset updated successfully.');
-        return redirect()->route('preset.index');
+        return redirect()->route('preset.index')->with('success', 'Preset updated successfully.');
     }
 
     /**
@@ -133,6 +123,11 @@ class PresetController extends Controller
      */
     public function destroy(Preset $preset)
     {
-        dd('delete');
+        DB::transaction(function () use ($preset) {
+            $preset->fields()->delete();
+            $preset->delete();
+        });
+
+        return redirect()->route('preset.index')->with('success', 'Preset deleted successfully.');
     }
 }

@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StepRequest;
 use App\Models\Step;
 use App\Models\Task;
 use App\Models\User;
 use Inertia\Inertia;
-use Illuminate\Http\Request;
-use App\Http\Requests\StepRequest;
 use App\Http\Resources\StepResource;
 use App\Models\Preset;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB ;
+use Illuminate\Support\Facades\DB;
 
 class StepController extends Controller
 {
@@ -20,44 +19,40 @@ class StepController extends Controller
      */
     public function index()
     {
-        //
+        // Optional: implement list of steps if needed
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new step.
      */
     public function create(Task $task)
     {
-        $users = User::all();
-    
         return Inertia::render('Step/Create', [
             'task' => $task,
-            'users' => $users,
+            'users' => User::all(),
             'presets' => Preset::with(['fields'])->get(),
         ]);
-
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created step in storage.
      */
     public function store(StepRequest $request)
     {
         $data = $request->validated();
-        // Wrap in a transaction for safety
+
         $step = DB::transaction(function () use ($data) {
-            // 1. Create the Step
+            // Create Step
             $step = Step::create([
                 'task_id'     => $data['task_id'],
-                'preset_id' => $data['preset_id'] ?? null,
+                'preset_id'   => $data['preset_id'] ?? null,
                 'title'       => $data['title'],
-                // 'type'       => $data['type'],
-                'description' => $data['description'],
-                'assigned_to' => $data['assigned_to'],
-                'status'      => $data['assigned_to'] ? 'assigned' : 'pending',
+                'description' => $data['description'] ?? null,
+                'assigned_to' => $data['assigned_to'] ?? null,
+                'status'      => !empty($data['assigned_to']) ? 'assigned' : 'pending',
             ]);
 
-            // 2. Create the Field Definitions (Questions)
+            // Create dynamic fields
             if (!empty($data['fields'])) {
                 foreach ($data['fields'] as $field) {
                     $step->fields()->create([
@@ -70,15 +65,13 @@ class StepController extends Controller
             return $step;
         });
 
-        if ($request->again) {
-            return back();
-        }
-
-        return redirect()->route('task.show', $step->task_id);
+        return !empty($data['again'])
+            ? back()
+            : redirect()->route('task.show', $step->task_id);
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified step.
      */
     public function show(Task $task, Step $step)
     {
@@ -87,7 +80,7 @@ class StepController extends Controller
             'assigned',
             'fields.responses.user',
             'proofs',
-             'comments.user',
+            'comments.user',
         ]);
 
         return Inertia::render('Step/Show', [
@@ -96,21 +89,26 @@ class StepController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified step.
      */
     public function edit(Task $task, Step $step)
     {
-        $step->load(['assigned', 'task', 'fields' => function ($query) {
-            $query->orderByRaw("CASE 
-            WHEN type = 'Checkbox' THEN 1 
-            WHEN type = 'Input' THEN 2 
-            WHEN type = 'Description' THEN 3 
-            ELSE 4 END");
-            // Load responses for the logged-in user so the form is pre-filled
-            $query->with(['responses' => function ($q) {
-                $q->where('user_id', Auth::id());
-            }]);
-        }]);
+        $step->load([
+            'assigned',
+            'task',
+            'fields' => function ($query) {
+                $query->orderByRaw("
+                    CASE
+                        WHEN type = 'Checkbox' THEN 1
+                        WHEN type = 'Input' THEN 2
+                        WHEN type = 'Description' THEN 3
+                        ELSE 4
+                    END
+                ")->with(['responses' => function ($q) {
+                    $q->where('user_id', Auth::id());
+                }]);
+            },
+        ]);
 
         return Inertia::render('Step/Edit', [
             'users' => User::all(),
@@ -119,28 +117,24 @@ class StepController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified step in storage.
      */
     public function update(StepRequest $request, Task $task, Step $step)
     {
         $data = $request->validated();
-
-        // Logic for setting status based on assignment
         $data['status'] = !empty($data['assigned_to']) ? 'assigned' : 'pending';
 
         DB::transaction(function () use ($data, $step) {
-            // 1. Update the Step basic info
+            // Update Step
             $step->update([
                 'title'       => $data['title'],
-                'description' => $data['description'],
-                'assigned_to' => $data['assigned_to'],
+                'description' => $data['description'] ?? null,
+                'assigned_to' => $data['assigned_to'] ?? null,
                 'status'      => $data['status'],
             ]);
 
-            // 2. Sync Field Definitions (Questions)
-            // Simplest approach: delete old ones and insert new ones
+            // Sync Fields (delete old + create new)
             $step->fields()->delete();
-
             if (!empty($data['fields'])) {
                 foreach ($data['fields'] as $field) {
                     $step->fields()->create([
@@ -151,22 +145,17 @@ class StepController extends Controller
             }
         });
 
-        if ($request->again === true) {
-            return back();
-        }
-
-        return redirect()->route('task.show', $step->task_id);
+        return !empty($data['again'])
+            ? back()
+            : redirect()->route('task.show', $step->task_id);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified step from storage.
      */
     public function destroy(Task $task, Step $step)
     {
         $step->delete();
-
         return back();
     }
-
-    
 }
