@@ -12,6 +12,7 @@ import { Head, router } from '@inertiajs/vue3';
 import { ArrowUpRightIcon, FolderCode, FolderOpen, List, NotepadText } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import step from '@/routes/step';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const props = defineProps<{
     task: { data: Task }
@@ -63,8 +64,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </div>
                     <div>
                         <p class="text-muted-foreground text-sm gap-2">
-                           Due: 
-                           {{ props.task.data.due_date ? new Date(props.task.data.due_date).toDateString() : 'No due date' }}
+                            Due:
+                            {{ props.task.data.due_date ? new Date(props.task.data.due_date).toDateString() : 'No due date' }}
                         </p>
                     </div>
                 </section>
@@ -77,10 +78,31 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <!-- <AddStepDialog :task="task" /> -->
                 <Button size="sm" @click="addStep">Add Step</Button>
             </div>
-
+            <Tabs default-value="account">
+                <TabsList>
+                    <TabsTrigger value="">
+                        All
+                    </TabsTrigger>
+                    <TabsTrigger value="">
+                        Assigned
+                    </TabsTrigger>
+                    <TabsTrigger value="">
+                        Accepted
+                    </TabsTrigger>
+                    <TabsTrigger value="">
+                        Completed
+                    </TabsTrigger>
+                </TabsList>
+                <!-- <TabsContent value="account">
+                    Make changes to your account here.
+                </TabsContent>
+                <TabsContent value="password">
+                    Change your password here.
+                </TabsContent> -->
+            </Tabs>
             <div class="space-y-4">
-                <div class="">
-                    <StepCard :steps="props.task.data.steps" />
+                <div class="space-y-4" >
+                    <StepCard :steps="props.task.data.steps" :creator="props.task.data.creator" />
                 </div>
                 <EmptyData :icon="NotepadText" title="No Steps Yet"
                     message="You haven't created any steps yet. Get started by creating first step."

@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('{task}/step/create', [StepController::class, 'create'])->name('step.create');
         Route::get('{task}/step/{step}', [StepController::class, 'show'])->name('step.show');
         Route::get('/{task}/step/{step}/edit', [StepController::class, 'edit'])->name('step.edit');
+        Route::patch('/{task}/step/{step}/updateStatus', [StepController::class, 'updateStatus'])->name('step.updateStatus');
 
         Route::post('/{task}/step', [StepController::class, 'store'])->name('step.store');
         Route::patch('/{task}/step/{step}', [StepController::class, 'update'])->name('step.update');

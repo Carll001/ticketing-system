@@ -87,7 +87,7 @@ class StepController extends Controller
             'assigned',
             'fields.responses.user',
             'proofs',
-             'comments.user',
+            'comments.user',
         ]);
 
         return Inertia::render('Step/Show', [
@@ -118,11 +118,25 @@ class StepController extends Controller
         ]);
     }
 
+    public function updateStatus(Task $task, Step $step, Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,assigned,accepted,cancelled,in-progress,completed',
+        ]);
+
+        $step->status = $request->status;
+        $step->assigned_to = Auth::id();
+        $step->save();
+        
+        return back();
+    }
+
     /**
      * Update the specified resource in storage.
      */
     public function update(StepRequest $request, Task $task, Step $step)
     {
+
         $data = $request->validated();
 
         // Logic for setting status based on assignment

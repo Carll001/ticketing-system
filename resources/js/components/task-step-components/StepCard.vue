@@ -8,8 +8,8 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import stepLink from '@/routes/step';
-import { Step } from '@/types';
-import { router } from '@inertiajs/vue3';
+import { Step, User } from '@/types';
+import { router, usePage } from '@inertiajs/vue3';
 import {
     Collapsible,
     CollapsibleContent,
@@ -24,8 +24,25 @@ import { Textarea } from '../ui/textarea';
 import StepDeleteDialog from './StepDeleteDialog.vue';
 import { Checkbox } from '../ui/checkbox';
 
+const page = usePage();
+const auth = computed(() => page.props.auth);
+
+const takeStep = (taskId: string, stepId: string) => {
+    router.patch(
+        stepLink.updateStatus({ task: taskId, step: stepId }).url,
+        { status: 'accepted' },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Optional: show success message or toast
+            }
+        }
+    );
+};
+
 const props = defineProps<{
     steps?: Step[];
+    creator?: User;
 }>();
 
 const openStepId = ref<string | null>(null);
@@ -90,8 +107,13 @@ const getGroupsForStep = (stepId: string) => {
                                     </div>
                                 </CardDescription>
                             </section>
-                            <section class="">
+                            <section class="space-x-2">
                                 <Button size="sm" @click="showStep(step.task_id, step.id)">View Step</Button>
+                                <Button size="sm" v-if="creator?.id !== auth.user.id && step.assigned_to === null"
+                                    @click="takeStep(step.task_id, step.id)">Take</Button>
+                                <Button size="sm"
+                                    v-if="creator?.id !== auth.user.id && step.status === 'assigned' && step.assigned_to === auth.user.id"
+                                    @click="takeStep(step.task_id, step.id)">Accept</Button>
                             </section>
                         </div>
 
@@ -168,7 +190,7 @@ const getGroupsForStep = (stepId: string) => {
                 </div>
 
             </div>
-
+            <!-- <pre>{{ props }}</pre> -->
         </Card>
     </Collapsible>
 </template>

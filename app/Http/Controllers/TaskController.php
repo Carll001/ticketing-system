@@ -46,10 +46,16 @@ class TaskController extends Controller
         // Get current user's department IDs
         $userDepartmentIds = Auth::user()->departments()->pluck('department_id');
 
-        // FETCH TASK DATA - Filter by user's departments
+        // FETCH TASK DATA with proper filtering
         $tasks = Task::with(['steps', 'assigned'])
-            ->whereIn('assigned_to', $userDepartmentIds)
-            ->orWhere('creator_id', Auth::id())
+            ->where(function ($query) use ($userDepartmentIds) {
+                // Show tasks created by the user
+                $query->where('creator_id', Auth::id())
+                    // OR tasks with no assignment (visible to everyone)
+                    ->orWhereNull('assigned_to')
+                    // OR tasks assigned to user's departments
+                    ->orWhereIn('assigned_to', $userDepartmentIds);
+            })
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%{$search}%")
@@ -57,7 +63,6 @@ class TaskController extends Controller
                 });
             })
             ->get();
-        // $departments = Department::all();
 
         return Inertia::render('Task/Index', [
             'tasks' => TaskResource::collection($tasks),
@@ -98,9 +103,22 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
+        $isCreator = $task->creator_id === Auth::id();
+
+        // Load task relationships with step filtering
         $task->load([
             'creator',
             'assigned',
+            'steps' => function ($query) use ($isCreator) {
+                if (!$isCreator) {
+                    // Non-creators only see unassigned steps OR steps assigned to them
+                    $query->where(function ($q) {
+                        $q->whereNull('assigned_to')
+                            ->orWhere('assigned_to', Auth::id());
+                    });
+                }
+                // Creators see all steps (no filter applied)
+            },
             'steps.assigned',
             'steps.fields' => function ($query) {
                 $query->orderByRaw("CASE 

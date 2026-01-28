@@ -28,11 +28,9 @@ const editTask = (id: string) => {
     router.visit(taskLink.edit(id).url)
 }
 
-
 const visitDepartment = (id: string) => {
     router.visit(`/department/${id}`)
 }
-
 
 const completedStepsCount = (task: Task) => {
     if (!task.steps) return 0;
