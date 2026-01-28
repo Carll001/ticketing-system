@@ -11,13 +11,35 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $transactions = Transaction::with(['user', 'task'])->get();
-        return Inertia::render('Transaction/Index',[
-            'transactions' => $transactions
-        ]);
-    }
+
+   public function index(Request $request)
+{
+    $search = $request->input('search');
+
+    $transactions = Transaction::with(['user', 'task'])
+        ->when($search, function ($query, $search) {
+            $query->where('transaction_number', 'ILIKE', "%{$search}%")
+                  ->orWhere('content', 'ILIKE', "%{$search}%")
+                  ->orWhereHas('user', function ($q) use ($search) {
+                      $q->where('name', 'ILIKE', "%{$search}%");
+                  });
+        })
+        ->get();
+
+    return Inertia::render('Transaction/Index', [
+        'transactions' => $transactions,
+        'filters' => ['search' => $search],
+    ]);
+}
+
+
+    // public function index()
+    // {
+    //     $transactions = Transaction::with(['user', 'task'])->get();
+    //     return Inertia::render('Transaction/Index',[
+    //         'transactions' => $transactions
+    //     ]);
+    // }
 
     /**
      * Show the form for creating a new resource.

@@ -39,34 +39,67 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+
     public function index(Request $request)
-    {
-        $search = $request->input('search');
+{
+    $search = $request->input('search');
 
-        // Get current user's department IDs
-        $userDepartmentIds = Auth::user()->departments()->pluck('department_id');
+    // Get current user's department IDs
+    $userDepartmentIds = Auth::user()->departments()->pluck('department_id');
 
-        // FETCH TASK DATA - Filter by user's departments
-        $tasks = Task::with(['steps', 'assigned'])
-            ->whereIn('assigned_to', $userDepartmentIds)
-            ->orWhere('creator_id', Auth::id())
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                });
-            })
-            ->get();
-        // $departments = Department::all();
+    $tasks = Task::with(['steps', 'assigned'])
+        ->where(function ($query) use ($userDepartmentIds) {
+            $query->whereIn('assigned_to', $userDepartmentIds)
+                  ->orWhere('creator_id', Auth::id());
+        })
+        ->when($search, function ($query) use ($search) {
+            $search = strtolower($search);
 
-        return Inertia::render('Task/Index', [
-            'tasks' => TaskResource::collection($tasks),
-            'departments' => DepartmentResource::collection(Department::all()),
-            'filters' => [
-                'search' => $search,
-            ],
-        ]);
-    }
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
+            });
+        })
+        ->get();
+
+    return Inertia::render('Task/Index', [
+        'tasks' => TaskResource::collection($tasks),
+        'departments' => DepartmentResource::collection(Department::all()),
+        'filters' => [
+            'search' => $search,
+        ],
+    ]);
+}
+
+    // public function index(Request $request)
+    // {
+    //     $search = $request->input('search');
+
+    //     // Get current user's department IDs
+    //     $userDepartmentIds = Auth::user()->departments()->pluck('department_id');
+
+    //     // FETCH TASK DATA - Filter by user's departments
+    //     $tasks = Task::with(['steps', 'assigned'])
+    //         ->whereIn('assigned_to', $userDepartmentIds)
+    //         ->orWhere('creator_id', Auth::id())
+    //         ->when($search, function ($query, $search) {
+    //             $query->where(function ($q) use ($search) {
+    //                 $q->where('title', 'like', "%{$search}%")
+    //                     ->orWhere('description', 'like', "%{$search}%");
+    //             });
+    //         })
+    //         ->get();
+    //     // $departments = Department::all();
+
+    //     return Inertia::render('Task/Index', [
+    //         'tasks' => TaskResource::collection($tasks),
+    //         'departments' => DepartmentResource::collection(Department::all()),
+    //         'filters' => [
+    //             'search' => $search,
+    //         ],
+    //     ]);
+    // }
 
     /**
      * Show the form for creating a new resource.

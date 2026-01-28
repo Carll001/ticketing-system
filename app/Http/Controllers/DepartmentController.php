@@ -57,9 +57,12 @@ class DepartmentController extends Controller
         $search = $request->input('search');
 
         $departments = Department::with('users')
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+
+        ->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
+
+            // ->when($search, function ($query, $search) {
+            //     $query->where('name', 'like', "%{$search}%");
+            // })
             ->latest()
             ->get();
 

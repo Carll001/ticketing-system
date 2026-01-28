@@ -16,18 +16,33 @@ const props = defineProps<{
     };
 }>();
 
+
 const search = ref(props.filters.search ?? '');
 
 watch(search, (value) => {
     router.get(
         taskLink.index.url(),
-        { search: value },
+        { search: value?.toLowerCase() ?? '' },
         {
             preserveState: true,
             replace: true,
         },
     );
 });
+
+
+
+
+// watch(search, (value) => {
+//     router.get(
+//         taskLink.index.url(),
+//         { search: value },
+//         {
+//             preserveState: true,
+//             replace: true,
+//         },
+//     );
+// });
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
