@@ -27,6 +27,19 @@ import { Checkbox } from '../ui/checkbox';
 const page = usePage();
 const auth = computed(() => page.props.auth);
 
+const takeStep = (taskId: string, stepId: string) => {
+    router.patch(
+        stepLink.updateStatus({ task: taskId, step: stepId }).url,
+        { status: 'accepted' },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Optional: show success message or toast
+            }
+        }
+    );
+};
+
 const props = defineProps<{
     steps?: Step[];
     creator?: User;
@@ -96,7 +109,11 @@ const getGroupsForStep = (stepId: string) => {
                             </section>
                             <section class="space-x-2">
                                 <Button size="sm" @click="showStep(step.task_id, step.id)">View Step</Button>
-                                <Button size="sm" v-if="creator?.id !== auth.user.id">Take</Button>
+                                <Button size="sm" v-if="creator?.id !== auth.user.id && step.assigned_to === null"
+                                    @click="takeStep(step.task_id, step.id)">Take</Button>
+                                <Button size="sm"
+                                    v-if="creator?.id !== auth.user.id && step.status === 'assigned' && step.assigned_to === auth.user.id"
+                                    @click="takeStep(step.task_id, step.id)">Accept</Button>
                             </section>
                         </div>
 

@@ -118,6 +118,19 @@ class StepController extends Controller
         ]);
     }
 
+    public function updateStatus(Task $task, Step $step, Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,assigned,accepted,cancelled,in-progress,completed',
+        ]);
+
+        $step->status = $request->status;
+        $step->assigned_to = Auth::id();
+        $step->save();
+        
+        return back();
+    }
+
     /**
      * Update the specified resource in storage.
      */
