@@ -61,12 +61,20 @@ class DepartmentController extends Controller
                 $query->where('name', 'like', "%{$search}%");
             })
             ->latest()
-            ->get();
+            ->paginate(10);
 
         $users = User::with('departments')->get();
 
         return Inertia::render('Department', [
-            'departments' => DepartmentResource::collection($departments),
+            'departments' => [
+                'data' => DepartmentResource::collection($departments->items())->resolve(),
+                'current_page' => $departments->currentPage(),
+                'last_page' => $departments->lastPage(),
+                'per_page' => $departments->perPage(),
+                'total' => $departments->total(),
+                'from' => $departments->firstItem(),
+                'to' => $departments->lastItem(),
+            ],
             'users' => UserResource::collection($users),
             'filters' => [
                 'search' => $search,

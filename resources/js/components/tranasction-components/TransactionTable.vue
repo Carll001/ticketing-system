@@ -60,6 +60,5 @@ const props = defineProps<{
                 </TableRow>
             </TableBody>
         </Table>
-        <pre>{{ props.transaction }}</pre>
     </div>
 </template>

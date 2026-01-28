@@ -16,8 +16,29 @@ import preset from '@/routes/preset';
 import { Preset } from '@/types';
 
 const props = defineProps<{
-    presets: Preset[],
+    presets: {
+        data: Preset[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
 }>();
+
+const goToPage = (page: number) => {
+    if (page >= 1 && page <= props.presets.last_page) {
+        router.get(
+            preset.index.url(),
+            { page },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    }
+};
 
 const createPreset = () => {
     router.visit(preset.create().url)
@@ -51,8 +72,7 @@ const viewPreset = (id: string) => {
                 </div>
             </section>
             <section>
-                <Table>
-                    <TableCaption>A list of your recent invoices.</TableCaption>
+                <Table class="overflow-hidden">
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-[100px]">
@@ -64,7 +84,7 @@ const viewPreset = (id: string) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="preset in presets">
+                        <TableRow v-for="preset in presets.data">
                             <TableCell class="font-medium">
                                 {{ preset.name }}
                             </TableCell>
@@ -98,7 +118,18 @@ const viewPreset = (id: string) => {
                         </TableRow> -->
                     </TableFooter>
                 </Table>
+                 <!-- pagination here -->
+          <div class="border-t px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm">Showing {{ presets.from }} to {{ presets.to }} of {{ presets.total }} presets</p>
+                        <div class="flex gap-2">
+                            <Button variant="outline" size="sm" :disabled="presets.current_page === 1" @click="goToPage(presets.current_page - 1)">Previous</Button>
+                            <Button variant="outline" size="sm" :disabled="presets.current_page === presets.last_page" @click="goToPage(presets.current_page + 1)">Next</Button>
+                        </div>
+                    </div>
+                </div>
             </section>
         </div>
+        
     </AppLayout>
 </template>

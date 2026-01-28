@@ -13,9 +13,17 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        $transactions = Transaction::with(['user', 'task'])->get();
+        $transactions = Transaction::with(['user', 'task'])->paginate(15);
         return Inertia::render('Transaction/Index',[
-            'transactions' => $transactions
+            'transactions' => [
+                'data' => $transactions->items(),
+                'current_page' => $transactions->currentPage(),
+                'last_page' => $transactions->lastPage(),
+                'per_page' => $transactions->perPage(),
+                'total' => $transactions->total(),
+                'from' => $transactions->firstItem(),
+                'to' => $transactions->lastItem(),
+            ]
         ]);
     }
 

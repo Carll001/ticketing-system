@@ -33,7 +33,7 @@ const visitDepartment = (id: string) => {
 }
 
 const completedStepsCount = (task: Task) => {
-    if (!task.steps) return 0;
+    if (!task.steps || !Array.isArray(task.steps)) return 0;
     return task.steps.filter(step => step.status === 'completed').length;
 };
 </script>

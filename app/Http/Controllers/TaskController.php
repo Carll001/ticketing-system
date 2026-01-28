@@ -62,10 +62,18 @@ class TaskController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 });
             })
-            ->get();
+            ->paginate(8);
 
         return Inertia::render('Task/Index', [
-            'tasks' => TaskResource::collection($tasks),
+            'tasks' => [
+                'data' => TaskResource::collection($tasks->items())->resolve(),
+                'current_page' => $tasks->currentPage(),
+                'last_page' => $tasks->lastPage(),
+                'per_page' => $tasks->perPage(),
+                'total' => $tasks->total(),
+                'from' => $tasks->firstItem(),
+                'to' => $tasks->lastItem(),
+            ],
             'departments' => DepartmentResource::collection(Department::all()),
             'filters' => [
                 'search' => $search,
