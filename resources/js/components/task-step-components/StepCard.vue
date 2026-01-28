@@ -8,8 +8,8 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import stepLink from '@/routes/step';
-import { Step } from '@/types';
-import { router } from '@inertiajs/vue3';
+import { Step, User } from '@/types';
+import { router, usePage } from '@inertiajs/vue3';
 import {
     Collapsible,
     CollapsibleContent,
@@ -24,8 +24,12 @@ import { Textarea } from '../ui/textarea';
 import StepDeleteDialog from './StepDeleteDialog.vue';
 import { Checkbox } from '../ui/checkbox';
 
+const page = usePage();
+const auth = computed(() => page.props.auth);
+
 const props = defineProps<{
     steps?: Step[];
+    creator?: User;
 }>();
 
 const openStepId = ref<string | null>(null);
@@ -90,8 +94,9 @@ const getGroupsForStep = (stepId: string) => {
                                     </div>
                                 </CardDescription>
                             </section>
-                            <section class="">
+                            <section class="space-x-2">
                                 <Button size="sm" @click="showStep(step.task_id, step.id)">View Step</Button>
+                                <Button size="sm" v-if="creator?.id !== auth.user.id">Take</Button>
                             </section>
                         </div>
 
@@ -168,7 +173,7 @@ const getGroupsForStep = (stepId: string) => {
                 </div>
 
             </div>
-
+            <!-- <pre>{{ props }}</pre> -->
         </Card>
     </Collapsible>
 </template>

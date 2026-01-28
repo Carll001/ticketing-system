@@ -87,7 +87,7 @@ class StepController extends Controller
             'assigned',
             'fields.responses.user',
             'proofs',
-             'comments.user',
+            'comments.user',
         ]);
 
         return Inertia::render('Step/Show', [
@@ -123,6 +123,7 @@ class StepController extends Controller
      */
     public function update(StepRequest $request, Task $task, Step $step)
     {
+
         $data = $request->validated();
 
         // Logic for setting status based on assignment
