@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
             'can view department',
             'can delete department',
             
+            
             'can create task',
             'can edit task',
             'can view task',

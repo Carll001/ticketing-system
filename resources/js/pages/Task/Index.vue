@@ -10,13 +10,34 @@ import { Search } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 const props = defineProps<{
-    tasks:  {data: Task[]};
+    tasks: {
+        data: Task[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
     filters: {
         search?: string;
     };
 }>();
 
 const search = ref(props.filters.search ?? '');
+
+const goToPage = (page: number) => {
+    if (page >= 1 && page <= props.tasks.last_page) {
+        router.get(
+            taskLink.index.url(),
+            { page, search: search.value || undefined },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    }
+};
 
 watch(search, (value) => {
     router.get(
@@ -68,6 +89,16 @@ const createTask = () => {
             </div>
             <div class="flex flex-col gap-4">
                 <TaskCard :tasks="props.tasks.data" />
+            </div>
+            <!-- pagination -->
+            <div class="border-t px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm">Showing {{ props.tasks.from }} to {{ props.tasks.to }} of {{ props.tasks.total }} tasks</p>
+                    <div class="flex gap-2">
+                        <Button variant="outline" size="sm" :disabled="props.tasks.current_page === 1" @click="goToPage(props.tasks.current_page - 1)">Previous</Button>
+                        <Button variant="outline" size="sm" :disabled="props.tasks.current_page === props.tasks.last_page" @click="goToPage(props.tasks.current_page + 1)">Next</Button>
+                    </div>
+                </div>
             </div>
         </div>
     </AppLayout>

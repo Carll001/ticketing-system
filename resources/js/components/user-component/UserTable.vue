@@ -19,7 +19,23 @@ import userLink from '@/routes/user';
 const props = defineProps<{
     users: User[];
     departments?: Department[];
+    pagination?: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
 }>();
+
+const goToPage = (page: number) => {
+    if (page >= 1 && page <= (props.pagination?.last_page ?? 1)) {
+        const params = new URLSearchParams(window.location.search);
+        const search = params.get('search') || '';
+        router.get(window.location.pathname, { page, search: search || undefined });
+    }
+};
 
 </script>
 <template>
@@ -74,4 +90,14 @@ const props = defineProps<{
             </TableBody>
         </Table>
     </div>
+     <!-- pagination here -->
+          <div v-if="props.pagination" class="border-t px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm">Showing {{ props.pagination.from }} to {{ props.pagination.to }} of {{ props.pagination.total }} users</p>
+                        <div class="flex gap-2">
+                            <Button variant="outline" size="sm" :disabled="props.pagination.current_page === 1" @click="goToPage(props.pagination.current_page - 1)">Previous</Button>
+                            <Button variant="outline" size="sm" :disabled="props.pagination.current_page === props.pagination.last_page" @click="goToPage(props.pagination.current_page + 1)">Next</Button>
+                        </div>
+                    </div>
+                </div>
 </template>

@@ -33,7 +33,15 @@ import PermissionGuard from '@/components/PermissionGuard.vue';
 
 // Create function
 const props = defineProps<{
-    departments: { data: Department[] };
+    departments: {
+        data: Department[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
     users: { data: User[] };
     filters: {
         search?: string;
@@ -41,6 +49,19 @@ const props = defineProps<{
 }>();
 
 const search = ref(props.filters.search ?? '');
+
+const goToPage = (page: number) => {
+    if (page >= 1 && page <= props.departments.last_page) {
+        router.get(
+            department.index.url(),
+            { page, search: search.value || undefined },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    }
+};
 
 watch(search, (value) => {
     router.get(
@@ -307,10 +328,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <!-- Pagination -->
                 <div class="border-t px-6 py-4">
                     <div class="flex items-center justify-between">
-                        <p class="text-sm">Showing 5 of 5 departments</p>
+                        <p class="text-sm">Showing {{ props.departments.from }} to {{ props.departments.to }} of {{ props.departments.total }} departments</p>
                         <div class="flex gap-2">
-                            <Button variant="outline" size="sm" disabled>Previous</Button>
-                            <Button variant="outline" size="sm" disabled>Next</Button>
+                            <Button variant="outline" size="sm" :disabled="props.departments.current_page === 1" @click="goToPage(props.departments.current_page - 1)">Previous</Button>
+                            <Button variant="outline" size="sm" :disabled="props.departments.current_page === props.departments.last_page" @click="goToPage(props.departments.current_page + 1)">Next</Button>
                         </div>
                     </div>
                 </div>

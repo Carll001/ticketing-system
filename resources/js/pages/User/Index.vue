@@ -13,7 +13,15 @@ import PermissionGuard from '@/components/PermissionGuard.vue';
 import { Button } from '@/components/ui/button';
 
 const props = defineProps<{
-    users: User[];
+    users: {
+        data: User[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
     departments: Department[];
     filters: {
         search?: string;
@@ -62,7 +70,7 @@ const createUser = () => {
                 </div>
             </section>
             <section>
-                <UserTable :users="props.users" :departments="props.departments" />
+                <UserTable :users="props.users.data" :pagination="props.users" :departments="props.departments" />
             </section>
         </div>
     </AppLayout>

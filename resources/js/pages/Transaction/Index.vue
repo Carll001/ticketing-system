@@ -3,12 +3,35 @@ import TransactionTable from '@/components/tranasction-components/TransactionTab
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Transaction } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { Search } from 'lucide-vue-next';
+import { Button } from '@/components/ui/button';
+import transaction from '@/routes/transaction';
 
 const props = defineProps<{
-    transactions: Transaction[]
+    transactions: {
+        data: Transaction[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
 }>();
+
+const goToPage = (page: number) => {
+    if (page >= 1 && page <= props.transactions.last_page) {
+        router.get(
+            transaction.index.url(),
+            { page },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    }
+};
 
 </script>
 <template>
@@ -28,7 +51,16 @@ const props = defineProps<{
                 </div> -->
             </section>
             <section>
-                <TransactionTable :transaction="props.transactions"/>
+                <TransactionTable :transaction="props.transactions.data"/>
+                <div class="border-t px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm">Showing {{ props.transactions.from }} to {{ props.transactions.to }} of {{ props.transactions.total }} transactions</p>
+                        <div class="flex gap-2">
+                            <Button variant="outline" size="sm" :disabled="props.transactions.current_page === 1" @click="goToPage(props.transactions.current_page - 1)">Previous</Button>
+                            <Button variant="outline" size="sm" :disabled="props.transactions.current_page === props.transactions.last_page" @click="goToPage(props.transactions.current_page + 1)">Next</Button>
+                        </div>
+                    </div>
+                </div>
             </section>
         </div>
     </AppLayout>
