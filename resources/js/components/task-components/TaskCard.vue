@@ -60,10 +60,9 @@ const completedStepsCount = (task: Task) => {
                     <Button
                         class="h-6 p-2 text-xs"
                         variant="outline"
-                        :disabled="!task.assigned"
-                        @click="task.assigned && visitDepartment(task.assigned.id)"
+                        @click="task.assigned && visitDepartment(task.assigned.data.id)"
                     >
-                        {{ task.assigned?.name ?? 'Anyone' }}
+                        {{ task.assigned?.data?.name ?? 'Anyone' }}
                     </Button>
 
                     <div class="flex items-end gap-1">
@@ -74,7 +73,7 @@ const completedStepsCount = (task: Task) => {
                     </div>
 
                     <p class="text-xs">
-                        Steps completed: {{ completedStepsCount(task) }} / {{ task.steps?.length ?? 0 }}
+                        Steps completed: {{ completedStepsCount(task) }} / {{ task.steps?.data.length || 0 }}
                     </p>
                     
                 </div>
@@ -90,4 +89,5 @@ const completedStepsCount = (task: Task) => {
         message="no task yet. be the first to create a task"
         :length="tasks.length === 0"
     />
+
 </template>
