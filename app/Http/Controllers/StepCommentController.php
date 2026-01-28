@@ -6,31 +6,33 @@ use App\Models\Step;
 use App\Models\Task;
 use App\Models\StepComment;
 use Illuminate\Http\Request;
-use App\Http\Services\StepCommentService;
+use Illuminate\Support\Facades\Auth;
 
 class StepCommentController extends Controller
 {
-    protected StepCommentService $commentService;
-
-    public function __construct(StepCommentService $commentService)
-    {
-        $this->commentService = $commentService;
-    }
-
     public function store(Request $request, Task $task, Step $step)
     {
-        $validated = $request->validate([
+        $request->validate([
             'content' => 'required|string|max:2000',
         ]);
 
-        $this->commentService->store($step, $validated);
+        StepComment::create([
+            'content' => $request->content,
+            'step_id' => $step->id,
+            'user_id' => Auth::id(),
+        ]);
 
         return back();
     }
 
     public function destroy(Task $task, Step $step, StepComment $comment)
     {
-        $this->commentService->delete($comment);
+        // optional safety check
+        if ($comment->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $comment->delete();
 
         return back();
     }

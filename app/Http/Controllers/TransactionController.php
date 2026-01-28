@@ -3,112 +3,67 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
-use App\Models\Task;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
     /**
-     * Display all transactions.
+     * Display a listing of the resource.
      */
     public function index()
     {
-        $transactions = Transaction::with(['user', 'task', 'step', 'department'])
-            ->latest()
-            ->get();
-
-        return Inertia::render('Transaction/Index', [
-            'transactions' => $transactions,
+        $transactions = Transaction::with(['user', 'task'])->get();
+        return Inertia::render('Transaction/Index',[
+            'transactions' => $transactions
         ]);
     }
 
     /**
-     * Show transactions for a specific task.
+     * Show the form for creating a new resource.
      */
-    public function forTask(Task $task)
+    public function create()
     {
-        $transactions = Transaction::with(['user', 'step', 'department'])
-            ->where('task_id', $task->id)
-            ->latest()
-            ->get();
-
-        return Inertia::render('Transaction/TaskTransactions', [
-            'task' => $task,
-            'transactions' => $transactions,
-        ]);
+        //
     }
 
     /**
-     * Store a new transaction for a task or step.
+     * Store a newly created resource in storage.
      */
-    public function store(Request $request, Task $task)
+    public function store(Request $request)
     {
-        $validated = $request->validate([
-            'content' => 'required|string|max:2000',
-            'step_id' => 'nullable|exists:steps,id',
-            'department_id' => 'nullable|exists:departments,id',
-        ]);
-
-        $transaction = Transaction::create([
-            'content' => $validated['content'],
-            'task_id' => $task->id,
-            'step_id' => $validated['step_id'] ?? null,
-            'department_id' => $validated['department_id'] ?? null,
-            'user_id' => Auth::id(),
-        ]);
-
-        return back()->with('success', 'Transaction created successfully.');
+        //
     }
 
     /**
-     * Display a single transaction.
+     * Display the specified resource.
      */
     public function show(Transaction $transaction)
     {
-        $transaction->load(['user', 'task', 'step', 'department']);
-
-        return Inertia::render('Transaction/Show', [
-            'transaction' => $transaction,
-        ]);
+        //
     }
 
     /**
-     * Show the edit form for a transaction.
+     * Show the form for editing the specified resource.
      */
     public function edit(Transaction $transaction)
     {
-        $transaction->load(['user', 'task', 'step', 'department']);
-
-        return Inertia::render('Transaction/Edit', [
-            'transaction' => $transaction,
-        ]);
+        //
     }
 
     /**
-     * Update a transaction.
+     * Update the specified resource in storage.
      */
     public function update(Request $request, Transaction $transaction)
     {
-        $validated = $request->validate([
-            'content' => 'required|string|max:2000',
-        ]);
-
-        $transaction->update([
-            'content' => $validated['content'],
-        ]);
-
-        return back()->with('success', 'Transaction updated successfully.');
+        //
     }
 
     /**
-     * Delete a transaction.
+     * Remove the specified resource from storage.
      */
     public function destroy(Transaction $transaction)
     {
-        $transaction->delete();
-
-        return back()->with('success', 'Transaction deleted successfully.');
+        //
     }
 }

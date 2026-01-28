@@ -3,26 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Proof;
-use App\Models\Step;
+use App\Models\Attachment;
 use App\Models\Task;
+use App\Models\Step;
 use Illuminate\Http\Request;
-use App\Http\Services\ProofService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProofController extends Controller
 {
-    protected ProofService $proofService;
-
-    public function __construct(ProofService $proofService)
-    {
-        $this->proofService = $proofService;
-    }
-
-    /**
-     * Display all proofs for a step
-     */
     public function index(Task $task, Step $step)
     {
-        $proofs = $this->proofService->getProofs($step);
+        $proofs = Proof::with(['attachments', 'user'])
+            ->where('step_id', $step->id)
+            ->latest()
+            ->get();
 
         return inertia('Proof/Index', [
             'task'   => $task,
@@ -31,35 +26,53 @@ class ProofController extends Controller
         ]);
     }
 
-    /**
-     * Store a new proof with optional attachments
-     */
-    public function store(Request $request, Task $task, Step $step)
-    {
-        $validated = $request->validate([
-            'description'   => ['nullable', 'string'],
-            'attachments.*' => ['file', 'max:20480'],
-        ]);
+   public function store(Request $request, Task $task, Step $step)
+{
+    $request->validate([
+        'description'   => ['nullable', 'string'],
+        'attachments.*' => ['max:20480'],
+    ]);
 
-        if (!$request->filled('description') && !$request->hasFile('attachments')) {
-            return back()->withErrors(['proof' => 'Nothing to submit.']);
-        }
-
-        $proof = $this->proofService->create(
-            $step,
-            $validated,
-            $request->file('attachments', [])
-        );
-
-        return back()->with([
-            'success' => 'Proof submitted successfully.',
-            'proof'   => $proof,
-        ]);
+    if (!$request->filled('description') && !$request->hasFile('attachments')) {
+        return back()->withErrors(['proof' => 'Nothing to submit.']);
     }
 
-    /**
-     * Show a specific proof
-     */
+    $proof = DB::transaction(function () use ($request, $step) {
+
+        if (!$step) {
+            throw new \Exception('Invalid step.');
+        }
+
+        $proof = Proof::create([
+            'step_id'     => $step->id,
+            'user_id'     => Auth::id(),
+            'description' => $request->description,
+        ]);
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $path = $file->store('proofs', 'public');
+
+                Attachment::create([
+                    'proof_id'      => $proof->id,
+                    'original_name' => $file->getClientOriginalName(),
+                    'path'          => $path,
+                    'mime'          => $file->getMimeType(),
+                    'size'          => $file->getSize(),
+                ]);
+            }
+        }
+
+        return $proof;
+    });
+
+    // ✅ CRITICAL FIX: ibalik natin ang proof na may attachments
+    return back()->with([
+        'success' => 'Proof submitted successfully.',
+        'proof'   => $proof->load('attachments', 'user'),
+    ]);
+}
+
     public function show(Task $task, Step $step, Proof $proof)
     {
         $proof->load(['attachments', 'user']);
@@ -71,9 +84,6 @@ class ProofController extends Controller
         ]);
     }
 
-    /**
-     * Show the edit form for a proof
-     */
     public function edit(Task $task, Step $step, Proof $proof)
     {
         return inertia('Proof/Edit', [
@@ -83,27 +93,30 @@ class ProofController extends Controller
         ]);
     }
 
-    /**
-     * Update a proof's description
-     */
     public function update(Request $request, Task $task, Step $step, Proof $proof)
     {
-        $validated = $request->validate([
+        $request->validate([
             'description' => ['nullable', 'string'],
         ]);
 
-        $this->proofService->update($proof, $validated);
+        $proof->update([
+            'description' => $request->description,
+        ]);
 
         return back()->with('success', 'Proof updated successfully.');
     }
 
-    /**
-     * Delete a proof (with step safety check)
-     */
-    public function destroy(Task $task, Step $step, Proof $proof)
-    {
-        $this->proofService->delete($proof, $step);
-
-        return response()->json(['message' => 'Proof deleted']);
+   public function destroy(Task $task, Step $step, Proof $proof)
+{
+    if ($proof->step_id !== $step->id) {
+        return response()->json(['message' => 'Proof does not belong to this step'], 403);
     }
+
+    $proof->delete();
+
+    return response()->json(['message' => 'Proof deleted']);
+}
+
+
+
 }
