@@ -15,10 +15,10 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('content');
             $table->string('transaction_number')->unique();
-            $table->foreignUuid('user_id')->nullable()->constrained();
-            $table->foreignUuid('task_id')->nullable()->constrained();
-            $table->foreignUuid('step_id')->nullable()->constrained();
-            $table->foreignUuid('department_id')->nullable()->constrained();
+            $table->foreignUuid('user_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignUuid('task_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignUuid('step_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignUuid('department_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
