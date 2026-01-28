@@ -3,26 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Department;
-use App\Models\DepartmentUser;
-use App\Models\User;
 use App\Models\Task;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
+use App\Http\Services\UserService;
 
 class UserController extends Controller
 {
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
-     * Display a listing of the resource.
+     * Display a listing of users.
      */
     public function index(Request $request)
     {
         $search = $request->input('search');
         $user = auth()->user();
 
+<<<<<<< HEAD
         // Determine which roles the user is allowed to see
         $rolesAllowed = match ($user->role) {
             'superadmin' => ['!=', 'superadmin'], // can see everyone except superadmins
@@ -44,39 +48,57 @@ class UserController extends Controller
             ->with('departments');
 
         $users = $usersQuery->get();
+=======
+        $users = User::where('role', 'staff')
+            ->when($search, fn($query) => $query->where(fn($q) => 
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+            ))
+            ->with('departments')
+            ->get();
+>>>>>>> TS-30
 
         $departments = Department::all();
 
         return Inertia::render('User/Index', [
             'users' => $users,
             'departments' => $departments,
-            'filters' => [
-                'search' => $search,
-            ],
+            'filters' => ['search' => $search],
         ]);
     }
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> TS-30
     /**
-     * Show the form for creating a new resource.
+     * Show form for creating a new user.
      */
     public function create()
     {
+<<<<<<< HEAD
         $departments = Department::all();
 
         return Inertia::render('User/Create', [
             'departments' => $departments,
+=======
+        return Inertia::render('User/Create', [
+            'departments' => Department::all(),
+>>>>>>> TS-30
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a new user.
      */
     public function store(Request $request)
     {
+        $validated = $this->userService->validateCreate($request);
+        $this->userService->store($validated);
 
+<<<<<<< HEAD
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:4', 'max:255'],
             'email' => [
@@ -108,16 +130,21 @@ class UserController extends Controller
         $user->departments()->sync($validated['department_id']);
 
         return redirect()->route('user.index');
+=======
+        return back()->with('success', 'User created successfully.');
+>>>>>>> TS-30
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified user and their tasks.
      */
     public function show(User $user)
     {
-        // Get tasks assigned to departments this user belongs to
         $departmentIds = $user->departments()->pluck('departments.id');
-        $tasks = Task::whereIn('assigned_to', $departmentIds)->with('creator', 'steps')->get();
+
+        $tasks = Task::whereIn('assigned_to', $departmentIds)
+            ->with(['creator', 'steps'])
+            ->get();
 
         return Inertia::render('User/Show', [
             'user' => $user->load('departments'),
@@ -127,25 +154,29 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show form for editing a user.
      */
     public function edit(User $user)
     {
-        $departments = Department::all();
-
         return Inertia::render('User/Edit', [
+<<<<<<< HEAD
             'user' => $user->load('departments', 'permissions'),
             'departments' => $departments,
             'userPermissions' => $user->permissions->pluck('name'),
+=======
+            'user' => $user->load('departments'),
+            'departments' => Department::all(),
+>>>>>>> TS-30
         ]);
     }
 
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified user.
      */
     public function update(Request $request, User $user)
     {
+<<<<<<< HEAD
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:4', 'max:255'],
             'email' => [
@@ -180,16 +211,22 @@ class UserController extends Controller
 
         // return redirect()->route('user.index');
         return back();
+=======
+        $validated = $this->userService->validateUpdate($request, $user);
+        $this->userService->update($user, $validated);
+
+        return back()->with('success', 'User updated successfully.');
+>>>>>>> TS-30
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified user.
      */
     public function destroy(User $user)
     {
         $user->departments()->detach();
         $user->delete();
 
-        return back();
+        return back()->with('success', 'User deleted successfully.');
     }
 }
