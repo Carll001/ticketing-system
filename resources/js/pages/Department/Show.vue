@@ -54,8 +54,8 @@ const getInitials = (name: string) => {
             <ArrowLeft class="h-4 w-4" />
           </Button>
         </Link>
-        <div>
-          <h1 class="text-2xl font-bold">{{ department?.name }}</h1>
+        <div class="w-md">
+          <h1 class="text-2xl font-bold truncate">{{ department?.name }}</h1>
           <p class="text-sm text-muted-foreground">Department Details</p>
         </div>
       </section>
@@ -71,7 +71,7 @@ const getInitials = (name: string) => {
                 {{ getInitials(department?.name || '') }}
               </div>
 
-              <CardTitle class="text-xl">{{ department?.name }}</CardTitle>
+              <CardTitle class="text-xl break-all">{{ department?.name }}</CardTitle>
               <p class="text-sm text-muted-foreground">Department</p>
             </CardHeader>
 

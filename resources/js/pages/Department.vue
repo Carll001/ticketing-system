@@ -295,8 +295,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                         <!-- Otherwise, render all departments -->
                         <TableRow v-else v-for="dept in props.departments.data" :key="dept.id">
                             <TableCell>
-                                <div class="flex items-center gap-3">
-                                    <p class="font-medium">
+                                <div class="flex items-center gap-3 w-lg">
+                                    <p class="font-medium truncate">
                                         {{ dept.name }}
                                     </p>
                                 </div>

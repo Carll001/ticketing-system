@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->foreignUuid('assigned_to')->nullable()->constrained('departments');
-            $table->foreignUuid('creator_id')->constrained('users');
+            $table->foreignUuid('assigned_to')->nullable()->constrained('departments')->onDelete('cascade');
+            $table->foreignUuid('creator_id')->constrained('users')->onDelete('cascade');
             $table->enum('order', ['sequential', 'random'])->default('random');
             $table->decimal('expenses_total', 12, 2)->nullable();
             // $table->enum('type', ['preset', 'custom'])->default('preset');

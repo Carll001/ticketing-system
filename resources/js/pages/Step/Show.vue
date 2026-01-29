@@ -291,8 +291,8 @@ const allFieldsHaveResponses = computed(() => {
           
         </section>
 
-        <section class="space-y-4">
-          <Card class="gap-2">
+        <section class="space-y-4" >
+          <Card class="gap-2" v-if="props.step.data.status === 'completed'">
             <CardHeader>
               <CardTitle>
                 <div class="flex justify-between items-center">

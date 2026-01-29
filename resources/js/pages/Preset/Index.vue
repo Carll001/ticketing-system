@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table'
 import preset from '@/routes/preset';
 import { Preset } from '@/types';
+import {type BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
     presets: {
@@ -56,17 +57,20 @@ const viewPreset = (id: string) => {
     router.visit(preset.show(id).url)
 }
 
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Presets',
+        href: ''
+    },
+];
+
 </script>
 <template>
 
     <Head title="Preset" />
-    <AppLayout>
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-col flex-1 gap-4 p-4">
             <section class="flex justify-between items-center">
-                <div>
-                    <h3 class="text-xl">Your Preset</h3>
-                    <p class="text-sm text-muted-foreground">your preset</p>
-                </div>
                 <div>
                     <Button size="sm" @click="createPreset">Create Preset</Button>
                 </div>
@@ -85,9 +89,9 @@ const viewPreset = (id: string) => {
                     </TableHeader>
                     <TableBody>
                         <TableRow v-for="preset in presets.data">
-                            <TableCell class="font-medium">
-                                {{ preset.name }}
-                            </TableCell>
+                            <TableCell class="font-medium max-w-lg truncate">
+    {{ preset.name }}
+</TableCell>
                             <TableCell class="text-right space-x-2">
                                 <Button size="sm" variant="destructive" @click="deletePreset(preset.id)">Delete</Button>
                                 <Button size="sm" variant="secondary" @click="editPreset(preset.id)">Edit</Button>
