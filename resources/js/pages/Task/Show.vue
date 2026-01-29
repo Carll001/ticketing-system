@@ -13,6 +13,7 @@ import { ArrowUpRightIcon, FolderCode, FolderOpen, List, NotepadText } from 'luc
 import { computed, ref } from 'vue';
 import step from '@/routes/step';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import PermissionGuard from '@/components/PermissionGuard.vue';
 
 const props = defineProps<{
     task: { data: Task }
@@ -71,12 +72,18 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </section>
             </div>
             <div class="flex justify-end gap-2">
-                <TaskDeleteDialog :id="props.task.data.id" />
-                <Button size="sm" @click="editTask" variant="secondary">
-                    Edit task
-                </Button>
-                <!-- <AddStepDialog :task="task" /> -->
-                <Button size="sm" @click="addStep">Add Step</Button>
+                <PermissionGuard permission="can delete task">
+                    <TaskDeleteDialog :id="props.task.data.id" />
+                </PermissionGuard>
+                <PermissionGuard permission="can edit task">
+                    <Button size="sm" @click="editTask" variant="secondary">
+                        Edit task
+                    </Button>
+                </PermissionGuard>
+                <PermissionGuard permission="can create task">
+                    <!-- <AddStepDialog :task="task" /> -->
+                    <Button size="sm" @click="addStep">Add Step</Button>
+                </PermissionGuard>
             </div>
             <Tabs default-value="account">
                 <TabsList>
@@ -101,7 +108,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </TabsContent> -->
             </Tabs>
             <div class="space-y-4">
-                <div class="space-y-4" >
+                <div class="space-y-4">
                     <StepCard :steps="props.task.data.steps" :creator="props.task.data.creator" />
                 </div>
                 <EmptyData :icon="NotepadText" title="No Steps Yet"

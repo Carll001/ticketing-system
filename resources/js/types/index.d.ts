@@ -67,6 +67,8 @@ export interface Proof {
   description?: string;
   attachments?: Attachment[];
   user?: User;
+
+  created_at: string;
 }
 
 export interface Attachment {
@@ -85,7 +87,13 @@ export interface Step {
   description?: string;
   assigned_to?: string;
   status: string;
-  comments: [];
+  comments: {
+    id: string;
+    content: string;
+    user: Name
+
+    created_at: string;
+  }[];
   task: Task;
   assigned: User;
   fields?: Field[];

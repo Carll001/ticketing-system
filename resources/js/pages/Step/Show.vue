@@ -3,92 +3,57 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/AppLayout.vue';
 import stepLink from '@/routes/step';
 import taskLink from '@/routes/task';
-import proofLink from '@/routes/proof';
 import { BreadcrumbItem, Step, Field } from '@/types';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, watch, ref } from 'vue';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { computed, reactive, watch, ref } from 'vue';
 import EmptyData from '@/components/EmptyData.vue';
+import { FileQuestion, Plus, X, File, Image as ImageIcon } from 'lucide-vue-next';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import StepDeleteDialog from '@/components/task-step-components/StepDeleteDialog.vue';
-import { FileQuestion, Plus } from 'lucide-vue-next';
-import { toast } from 'vue-sonner';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import response from '@/routes/response';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area'
+import proof from '@/routes/proof';
+import step from '@/routes/step';
+import comment from '@/routes/step/comment'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import PermissionGuard from '@/components/PermissionGuard.vue';
 
-const viewProofs = ref(false);
-const viewComments = ref(false);
-
+const openProofs = ref(false);
+const page = usePage();
+const auth = computed(() => page.props.auth);
 interface FormState {
   step_field_id: string | number;
   response: Record<string, any>;
 }
 
-const props = defineProps<{ step: { data: Step } }>();
+const props = defineProps<{
+  step: { data: Step }
+}>();
 
-// -----------------------------
-// STEP COMMENTS (with useForm)
-// -----------------------------
-interface StepComment {
-  id: number;
-  content: string;
-  created_at: string;
-  user: {
-    name: string;
-  };
-}
-
-const stepComments = ref<StepComment[]>(props.step.data.comments ?? []);
-
-const commentForm = useForm({
-  content: '',
-});
-
-const addStepComment = () => {
-  if (!commentForm.content.trim()) return;
-
-  commentForm.post(
-    `/task/${props.step.data.task_id}/step/${props.step.data.id}/comment`,
-    {
-      preserveScroll: true,
-      onSuccess: () => {
-        stepComments.value = props.step.data.comments ?? [];
-        commentForm.reset();
-        toast.success('Step comment added successfully!');
-      },
-    }
-  );
-};
-
-// -----------------------------
-// PROOFS STATE
-// -----------------------------
-const proofs = ref<any[]>(props.step.data.proofs ?? []);
-
-watch(
-  () => props.step.data.proofs,
-  (val) => {
-    if (val) proofs.value = val;
-  },
-  { immediate: true }
-);
-
-// -----------------------------
-// BREADCRUMBS
-// -----------------------------
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Task', href: taskLink.index().url },
-  { title: props.step.data.task.title, href: taskLink.show(props.step.data.task_id).url },
-  { title: props.step.data.title, href: stepLink.show({ task: props.step.data.task_id, step: props.step.data.id }).url },
+  {
+    title: 'Task',
+    href: taskLink.index().url,
+  },
+  {
+    title: props.step.data.task.title,
+    href: taskLink.show(props.step.data.task_id).url,
+  },
+  {
+    title: props.step.data.title,
+    href: stepLink.show({ task: props.step.data.task_id, step: props.step.data.id }).url,
+  },
 ];
 
-// -----------------------------
-// STEP FIELDS
-// -----------------------------
 const groupedFields = computed(() => {
   const fields = props.step.data.fields || [];
+
   return fields.reduce((acc, field) => {
     const type = field.type;
     if (!acc[type]) acc[type] = [];
@@ -97,296 +62,431 @@ const groupedFields = computed(() => {
   }, {} as Record<string, Field[]>);
 });
 
-const form = useForm<FormState>({
+const form = useForm<{
+  step_field_id: string | number;
+  response: Record<string, any>;
+}>({
   step_field_id: props.step.data.id,
   response: (props.step.data.fields || []).reduce((acc, field) => {
     const existingValue = field.responses?.[0]?.response;
-    if (field.type === 'Checkbox') acc[field.id] = existingValue ?? 'false';
-    else acc[field.id] = existingValue || '';
+
+    if (field.type === 'Checkbox') {
+      acc[field.id] = existingValue !== undefined ? existingValue : "0";
+    } else {
+      acc[field.id] = existingValue || '';
+    }
     return acc;
   }, {} as Record<string, any>)
 });
 
+// Proof submission form with attachments
+const proofForm = useForm({
+  description: '',
+  attachments: [] as File[]
+});
+
+const commentForm = useForm({
+  content: ''
+});
+
+
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const attachmentPreviews = ref<{ file: File; preview?: string }[]>([]);
+
 watch(() => props.step.data.fields, (newFields) => {
   newFields?.forEach(field => {
     const freshValue = field.responses?.[0]?.response;
-    if (freshValue !== undefined) form.response[field.id] = freshValue;
+    if (freshValue !== undefined) {
+      form.response[field.id] = freshValue;
+    }
   });
 }, { deep: true });
 
 const editStep = (task_id: string, step_id: string) => {
-  router.visit(stepLink.edit({ task: task_id, step: step_id }).url, { preserveScroll: true });
+  router.visit(stepLink.edit({ task: task_id, step: step_id }).url, {
+    preserveScroll: true,
+  });
 };
 
-// -----------------------------
-// PROOF FORM (with useForm)
-// -----------------------------
-const proofForm = useForm({
-  description: '',
-  attachments: [] as File[],
-});
+const submitResponse = () => {
+  form.post(response.store().url, {
+    preserveScroll: true,
+    onSuccess: () => {
+      // Optional: clear or handle success
+    },
+  });
+};
 
-const fileInputRef = ref<HTMLInputElement | null>(null);
+const handleAddAttachment = () => {
+  fileInputRef.value?.click();
+};
 
-const triggerFileInput = () => fileInputRef.value?.click();
-
-const handleFiles = (event: Event) => {
+const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target.files) {
-    proofForm.attachments.push(...Array.from(target.files));
+  const files = target.files;
+
+  if (files) {
+    const newFiles = Array.from(files);
+
+    // Add files to the form
+    proofForm.attachments.push(...newFiles);
+
+    // Create previews for images
+    newFiles.forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          attachmentPreviews.value.push({
+            file,
+            preview: e.target?.result as string
+          });
+        };
+        reader.readAsDataURL(file);
+      } else {
+        attachmentPreviews.value.push({ file });
+      }
+    });
+
+    // Clear input for re-selection
     target.value = '';
   }
 };
 
 const removeAttachment = (index: number) => {
   proofForm.attachments.splice(index, 1);
+  attachmentPreviews.value.splice(index, 1);
 };
 
-const attachmentPreviews = computed(() =>
-  proofForm.attachments.map(file => ({
-    file,
-    url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
-  }))
-);
-
-const editProof = (proof: any) => {
-  router.visit(`/task/${props.step.data.task_id}/step/${props.step.data.id}/proof/${proof.id}/edit`);
-};
-
-const deleteProof = (proofId: string) => {
-  const taskId = props.step.data.task_id;
-  const stepId = props.step.data.id;
-
-  if (!taskId || !stepId) {
-    console.error('Missing task or step ID!');
-    return;
-  }
-
-  router.delete(`/task/${taskId}/step/${stepId}/proof/${proofId}`, {
+const submitProof = () => {
+  // Update the route as needed for proof submission
+  proofForm.post(proof.store({ task: props.step.data.task_id, step: props.step.data.id }).url, {
     preserveScroll: true,
     onSuccess: () => {
-      proofs.value = proofs.value.filter(p => p.id !== proofId);
-      toast.success('Proof deleted successfully');
+      // Clear form after successful submission
+      proofForm.reset();
+      attachmentPreviews.value = [];
     },
   });
 };
 
-// -----------------------------
-// SUBMIT FUNCTION
-// -----------------------------
-const submitAll = () => {
-  const formData = new FormData();
-
-  formData.append('step_field_id', String(props.step.data.id));
-  Object.keys(form.response).forEach(key => {
-    formData.append(`response[${key}]`, form.response[key]);
+const submitComment = () => {
+  commentForm.post(comment.store({ task: props.step.data.task_id, step: props.step.data.id }).url, {
+    preserveScroll: true,
+    onSuccess: () => {
+      // Clear form after successful submission
+      commentForm.reset();
+    },
   });
-
-  formData.append('description', proofForm.description);
-  proofForm.attachments.forEach((file, i) => {
-    formData.append(`attachments[${i}]`, file);
-  });
-
-  router.post(
-    proofLink.store({ task: props.step.data.task_id, step: props.step.data.id }).url,
-    formData,
-    {
-      preserveScroll: true,
-      forceFormData: true,
-      onSuccess: (page) => {
-        // Reset proof form
-        proofForm.reset();
-
-        // Update proofs from backend
-        const updatedStep = page.props.step as Step;
-        proofs.value = updatedStep.proofs ?? [];
-        toast.success('Proof submitted successfully!');
-      },
-    }
-  );
 };
 
-</script>
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+};
 
+// Check if all fields have responses
+const allFieldsHaveResponses = computed(() => {
+  const fields = props.step.data.fields || [];
+  
+  if (fields.length === 0) return false;
+  
+  return fields.every(field => {
+    const response = form.response[field.id];
+    
+    // For checkboxes, both "true" and "false" are valid responses
+    if (field.type === 'Checkbox') {
+      return response === 'true' || response === 'false' || response === '0';
+    }
+    
+    // For other fields, check if there's a non-empty value
+    return response && response.toString().trim() !== '';
+  });
+});
+</script>
 
 <template>
 
-  <Head :title="step.data.title ?? 'Undefined'" />
+  <Head :title="props.step.data.title ?? 'Undefined'" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex flex-col flex-1 gap-4 p-4">
-
-      <!-- Step Header -->
       <div class="flex items-start justify-between">
         <section>
           <h3 class="text-3xl font-bold">{{ props.step.data.title }}</h3>
           <p class="text-muted-foreground">{{ props.step.data.description ?? 'No description' }}</p>
         </section>
+
         <section class="flex gap-2 flex-col items-end mb-6">
           <div class="flex gap-2 items-center">
             <p class="text-muted-foreground text-sm">Assigned to:</p>
-            <Button class="text-xs p-2 h-8" variant="outline">{{ props.step.data.assigned?.name ?? 'Anyone' }}</Button>
+            <Button class="text-xs p-2 h-8" variant="outline">
+              {{ props.step.data.assigned?.name ?? 'Anyone' }} 
+            </Button>
           </div>
           <div class="space-x-2">
+            <!-- <PermissionGuard permission="can delete step"> -->
             <StepDeleteDialog :step="props.step.data" />
-            <Button size="sm" @click="editStep(props.step.data.task_id, props.step.data.id)">Edit</Button>
-            <Button @click="submitAll" :disabled="form.processing">
-              {{ form.processing ? 'Submitting...' : 'Submit Response' }}
-            </Button>
+            <!-- </PermissionGuard> -->
+            <!-- <PermissionGuard permission="can edit step"> -->
+              <Button size="sm" @click="editStep(props.step.data.task_id, props.step.data.id)">Edit</Button>
+              <Button v-if="allFieldsHaveResponses">Mark as Completed</Button>
+            <!-- </PermissionGuard> -->
+            
+            <Button @click="submitResponse" v-if="!allFieldsHaveResponses">Submit Response </Button>
           </div>
         </section>
       </div>
 
-      <!-- Step Fields -->
-      <div class="space-y-8">
-        <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
-          <Label
-            class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800 pb-1 block">
-            {{ type }}{{ type === 'Checkbox' ? 'es' : 's' }}
-          </Label>
-          <div class="space-y-4 pl-2">
-            <div v-for="field in fields" :key="field.id" class="space-y-4">
-              <div class="flex gap-3" :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
-                <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
-                  <Input v-if="type === 'Input'" v-model="form.response[field.id]"
-                    :placeholder="`Enter ${field.label.toLowerCase()}...`" class="h-8 text-xs bg-zinc-900/50" />
-                  <Textarea v-else-if="type === 'Description'" v-model="form.response[field.id]"
-                    :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
-                    class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
-                  <div v-else-if="type === 'Checkbox'" class="flex items-center">
-                    <Checkbox :id="field.id" :model-value="form.response[field.id] === 'true'"
-                      @update:model-value="(val) => form.response[field.id] = val ? 'true' : 'false'" />
+      <div class="grid grid-cols-[3fr_2fr] gap-4">
+        <section class="h-fit">
+          <Card>
+            <CardHeader>
+              <CardTitle>Fields</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="space-y-4">
+                <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
+                  <Label
+                    class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800 pb-1 block">
+                    {{ type }}{{ type === 'Checkbox' ? 'es' : 's' }}
+                  </Label>
+
+                  <div class="space-y-4 pl-2">
+                    <div v-for="field in fields" :key="field.id" class="space-y-4">
+                      <div class="flex gap-3"
+                        :class="type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start'">
+                        <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
+                          <Input v-if="type === 'Input'" v-model="form.response[field.id]" :readonly="auth.user.id === props.step.data.task.creator_id"
+                            :placeholder="`Enter ${field.label.toLowerCase()}...`" class="h-8 text-xs bg-zinc-900/50" />
+
+                          <Textarea v-else-if="type === 'Description'" v-model="form.response[field.id]" :readonly="auth.user.id === props.step.data.task.creator_id"
+                            :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
+                            class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+
+                          <div v-else-if="type === 'Checkbox'" class="flex items-center">
+                            <Checkbox :id="field.id" :model-value="form.response[field.id] === 'true'" :disabled="auth.user.id === props.step.data.task.creator_id"
+                              @update:model-value="(val) => form.response[field.id] = val ? 'true' : 'false'" />
+                          </div>
+                        </div>
+
+                        <Label :class="[
+                          'text-xs font-medium text-zinc-300',
+                          type === 'Checkbox' ? 'order-2' : 'order-1'
+                        ]">
+                          {{ field.label }}
+                        </Label>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <Label :class="['text-xs font-medium text-zinc-300', type === 'Checkbox' ? 'order-2' : 'order-1']">
-                  {{ field.label }}
-                </Label>
               </div>
-            </div>
-          </div>
-        </div>
+              <div class="text-xs text-zinc-600 text-center mx-auto">
+                <EmptyData :icon="FileQuestion" title="no fields yet" message="No fields configured for this step."
+                  :length="props.step.data.fields?.length === 0" />
+              </div>
+            </CardContent>
+          </Card>
+          
+        </section>
 
-        <div class="text-xs text-zinc-600 text-center mx-auto">
-          <EmptyData :icon="FileQuestion" title="no fields yet" message="No fields configured for this step."
-            :length="props.step.data.fields?.length === 0" />
-        </div>
-
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Proofs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div class="space-y-2">
-              <Label class="text-xs font-bold uppercase">Add New Proof</Label>
-              <Textarea v-model="proofForm.description" placeholder="Enter proof description..."
-                class="min-h-[50px] text-xs bg-zinc-900/50 resize-none" />
-
-
-              <div v-if="attachmentPreviews.length" class="flex flex-wrap gap-2 mt-2">
-                <div v-for="(item, idx) in attachmentPreviews" :key="idx"
-                  class="relative w-20 h-20 border border-zinc-700 rounded overflow-hidden bg-zinc-900 group">
-                  <img v-if="item.url" :src="item.url" class="w-full h-full object-cover" />
-                  <p v-else class="text-[10px] text-center p-1 break-words">{{ item.file.name }}</p>
-                  <button @click="removeAttachment(idx)"
-                    class="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center text-xs"
-                    type="button">×</button>
+        <section class="space-y-4">
+          <Card class="gap-2">
+            <CardHeader>
+              <CardTitle>
+                <div class="flex justify-between items-center">
+                  <p>Submit proof</p>
+                  <Button variant="secondary" @click="openProofs = true" size="sm">View submitted proofs</Button>
                 </div>
-              </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="space-y-4">
+                <Textarea v-model="proofForm.description" placeholder="Enter proof description..."
+                  class="bg-zinc-900/50 resize-none" />
 
-              <div class="flex gap-2 mt-2">
-                <Button size="sm" variant="ghost" @click="triggerFileInput">
-                  <Plus class="w-3 h-3 mr-1 inline" /> Add Attachments
+                <!-- Hidden file input -->
+                <input ref="fileInputRef" type="file" multiple accept="image/*,application/pdf,.doc,.docx,.txt"
+                  class="hidden" @change="handleFileSelect" />
+
+                <!-- Attachment previews -->
+                <div v-if="attachmentPreviews.length > 0" class="space-y-2">
+                  <Label class="text-xs text-zinc-400">Attachments ({{ attachmentPreviews.length }})</Label>
+                  <ScrollArea class="h-48 w-full">
+                    <div class="space-y-2">
+                      <div v-for="(item, index) in attachmentPreviews" :key="index"
+                        class="flex items-center gap-3 p-2 bg-zinc-900 rounded border border-zinc-800">
+                        <!-- Image preview -->
+                        <div v-if="item.preview" class="w-12 h-12 rounded overflow-hidden flex-shrink-0">
+                          <img :src="item.preview" :alt="item.file.name" class="w-full h-full object-cover" />
+                        </div>
+                        <!-- File icon for non-images -->
+                        <div v-else
+                          class="w-12 h-12 rounded bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                          <File class="w-6 h-6 text-zinc-400" />
+                        </div>
+
+                        <!-- File info -->
+                        <div class="flex-1 min-w-0">
+                          <p class="text-xs text-zinc-300 truncate">{{ item.file.name }}</p>
+                          <p class="text-[10px] text-zinc-500">{{ formatFileSize(item.file.size) }}</p>
+                        </div>
+
+                        <!-- Remove button -->
+                        <Button size="sm" variant="ghost" class="h-8 w-8 p-0 hover:bg-red-950 hover:text-red-400"
+                          @click="removeAttachment(index)">
+                          <X class="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </div>
+
+                <Button size="sm" variant="outline" @click="handleAddAttachment">
+                  <Plus class="w-4 h-4" /> Add attachment
                 </Button>
-                <input type="file" multiple ref="fileInputRef" class="hidden" @change="handleFiles" />
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+            <CardFooter class="justify-end">
+              <Button size="sm" @click="submitProof" :disabled="proofForm.processing">
+                {{ proofForm.processing ? 'Submitting...' : 'Submit proof' }}
+              </Button>
+            </CardFooter>
+          </Card>
 
-        <Card class="p-3 gap-0">
-          <CardHeader class="p-3">
-            <CardTitle>Proof / Comment</CardTitle>
-            <CardDescription>Proof / Comment</CardDescription>
-          </CardHeader>
-          <CardFooter class="p-3 space-x-2">
-            <Button variant="outline" @click="viewProofs = true" size="sm">Proofs</Button>
-            <Button variant="outline" @click="viewComments = true" size="sm">Comments</Button>
-          </CardFooter>
-        </Card>
+          <Card>
+            <form @submit.prevent="comment.store({ task: props.step.data.task_id, step: props.step.data.id }).url">
+              <CardHeader>
+                <CardTitle>Comments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <ScrollArea class="min-h-20">
+
+                    <div class="h-48 w-full">
+                      <div class="space-y-2 pr-4">
+                        <!-- Display actual comments if they exist -->
+                        <template v-if="props.step.data.comments && props.step.data.comments.length > 0">
+                          <div v-for="stepComment in [...props.step.data.comments].reverse()" :key="stepComment.id"
+                            class="p-4 bg-zinc-900 rounded border border-zinc-800">
+                            <p class="text-xs text-zinc-300">{{ stepComment.content }}</p>
+                            <p class="text-[10px] text-zinc-500 mt-2">
+                              by <span class="font-medium text-zinc-400">{{ stepComment.user?.name ?? 'Someone'
+                                }}</span> on
+                              {{ new Date(stepComment.created_at).toLocaleString() }}
+                            </p>
+                          </div>
+                        </template>
+
+                        <!-- Empty state -->
+                        <div v-else class="text-center py-8">
+                          <p class="text-xs text-zinc-500">No comments yet. Be the first to comment!</p>
+                        </div>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </div>
+              </CardContent>
+              <CardFooter class="pt-4 w-full">
+                <div class="space-y-2 flex flex-col w-full">
+                  <Textarea placeholder="Add a comment..." v-model="commentForm.content"
+                    class="bg-zinc-900/50 resize-none" />
+                  <Button size="sm" class="ml-auto" @click="submitComment">Post Comment</Button>
+                </div>
+              </CardFooter>
+            </form>
+          </Card>
+        </section>
       </div>
     </div>
 
-    <!-- Submitted Proofs Dialog -->
-    <Dialog v-model:open="viewProofs">
-      <DialogContent>
+    <!-- Proofs Dialog -->
+    <Dialog v-model:open="openProofs">
+      <DialogContent class="max-w-3xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>Submitted Proofs</DialogTitle>
-          <DialogDescription>View all submitted proofs</DialogDescription>
+          <DialogTitle>Submitted Proofs ({{ props.step.data.proofs?.length || 0 }})</DialogTitle>
         </DialogHeader>
 
-        <div v-if="proofs.length" class="mt-6 space-y-4">
-          <div v-for="proof in proofs" :key="proof.id"
-            class="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">
-            <p class="text-xs text-zinc-300">
-              {{ proof.description || 'No description provided.' }}
-            </p>
+        <ScrollArea class="h-[60vh] pr-4">
+          <div class="space-y-4">
+            <!-- Display proofs if they exist -->
+            <template v-if="props.step.data.proofs && props.step.data.proofs.length > 0">
+              <div v-for="(proofItem, index) in props.step.data.proofs" :key="proofItem.id"
+                class="p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
+                <!-- Proof Header -->
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex-1">
+                    <p class="text-xs font-medium text-zinc-400">
+                      Proof #{{ index + 1 }}
+                    </p>
+                    <p class="text-[10px] text-zinc-500 mt-1">
+                      Submitted by <span class="font-medium text-zinc-400">{{ proofItem.user?.name ?? 'Unknown'
+                        }}</span>
+                    </p>
+                    <p class="text-[10px] text-zinc-500">
+                      {{ new Date(proofItem.created_at).toLocaleString() }}
+                    </p>
+                  </div>
+                </div>
 
-            <div class="flex flex-wrap gap-2">
-              <div v-for="(file, i) in proof.attachments || []" :key="i"
-                class="w-24 h-24 rounded overflow-hidden border border-zinc-800">
-                <img :src="file.url" class="w-full h-full object-cover" />
+                <!-- Proof Description -->
+                <div v-if="proofItem.description" class="mb-3">
+                  <Label class="text-xs text-zinc-400 mb-1 block">Description</Label>
+                  <p class="text-sm text-zinc-300 bg-zinc-800/50 p-3 rounded">
+                    {{ proofItem.description }}
+                  </p>
+                </div>
+
+                <!-- Attachments -->
+                <div v-if="proofItem.attachments && proofItem.attachments.length > 0" class="mt-3">
+                  <Label class="text-xs text-zinc-400 mb-2 block">
+                    Attachments ({{ proofItem.attachments.length }})
+                  </Label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <a v-for="attachment in proofItem.attachments" :key="attachment.id"
+                      :href="`/storage/${attachment.path}`" target="_blank"
+                      class="flex items-center gap-2 p-2 bg-zinc-800/50 rounded border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 transition-colors">
+                      <!-- Image preview for images -->
+                      <div v-if="attachment.mime?.startsWith('image/')"
+                        class="w-10 h-10 rounded overflow-hidden flex-shrink-0">
+                        <img :src="`/storage/${attachment.path}`" :alt="attachment.original_name"
+                          class="w-full h-full object-cover" />
+                      </div>
+                      <!-- File icon for non-images -->
+                      <div v-else class="w-10 h-10 rounded bg-zinc-700 flex items-center justify-center flex-shrink-0">
+                        <File class="w-5 h-5 text-zinc-400" />
+                      </div>
+
+                      <!-- File info -->
+                      <div class="flex-1 min-w-0">
+                        <p class="text-xs text-zinc-300 truncate">{{ attachment.original_name }}</p>
+                        <p class="text-[10px] text-zinc-500">
+                          {{ formatFileSize(attachment.size || 0) }}
+                        </p>
+                      </div>
+
+                      <!-- Download icon -->
+                      <ExternalLink class="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                    </a>
+                  </div>
+                </div>
+
+                <Separator v-if="index < props.step.data.proofs.length - 1" class="mt-4" />
               </div>
-            </div>
+            </template>
 
-            <div class="flex justify-end gap-2">
-              <Button size="sm" variant="outline" @click="editProof(proof)">Edit</Button>
-              <Button size="sm" variant="destructive" @click="deleteProof(proof.id)">Delete</Button>
+            <!-- Empty state -->
+            <div v-else class="text-center py-12">
+              <FileQuestion class="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+              <p class="text-sm text-zinc-500">No proofs submitted yet</p>
+              <p class="text-xs text-zinc-600 mt-1">Submit your first proof above</p>
             </div>
           </div>
-        </div>
-
-        <p v-else class="text-xs text-zinc-600 text-center py-4">No proofs submitted yet.</p>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
-
-    <!-- Comments Dialog -->
-    <Dialog v-model:open="viewComments">
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Comments</DialogTitle>
-          <DialogDescription>Step comments and discussions</DialogDescription>
-        </DialogHeader>
-
-        <!-- Comment list -->
-        <div v-if="stepComments.length" class="space-y-3 max-h-96 overflow-y-auto">
-          <div v-for="comment in stepComments" :key="comment.id"
-            class="bg-zinc-900 border border-zinc-800 rounded p-3 space-y-1">
-            <div class="flex justify-between text-xs text-zinc-500">
-              <span class="font-medium truncate max-w-[120px]">{{ comment.user.name }}</span>
-              <span>{{ new Date(comment.created_at).toLocaleString() }}</span>
-            </div>
-            <p class="text-sm text-zinc-200">
-              {{ comment.content }}
-            </p>
-          </div>
-        </div>
-
-        <p v-else class="text-xs text-zinc-600 text-center py-4">No comments yet.</p>
-
-        <!-- Add comment -->
-        <div class="space-y-2 pt-2 border-t border-zinc-800">
-          <Textarea v-model="commentForm.content" placeholder="Write a comment..."
-            class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
-
-          <div class="flex justify-end">
-            <Button size="sm" @click="addStepComment" :disabled="commentForm.processing">
-              {{ commentForm.processing ? 'Posting...' : 'Post Comment' }}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-
-    <pre>{{ form }}</pre>
   </AppLayout>
+
+
 </template>

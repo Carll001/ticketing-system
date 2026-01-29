@@ -230,6 +230,6 @@ const editUser = () => {
                 </section>
             </form>
         </div>
-        <pre>{{ form }}</pre>
+        <!-- <pre>{{ form }}</pre> -->
     </AppLayout>
 </template>

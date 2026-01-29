@@ -58,7 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{task}/step/{step}', [StepController::class, 'destroy'])->name('step.delete');
     });
 
-    Route::prefix('task/{task}/step/{step}')->group(function () {
+    Route::prefix('/{task}/step/{step}')->group(function () {
         Route::post('/comment', [StepCommentController::class, 'store'])->name('step.comment.store');
         Route::delete('/comment/{comment}', [StepCommentController::class, 'destroy'])->name('step.comment.destroy');
     });

@@ -82,6 +82,7 @@ const groupedFields = computed(() => {
 const getGroupsForStep = (stepId: string) => {
     return groupedFields.value.find(g => g.stepId === stepId)?.groups || {};
 };
+
 </script>
 <template>
     <Collapsible v-for="step in props.steps" :key="step.id" :open="openStepId === step.id">
@@ -108,7 +109,9 @@ const getGroupsForStep = (stepId: string) => {
                                 </CardDescription>
                             </section>
                             <section class="space-x-2">
-                                <Button size="sm" @click="showStep(step.task_id, step.id)">View Step</Button>
+                                <Button size="sm" @click="showStep(step.task_id, step.id)"
+                                    v-if="auth.user.role !== 'admin' || (step.status === 'accepted' && step.assigned.id === auth.user.id)">View
+                                    Step</Button>
                                 <Button size="sm" v-if="creator?.id !== auth.user.id && step.assigned_to === null"
                                     @click="takeStep(step.task_id, step.id)">Take</Button>
                                 <Button size="sm"
@@ -138,7 +141,7 @@ const getGroupsForStep = (stepId: string) => {
                                             <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
                                                 <Input v-if="type === 'Input'"
                                                     :model-value="field.responses?.[0]?.response ?? ''" readonly
-                                                    disabled :placeholder="`Enter ${field.label.toLowerCase()}...`"
+                                                    :disabled="auth.user.id === props.creator?.id" :placeholder="`asdEnter ${field.label.toLowerCase()}...`"
                                                     class="h-8 text-xs bg-zinc-900/50" />
 
                                                 <Textarea v-else-if="type === 'Description'"

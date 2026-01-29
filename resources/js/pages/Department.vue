@@ -271,9 +271,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
             <!-- Table -->
             <div class="overflow-hidden rounded-xl border shadow-sm">
-                <div class="border-b p-3">
+                <!-- <div class="border-b p-3">
                     <h2 class="text-md">Department List</h2>
-                </div>
+                </div> -->
 
                 <Table>
                     <TableHeader>
