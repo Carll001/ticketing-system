@@ -95,9 +95,9 @@ const getGroupsForStep = (stepId: string) => {
                     <CardHeader class="w-full m-0 px-2">
                         <div class="flex items-start justify-between ">
                             <section class="space-y-2">
-                                <CardTitle>{{ step.title }}</CardTitle>
+                                <CardTitle class="break-all">{{ step.title }}</CardTitle>
                                 <CardDescription>
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-2 break-all">
                                         <Button class="h-6 p-2 text-xs" variant="outline">
                                             {{ step.assigned?.name ?? 'Anyone' }}
                                         </Button>

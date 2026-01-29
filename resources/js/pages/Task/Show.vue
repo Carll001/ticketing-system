@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import AppLayout from '@/layouts/AppLayout.vue';
 import taskLink from '@/routes/task';
-import { BreadcrumbItem, Task } from '@/types';
+import { BreadcrumbItem, Department, Task } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { ArrowUpRightIcon, FolderCode, FolderOpen, List, NotepadText } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -48,11 +48,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
     <AppLayout :breadcrumbs="breadcrumbs">
 
-        <div class="flex flex-col flex-1 gap-4 p-4">
-            <div class="flex items-start justify-between">
-                <section>
-                    <h3 class="text-3xl">{{ props.task.data.title }}</h3>
-                    <p class="text-muted-foreground">{{ props.task.data.description ?? 'No description' }}</p>
+        <div class="flex flex-col flex-1 gap-4 p-10">
+            <div class="flex items-start justify-between truncate">
+                <section class="min-w-0 flex-1">
+                    <h3 class="text-3xl truncate">{{ props.task.data.title }}</h3>
+                    <p class="text-muted-foreground truncate">{{ props.task.data.description ?? 'No description' }}</p>
                     <p class="text-muted-foreground text-sm">Creator: {{ props.task.data.creator?.name }}</p>
                 </section>
                 <section class="text-right">

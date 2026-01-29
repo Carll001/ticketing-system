@@ -206,6 +206,14 @@ const submitAll = () => {
   );
 };
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { MoreVertical } from 'lucide-vue-next'
+
 </script>
 
 
@@ -227,11 +235,29 @@ const submitAll = () => {
             <Button class="text-xs p-2 h-8" variant="outline">{{ props.step.data.assigned?.name ?? 'Anyone' }}</Button>
           </div>
           <div class="space-x-2">
-            <StepDeleteDialog :step="props.step.data" />
-            <Button size="sm" @click="editStep(props.step.data.task_id, props.step.data.id)">Edit</Button>
             <Button @click="submitAll" :disabled="form.processing">
               {{ form.processing ? 'Submitting...' : 'Submit Response' }}
             </Button>
+            <div>
+              <DropdownMenu>
+  <DropdownMenuTrigger as-child>
+    <Button variant="ghost" size="icon">
+      <MoreVertical class="w-4 h-4" />
+    </Button>
+  </DropdownMenuTrigger>
+
+  <DropdownMenuContent align="end" class="w-44">
+    <DropdownMenuItem
+      @click="editStep(props.step.data.task_id, props.step.data.id)"
+    >
+      Edit
+    </DropdownMenuItem>
+    <DropdownMenuItem class="text-destructive focus:text-destructive">
+      <StepDeleteDialog :step="props.step.data" />
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+            </div>
           </div>
         </section>
       </div>

@@ -8,13 +8,21 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import userLink from '@/routes/user';
 import { Department, User } from '@/types';
 import { router } from '@inertiajs/vue3';
-import { Badge } from '../ui/badge';
-import DeleteUserModal from './DeleteUserModal.vue';
-import EditUserForm from './EditUserForm.vue';
+import { Building } from 'lucide-vue-next';
 import PermissionGuard from '../PermissionGuard.vue';
-import userLink from '@/routes/user';
+import { Badge } from '../ui/badge';
+import {
+    Empty,
+    EmptyContent,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from '../ui/empty';
+import DeleteUserModal from './DeleteUserModal.vue';
 
 const props = defineProps<{
     users: User[];
@@ -33,10 +41,12 @@ const goToPage = (page: number) => {
     if (page >= 1 && page <= (props.pagination?.last_page ?? 1)) {
         const params = new URLSearchParams(window.location.search);
         const search = params.get('search') || '';
-        router.get(window.location.pathname, { page, search: search || undefined });
+        router.get(window.location.pathname, {
+            page,
+            search: search || undefined,
+        });
     }
 };
-
 </script>
 <template>
     <div class="overflow-hidden rounded-lg border">
@@ -60,15 +70,39 @@ const goToPage = (page: number) => {
                     <TableCell>{{ user.email }}</TableCell>
                     <TableCell>{{ user.role }}</TableCell>
                     <TableCell>
-                        <div v-if="
-                            user.departments && user.departments?.length > 0
-                        " class="flex flex-wrap gap-1">
-                            <Badge v-for="dept in user.departments" :key="dept.id" variant="outline" class="rounded-lg">
+                        <div
+                            v-if="
+                                user.departments && user.departments?.length > 0
+                            "
+                            class="flex w-md flex-wrap gap-1"
+                        >
+                            <Badge
+                                v-for="dept in user.departments"
+                                :key="dept.id"
+                                variant="outline"
+                                class="rounded-lg"
+                            >
                                 {{ dept.name }}
                             </Badge>
                         </div>
-                        <span v-else class="text-sm text-muted-foreground italic">
-                            No departments
+                        <span
+                            v-else
+                            class="text-sm text-muted-foreground italic"
+                        >
+                            <Empty>
+                                <EmptyHeader>
+                                    <EmptyMedia variant="icon">
+                                        <Building />
+                                    </EmptyMedia>
+                                </EmptyHeader>
+                                <EmptyTitle>No data</EmptyTitle>
+                                <EmptyDescription
+                                    >No data found</EmptyDescription
+                                >
+                                <EmptyContent>
+                                    <Button>Add data</Button>
+                                </EmptyContent>
+                            </Empty>
                         </span>
                     </TableCell>
                     <TableCell class="text-right">
@@ -78,11 +112,21 @@ const goToPage = (page: number) => {
                             </PermissionGuard>
                             <PermissionGuard permission="can edit user">
                                 <!-- <EditUserForm :user="user" :departments="props.departments" /> -->
-                                <Button @click="router.visit(userLink.edit(user.id).url)" size="sm">Edit</Button>
+                                <Button
+                                    @click="
+                                        router.visit(userLink.edit(user.id).url)
+                                    "
+                                    size="sm"
+                                    >Edit</Button
+                                >
                             </PermissionGuard>
                             <PermissionGuard permission="can view user">
-                                <Button size="sm" variant="default"
-                                    @click="router.visit(`/user/${user.id}`)">View</Button>
+                                <Button
+                                    size="sm"
+                                    variant="default"
+                                    @click="router.visit(`/user/${user.id}`)"
+                                    >View</Button
+                                >
                             </PermissionGuard>
                         </div>
                     </TableCell>
@@ -90,14 +134,33 @@ const goToPage = (page: number) => {
             </TableBody>
         </Table>
     </div>
-     <!-- pagination here -->
-          <div v-if="props.pagination" class="border-t px-6 py-4">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm">Showing {{ props.pagination.from }} to {{ props.pagination.to }} of {{ props.pagination.total }} users</p>
-                        <div class="flex gap-2">
-                            <Button variant="outline" size="sm" :disabled="props.pagination.current_page === 1" @click="goToPage(props.pagination.current_page - 1)">Previous</Button>
-                            <Button variant="outline" size="sm" :disabled="props.pagination.current_page === props.pagination.last_page" @click="goToPage(props.pagination.current_page + 1)">Next</Button>
-                        </div>
-                    </div>
-                </div>
+
+    <!-- pagination here -->
+    <div v-if="props.pagination" class="border-t px-6 py-4">
+        <div class="flex items-center justify-between">
+            <p class="text-sm">
+                Showing {{ props.pagination.from }} to
+                {{ props.pagination.to }} of {{ props.pagination.total }} users
+            </p>
+            <div class="flex gap-2">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    :disabled="props.pagination.current_page === 1"
+                    @click="goToPage(props.pagination.current_page - 1)"
+                    >Previous</Button
+                >
+                <Button
+                    variant="outline"
+                    size="sm"
+                    :disabled="
+                        props.pagination.current_page ===
+                        props.pagination.last_page
+                    "
+                    @click="goToPage(props.pagination.current_page + 1)"
+                    >Next</Button
+                >
+            </div>
+        </div>
+    </div>
 </template>

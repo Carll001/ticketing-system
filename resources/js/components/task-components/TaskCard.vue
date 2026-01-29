@@ -43,8 +43,8 @@ const completedStepsCount = (task: Task) => {
         <Card v-for="task in props.tasks"  >
         <CardHeader>
             <div class="flex justify-between items-center">
-                <CardTitle @click="visitTask(task.id)" class="cursor-pointer text-lg">
-                    {{ task.title }}
+                <CardTitle @click="visitTask(task.id)" class="cursor-pointer text-lg truncate max-w-[18rem]">
+                    {{ task.title }},
                 </CardTitle>
 
                 <div class="space-x-2">
