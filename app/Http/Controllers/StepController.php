@@ -47,6 +47,7 @@ class StepController extends Controller
         // Wrap in a transaction for safety
         $step = DB::transaction(function () use ($data) {
             // 1. Create the Step
+            dd($data['has_cost']);
             $step = Step::create([
                 'task_id'     => $data['task_id'],
                 'preset_id' => $data['preset_id'] ?? null,

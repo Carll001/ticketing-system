@@ -27,6 +27,7 @@ class StepRequest extends FormRequest
             'description' => 'nullable|string',
             'assigned_to' => 'nullable|exists:users,id',
             'again'       => 'nullable|boolean',
+            'has_cost'   => 'nullable|boolean',
             // Add validation for dynamic fields
             'fields'      => 'array',
             'fields.*.type'  => 'required|in:Checkbox,Input,Description',
