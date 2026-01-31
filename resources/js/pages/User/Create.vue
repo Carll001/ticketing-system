@@ -169,7 +169,7 @@ const createUser = () => {
                                         <Label for="email">Email</Label>
                                         <Input id="email" type="email" v-model="form.email" />
                                     </div>
-                                    <div class="space-y-2" v-if="auth.user.role === 'superadmin'">
+                                    <div class="space-y-2">
                                         <Label for="email">Role</Label>
                                         <Select v-model="form.role">
                                             <SelectTrigger class="w-full">
