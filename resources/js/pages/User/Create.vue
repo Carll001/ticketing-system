@@ -94,21 +94,6 @@ const selectedLabel = computed(() => {
     }
     return `${form.department_id.length} departments selected`;
 });
-
-const allPermissionsSelected = computed({
-    get: () => form.permissions.length === permissions.length,
-    set: (value) => {
-        if (value) {
-            // Clear existing and add all
-            form.permissions.splice(0);
-            form.permissions.push(...permissions.map(p => p.name));
-        } else {
-            // Clear all
-            form.permissions.splice(0);
-        }
-    }
-});
-
 const createUser = () => {
     form.post(user.store().url, {
         onSuccess: () => form.reset()
@@ -145,7 +130,7 @@ const createUser = () => {
                                 <section class="grid grid-cols-[2fr_1fr] gap-4">
                                     <div class="space-y-2">
                                         <Label for="name">Name</Label>
-                                        <Input placeholder="e.g Juan Dela Cruz" id="name" v-model="form.name" />
+                                        <Input id="name" v-model="form.name" />
                                     </div>
                                     <div class="space-y-2 flex flex-col">
                                         <Label for="department">Departments</Label>
@@ -179,10 +164,10 @@ const createUser = () => {
                                         <InputError :message="form.errors.department_id" />
                                     </div>
                                 </section>
-                                <section :class="['gap-4', auth.user.role === 'superadmin' ? 'grid grid-cols-[2fr_1fr]' : 'w-full']">
+                                <section class="gap-4 grid grid-cols-[2fr_1fr] w-full">
                                     <div class="space-y-2">
                                         <Label for="email">Email</Label>
-                                        <Input placeholder="example@sample.com" id="email" type="email" v-model="form.email" />
+                                        <Input id="email" type="email" v-model="form.email" />
                                     </div>
                                     <div class="space-y-2" v-if="auth.user.role === 'superadmin'">
                                         <Label for="email">Role</Label>
@@ -222,32 +207,23 @@ const createUser = () => {
                             <CardDescription>User permissions</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div class="space-y-4">
-                                <div class="flex items-center gap-2 pb-4 border-b">
-                                    <input type="checkbox" id="select-all" v-model="allPermissionsSelected"
-                                        class="h-4 w-4 rounded border-gray-300" />
-                                    <Label for="select-all" class="text-sm font-semibold cursor-pointer">
-                                        Select All
+                            <div class="columns-2 space-y-4">
+                                <div v-for="permission in permissions" :key="permission.name"
+                                    class="flex items-center gap-2">
+                                    <input type="checkbox" :id="permission.name" :value="permission.name"
+                                        v-model="form.permissions" class="h-4 w-4 rounded border-gray-300" />
+
+                                    <Label :for="permission.name" class="text-sm font-normal cursor-pointer capitalize">
+                                        {{ permission.name }}
                                     </Label>
                                 </div>
-                                <div class="columns-2 space-y-4">
-                                    <div v-for="permission in permissions" :key="permission.name"
-                                        class="flex items-center gap-2">
-                                        <input type="checkbox" :id="permission.name" :value="permission.name"
-                                            v-model="form.permissions" class="h-4 w-4 rounded border-gray-300" />
 
-                                        <Label :for="permission.name" class="text-sm font-normal cursor-pointer capitalize">
-                                            {{ permission.name }}
-                                        </Label>
-                                    </div>
-
-                                </div>
                             </div>
                         </CardContent>
                     </Card>
                 </section>
             </form>
         </div>
-        <!-- <pre>{{ form }}</pre> -->
+        <pre>{{ form }}</pre>
     </AppLayout>
 </template>

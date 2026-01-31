@@ -36,6 +36,7 @@ export interface User {
   created_at: string;
   updated_at: string;
   role: 'superadmin' | 'admin' | 'staff';
+  can: string[];
   [key: string]: unknown;
 
   departments?: Department[];
