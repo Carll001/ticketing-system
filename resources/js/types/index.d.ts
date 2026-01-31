@@ -53,11 +53,10 @@ export interface Task {
   updated_at: string;
 
   creator?: User;
-  steps?: {
-    data: Step[]
-  };
+  steps?:  {data: Step[]}
   assigned?: {
     data: Department
+    name: string
   }; 
 
 }

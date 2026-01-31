@@ -15,8 +15,15 @@ const hasPermission = computed(() => {
     // 1. Safe access to user
     const user = page.props.auth?.user;
     
-    // 2. Ensure 'can' is treated as an array even if it's missing
-    const permissions = user?.can || [];
+    if (!user) return false;
+    
+    // 2. Check if user is superadmin - superadmin bypasses all permission checks
+    const isSuperAdmin = user.role === 'superadmin' || user.role === 'super-admin' || user.role === 'Super Admin';
+    
+    if (isSuperAdmin) return true;
+    
+    // 3. Ensure 'can' is treated as an array even if it's missing
+    const permissions = user.can || [];
     
     return permissions.includes(props.permission);
 });

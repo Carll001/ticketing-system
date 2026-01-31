@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PermissionGuard from '@/components/PermissionGuard.vue';
 import TaskCard from '@/components/task-components/TaskCard.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Input } from '@/components/ui/input';
@@ -41,11 +42,11 @@ const goToPage = (page: number) => {
 
 watch(search, (value) => {
     router.get(
-        taskLink.index.url(),    
-        { search: value ?? '' }, 
-        { 
-            preserveState: true, 
-            replace: true 
+        taskLink.index.url(),
+        { search: value ?? '' },
+        {
+            preserveState: true,
+            replace: true
         }
     );
 });
@@ -87,16 +88,17 @@ const createTask = () => {
 };
 </script>
 <template>
+
     <Head title="Task" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-4 p-4">
             <div class="flex justify-end">
-                <Button @click="createTask" class="cursor-pointer">Creat Task</Button>
+                <PermissionGuard permission="can create task">
+                    <Button @click="createTask" class="cursor-pointer">Creat Task</Button>
+                </PermissionGuard>
             </div>
             <div class="relative w-120">
-                <Search
-                    class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                />
+                <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input v-model="search" class="pl-10" placeholder="Search..." />
             </div>
             <div class="flex flex-col gap-4">
@@ -105,10 +107,14 @@ const createTask = () => {
             <!-- pagination -->
             <div class="border-t px-6 py-4">
                 <div class="flex items-center justify-between">
-                    <p class="text-sm">Showing {{ props.tasks.from }} to {{ props.tasks.to }} of {{ props.tasks.total }} tasks</p>
+                    <p class="text-sm">Showing {{ props.tasks.from }} to {{ props.tasks.to }} of {{ props.tasks.total }}
+                        tasks</p>
                     <div class="flex gap-2">
-                        <Button variant="outline" size="sm" :disabled="props.tasks.current_page === 1" @click="goToPage(props.tasks.current_page - 1)">Previous</Button>
-                        <Button variant="outline" size="sm" :disabled="props.tasks.current_page === props.tasks.last_page" @click="goToPage(props.tasks.current_page + 1)">Next</Button>
+                        <Button variant="outline" size="sm" :disabled="props.tasks.current_page === 1"
+                            @click="goToPage(props.tasks.current_page - 1)">Previous</Button>
+                        <Button variant="outline" size="sm"
+                            :disabled="props.tasks.current_page === props.tasks.last_page"
+                            @click="goToPage(props.tasks.current_page + 1)">Next</Button>
                     </div>
                 </div>
             </div>

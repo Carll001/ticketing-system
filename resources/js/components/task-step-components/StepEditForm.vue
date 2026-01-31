@@ -41,6 +41,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { toast } from 'vue-sonner';
 
 const openCombobox = ref(false);
 
@@ -90,7 +91,12 @@ const updateStep = () => {
     form.patch(stepLink.update({ 
         task: props.step.task_id, 
         step: props.step.id 
-    }).url);
+    }).url,{
+        onSuccess: () => {
+            // Optionally handle success (e.g., show a notification)
+            toast.success('Step updated successfully');
+        },
+    });
 };
 
 const discardEdit = () => {

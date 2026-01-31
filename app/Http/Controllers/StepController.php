@@ -128,7 +128,7 @@ class StepController extends Controller
         $step->assigned_to = Auth::id();
         $step->save();
         
-        return back();
+        return redirect()->route('task.show', $step->task_id);
     }
 
     /**
@@ -169,7 +169,7 @@ class StepController extends Controller
             return back();
         }
 
-        return redirect()->route('task.show', $step->task_id);
+        return redirect()->route('step.show', ['task' => $step->task_id, 'step' => $step->id]);
     }
 
     /**
@@ -179,7 +179,7 @@ class StepController extends Controller
     {
         $step->delete();
 
-        return back();
+        return redirect()->route('step.show', ['task' => $step->task_id, 'step' => $step->id]);
     }
 
     

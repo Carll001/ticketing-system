@@ -39,6 +39,30 @@ const takeStep = (taskId: string, stepId: string) => {
         }
     );
 };
+const acceptStep = (taskId: string, stepId: string) => {
+    router.patch(
+        stepLink.updateStatus({ task: taskId, step: stepId }).url,
+        { status: 'accepted' },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Optional: show success message or toast
+            }
+        }
+    );
+};
+const rejectStep = (taskId: string, stepId: string) => {
+    router.patch(
+        stepLink.updateStatus({ task: taskId, step: stepId }).url,
+        { status: 'reject' },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Optional: show success message or toast
+            }
+        }
+    );
+};
 
 const props = defineProps<{
     steps?: Step[];
@@ -83,6 +107,20 @@ const getGroupsForStep = (stepId: string) => {
     return groupedFields.value.find(g => g.stepId === stepId)?.groups || {};
 };
 
+const isCreator = computed(() => {
+    return auth.value.user.id === props.creator?.id;
+});
+
+// Emit event to parent component to change active tab
+const emit = defineEmits<{
+    filterByStatus: [status: string]
+}>();
+
+// Handle status button click
+const handleStatusClick = (status: string) => {
+    emit('filterByStatus', status);
+}
+
 </script>
 <template>
     <Collapsible v-for="step in props.steps" :key="step.id" :open="openStepId === step.id">
@@ -102,7 +140,7 @@ const getGroupsForStep = (stepId: string) => {
                                         <Button class="h-6 p-2 text-xs" variant="outline">
                                             {{ step.assigned?.name ?? 'Anyone' }}
                                         </Button>
-                                        <Button class="h-6 p-2 text-xs capitalize" variant="outline">
+                                        <Button class="h-6 p-2 text-xs capitalize" variant="outline" @click="handleStatusClick(step.status)">
                                             {{ step.status }}
                                         </Button>
                                     </div>
@@ -110,13 +148,16 @@ const getGroupsForStep = (stepId: string) => {
                             </section>
                             <section class="space-x-2">
                                 <Button size="sm" @click="showStep(step.task_id, step.id)"
-                                    v-if="auth.user.role !== 'admin' || (step.status === 'accepted' && step.assigned.id === auth.user.id)">View
+                                    v-if="isCreator || (auth.user.role !== 'admin' && step.status !== 'pending' && step.status !== 'assigned') || (step.status === 'accepted' && step.assigned.id === auth.user.id)">View
                                     Step</Button>
                                 <Button size="sm" v-if="creator?.id !== auth.user.id && step.assigned_to === null"
                                     @click="takeStep(step.task_id, step.id)">Take</Button>
                                 <Button size="sm"
                                     v-if="creator?.id !== auth.user.id && step.status === 'assigned' && step.assigned_to === auth.user.id"
-                                    @click="takeStep(step.task_id, step.id)">Accept</Button>
+                                    @click="rejectStep(step.task_id, step.id)">Reject</Button>
+                                <Button size="sm"
+                                    v-if="creator?.id !== auth.user.id && step.status === 'assigned' && step.assigned_to === auth.user.id"
+                                    @click="acceptStep(step.task_id, step.id)">Accept</Button>
                             </section>
                         </div>
 
@@ -141,7 +182,8 @@ const getGroupsForStep = (stepId: string) => {
                                             <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
                                                 <Input v-if="type === 'Input'"
                                                     :model-value="field.responses?.[0]?.response ?? ''" readonly
-                                                    :disabled="auth.user.id === props.creator?.id" :placeholder="`asdEnter ${field.label.toLowerCase()}...`"
+                                                    :disabled="auth.user.id === props.creator?.id"
+                                                    :placeholder="`asdEnter ${field.label.toLowerCase()}...`"
                                                     class="h-8 text-xs bg-zinc-900/50" />
 
                                                 <Textarea v-else-if="type === 'Description'"

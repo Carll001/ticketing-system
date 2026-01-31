@@ -45,6 +45,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { toast } from 'vue-sonner';
 const openCombobox = ref(false);
 
 const props = defineProps<{
@@ -96,6 +97,7 @@ const storeStep = () => {
     form.post(stepLink.store({ task: props.task.id }).url, {
         onSuccess: () => {
             form.reset();
+            toast.success('Task step created successfully!');
         },
     });
 };

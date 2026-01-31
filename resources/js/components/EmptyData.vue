@@ -13,6 +13,7 @@ const empty = defineProps<{
     title: string;
     message: string;
     length: boolean;
+    button?: Component;
 }>();
 </script>
 <template>
