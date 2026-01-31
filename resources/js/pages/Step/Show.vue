@@ -43,6 +43,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 const form = useForm<{
   step_field_id: string | number;
   response: Record<string, any>;
+  cost?: number | null;
 }>({
   step_field_id: props.step.data.id,
   response: (props.step.data.fields || []).reduce((acc, field) => {
@@ -61,7 +62,8 @@ const form = useForm<{
       acc[field.id] = existingValue || '';
     }
     return acc;
-  }, {} as Record<string, any>)
+  }, {} as Record<string, any>),
+  cost: props.step.data.cost || null,
 });
 
 // Computed properties for UI state
@@ -88,6 +90,7 @@ const editStep = (task_id: string, step_id: string) => {
 };
 
 const submitResponse = () => {
+  
   form.post(response.store().url, {
     preserveScroll: true,
     onSuccess: () => {

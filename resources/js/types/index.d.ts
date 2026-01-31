@@ -86,6 +86,8 @@ export interface Step {
   description?: string;
   assigned_to?: string;
   status: string;
+  has_cost: boolean;
+  cost: number;
   comments: {
     id: string;
     content: string;

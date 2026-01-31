@@ -56,6 +56,7 @@ const form = useForm({
     description: props.step.description,
     assigned_to: props.step.assigned_to ? String(props.step.assigned_to) : null,
     status: props.step.status,
+    has_cost: props.step.has_cost,
     // Initialize fields from props and ensure unique IDs for Vue keys
     fields: (props.step.fields ?? []).map(field => ({
         ...field,
@@ -88,10 +89,10 @@ const assignedUser = computed(() => {
 });
 
 const updateStep = () => {
-    form.patch(stepLink.update({ 
-        task: props.step.task_id, 
-        step: props.step.id 
-    }).url,{
+    form.patch(stepLink.update({
+        task: props.step.task_id,
+        step: props.step.id
+    }).url, {
         onSuccess: () => {
             // Optionally handle success (e.g., show a notification)
             toast.success('Step updated successfully');
@@ -146,85 +147,110 @@ const groupedFields = computed(() => {
                             </section>
                             <section class="space-y-4">
                                 <Label for="step-description">Step description</Label>
-                                <Textarea id="step-description" v-model="form.description" placeholder="step description" />
+                                <Textarea id="step-description" v-model="form.description"
+                                    placeholder="step description" />
                                 <InputError :message="form.errors.description" />
                             </section>
                         </div>
 
                         <div class="space-y-6 mt-8">
-    <div class="flex justify-between items-center border-b pb-2">
-        <div>
-            <Label class="text-base font-semibold">User Input Fields</Label>
-            <p class="text-xs text-zinc-500">Define what information the user must provide.</p>
-        </div>
-        <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-                <Button size="sm" variant="outline" class="gap-2">
-                    <Plus class="w-4 h-4" /> Add Field
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem @click="addField('Description')">Textarea (Description)</DropdownMenuItem>
-                <DropdownMenuItem @click="addField('Checkbox')">Checkbox (Confirmation)</DropdownMenuItem>
-                <DropdownMenuItem @click="addField('Input')">Small Input (Text/Number)</DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    </div>
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div>
+                                    <Label class="text-base font-semibold">User Input Fields</Label>
+                                    <p class="text-xs text-zinc-500">Define what information the user must provide.</p>
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger as-child>
+                                        <Button size="sm" variant="outline" class="gap-2">
+                                            <Plus class="w-4 h-4" /> Add Field
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem @click="addField('Description')">Textarea (Description)
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="addField('Checkbox')">Checkbox (Confirmation)
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="addField('Input')">Small Input (Text/Number)
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
 
-    <div v-if="form.fields.length === 0"
-        class="border-2 border-dashed border-zinc-800 rounded-lg p-6 text-center">
-        <p class="text-sm text-zinc-500">No input fields added. The user will just mark this step as complete.</p>
-    </div>
+                            <div v-if="form.fields.length === 0"
+                                class="border-2 border-dashed border-zinc-800 rounded-lg p-6 text-center">
+                                <p class="text-sm text-zinc-500">No input fields added. The user will just mark this
+                                    step as complete.</p>
+                            </div>
 
-    <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
-        <Label class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800/50 pb-1 block">
-            {{ type }}s
-        </Label>
+                            <div v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
+                                <Label
+                                    class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800/50 pb-1 block">
+                                    {{ type }}s
+                                </Label>
 
-        <div class="space-y-4">
-            <section v-for="field in fields" :key="field.id"
-                class="relative p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-3 group">
+                                <div class="space-y-4">
+                                    <section v-for="field in fields" :key="field.id"
+                                        class="relative p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-3 group">
 
-                <div class="flex items-end justify-between">
-                    <div class="flex-1 mr-4">
-                        <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Field Label / Question</Label>
-                        <Input v-model="form.fields[form.fields.indexOf(field)].label"
-                            :placeholder="`e.g. ${type === 'Checkbox' ? 'Check if confirmed' : 'Enter detail name'}`" />
-                    </div>
-                    <Button variant="ghost" size="icon" class="h-8 w-8 text-zinc-500 hover:text-red-500 shrink-0 mb-1"
-                        @click="removeField(form.fields.indexOf(field))">
-                        <Trash2Icon class="w-4 h-4" />
-                    </Button>
-                </div>
+                                        <div class="flex items-end justify-between">
+                                            <div class="flex-1 mr-4">
+                                                <Label
+                                                    class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Field
+                                                    Label / Question</Label>
+                                                <Input v-model="form.fields[form.fields.indexOf(field)].label"
+                                                    :placeholder="`e.g. ${type === 'Checkbox' ? 'Check if confirmed' : 'Enter detail name'}`" />
+                                            </div>
+                                            <Button variant="ghost" size="icon"
+                                                class="h-8 w-8 text-zinc-500 hover:text-red-500 shrink-0 mb-1"
+                                                @click="removeField(form.fields.indexOf(field))">
+                                                <Trash2Icon class="w-4 h-4" />
+                                            </Button>
+                                        </div>
 
-                <div class="mt-4 pt-4 border-t border-zinc-800/50 opacity-40 grayscale pointer-events-none">
-                    <p class="text-[9px] uppercase font-bold text-zinc-600 mb-2">User Response Preview</p>
-                    
-                    <div :class="['flex gap-3', type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start']">
-                        
-                        <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
-                            <div v-if="type === 'Checkbox'" class="w-4 h-4 rounded border border-zinc-700 bg-zinc-900/50"></div>
-                            
-                            <Input v-if="type === 'Input'" disabled 
-                                :placeholder="`User will enter ${field.label || 'data'}...`" 
-                                class="h-8 text-xs bg-zinc-900/50" />
-                            
-                            <Textarea v-if="type === 'Description'" disabled 
-                                :placeholder="`User will provide ${field.label || 'details'}...`" 
-                                class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                        <div
+                                            class="mt-4 pt-4 border-t border-zinc-800/50 opacity-40 grayscale pointer-events-none">
+                                            <p class="text-[9px] uppercase font-bold text-zinc-600 mb-2">User Response
+                                                Preview</p>
+
+                                            <div
+                                                :class="['flex gap-3', type === 'Checkbox' ? 'flex-row items-center' : 'flex-col items-start']">
+
+                                                <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
+                                                    <div v-if="type === 'Checkbox'"
+                                                        class="w-4 h-4 rounded border border-zinc-700 bg-zinc-900/50">
+                                                    </div>
+
+                                                    <Input v-if="type === 'Input'" disabled
+                                                        :placeholder="`User will enter ${field.label || 'data'}...`"
+                                                        class="h-8 text-xs bg-zinc-900/50" />
+
+                                                    <Textarea v-if="type === 'Description'" disabled
+                                                        :placeholder="`User will provide ${field.label || 'details'}...`"
+                                                        class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                                </div>
+
+                                                <span
+                                                    :class="['text-sm', type === 'Checkbox' ? 'order-2' : 'order-1 font-medium text-zinc-300']">
+                                                    {{ field.label || 'Field Label' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <InputError
+                                            :message="form.errors[`fields.${form.fields.indexOf(field)}.label` as keyof typeof form.errors]" />
+                                    </section>
+
+
+                                </div>
+                            </div>
+
+                            <div v-if="form.has_cost" class="space-y-4 my-4">
+                                <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field
+                                    Preview</Label>
+                                <Input disabled placeholder="User will enter cost amount..."
+                                    class="h-8 text-xs bg-zinc-900/50 " />
+                            </div>
                         </div>
-
-                        <span :class="['text-sm', type === 'Checkbox' ? 'order-2' : 'order-1 font-medium text-zinc-300']">
-                            {{ field.label || 'Field Label' }}
-                        </span>
-                    </div>
-                </div>
-                
-                <InputError :message="form.errors[`fields.${form.fields.indexOf(field)}.label` as keyof typeof form.errors]" />
-            </section>
-        </div>
-    </div>
-</div>
                     </CardContent>
                 </Card>
 
@@ -252,14 +278,17 @@ const groupedFields = computed(() => {
                                         <CommandList>
                                             <CommandEmpty>No user found.</CommandEmpty>
                                             <CommandGroup>
-                                                <CommandItem value="Anyone" @select="() => { form.assigned_to = null; openCombobox = false; }">
+                                                <CommandItem value="Anyone"
+                                                    @select="() => { form.assigned_to = null; openCombobox = false; }">
                                                     Anyone
                                                     <CheckIcon v-show="form.assigned_to === null" class="ml-auto" />
                                                 </CommandItem>
                                                 <CommandItem v-for="user in props.users" :key="user.id"
-                                                    :value="String(user.id)" @select="() => { form.assigned_to = String(user.id); openCombobox = false; }">
+                                                    :value="String(user.id)"
+                                                    @select="() => { form.assigned_to = String(user.id); openCombobox = false; }">
                                                     {{ user.name }}
-                                                    <CheckIcon v-show="form.assigned_to === String(user.id)" class="ml-auto" />
+                                                    <CheckIcon v-show="form.assigned_to === String(user.id)"
+                                                        class="ml-auto" />
                                                 </CommandItem>
                                             </CommandGroup>
                                         </CommandList>
@@ -271,9 +300,14 @@ const groupedFields = computed(() => {
 
                         <Separator class="my-4" />
 
-                        <div class="pt-2">
-                             <Label class="text-xs text-zinc-500 uppercase">Current Status</Label>
-                             <p class="text-sm font-medium capitalize mt-1 text-zinc-300">{{ form.status }}</p>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3">
+                                <Checkbox id="has-cost" v-model="form.has_cost" />
+                                <Label for="has-cost">has cost</Label>
+                            </div>
+                            <p class="text-sm text-zinc-500">
+                                Check this if the step has a cost; you can enter an amount below.
+                            </p>
                         </div>
                     </CardContent>
                 </Card>

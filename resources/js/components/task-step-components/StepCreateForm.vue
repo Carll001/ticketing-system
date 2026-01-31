@@ -262,12 +262,13 @@ const applyPreset = (presetId: string | null) => {
                                             :message="form.errors[`fields.${form.fields.indexOf(field)}.label` as keyof typeof form.errors]" />
                                     </section>
                                 </div>
-                                <div v-if="form.has_cost" class="space-y-4 my-4">
-                                    <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field Preview</Label>
-                                    <Input disabled placeholder="User will enter cost amount..."
-                                        class="h-8 text-xs bg-zinc-900/50 " />
 
-                                </div>
+                            </div>
+                            <div v-if="form.has_cost" class="space-y-4 my-4">
+                                <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field
+                                    Preview</Label>
+                                <Input disabled placeholder="User will enter cost amount..."
+                                    class="h-8 text-xs bg-zinc-900/50 " />
                             </div>
                         </div>
                     </CardContent>
@@ -294,7 +295,8 @@ const applyPreset = (presetId: string | null) => {
                         <div v-if="form.type === 'preset'"
                             class="space-y-4 mt-4 animate-in fade-in slide-in-from-top-1">
                             <Label for="preset-selection">Choose Preset</Label>
-                            <Select @update:modelValue="(val) => applyPreset(val as string)" class="w-full" :disabled="presets.length === 0">
+                            <Select @update:modelValue="(val) => applyPreset(val as string)" class="w-full"
+                                :disabled="presets.length === 0">
                                 <SelectTrigger class="w-full">
                                     <SelectValue class="w-full" placeholder="Select a template..." />
                                 </SelectTrigger>
@@ -373,7 +375,7 @@ const applyPreset = (presetId: string | null) => {
                         <section class="space-y-4">
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3">
-                                    <Checkbox id="has-cost"  v-model="form.has_cost"/>
+                                    <Checkbox id="has-cost" v-model="form.has_cost" />
                                     <Label for="has-cost">has cost</Label>
                                 </div>
                                 <p class="text-sm text-zinc-500">
@@ -383,7 +385,7 @@ const applyPreset = (presetId: string | null) => {
 
                             <div class="space-y-2">
                                 <div class="flex items-center gap-3">
-                                    <Checkbox id="add-new" v-model="form.again"  />
+                                    <Checkbox id="add-new" v-model="form.again" />
                                     <Label for="add-new">Add another</Label>
                                 </div>
                                 <p class="text-sm text-zinc-500">

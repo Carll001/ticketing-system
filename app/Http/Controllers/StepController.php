@@ -47,16 +47,18 @@ class StepController extends Controller
         // Wrap in a transaction for safety
         $step = DB::transaction(function () use ($data) {
             // 1. Create the Step
+
+            
             $step = Step::create([
                 'task_id'     => $data['task_id'],
                 'preset_id' => $data['preset_id'] ?? null,
                 'title'       => $data['title'],
+                'has_cost'   => $data['has_cost'],
                 // 'type'       => $data['type'],
                 'description' => $data['description'],
                 'assigned_to' => $data['assigned_to'],
                 'status'      => $data['assigned_to'] ? 'assigned' : 'pending',
             ]);
-
             // 2. Create the Field Definitions (Questions)
             if (!empty($data['fields'])) {
                 foreach ($data['fields'] as $field) {
