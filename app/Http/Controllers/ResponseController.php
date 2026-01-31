@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Response;
 use App\Models\Proof;
 use App\Models\Attachment;
+use App\Models\Step;
 use App\Models\StepField;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -37,10 +38,12 @@ class ResponseController extends Controller
         $validated = $request->validate([
             'step_field_id' => 'required|uuid', // This is actually the Step ID
             'response'      => 'required|array',
+            'cost'          => 'nullable|numeric|min:0',
         ]);
 
+
+        // Save field responses
         foreach ($validated['response'] as $fieldId => $value) {
-            // Only save if the value isn't null (optional, depending on your needs)
             \App\Models\Response::updateOrCreate(
                 [
                     'step_field_id' => $fieldId, // The ID of the specific field
@@ -52,8 +55,19 @@ class ResponseController extends Controller
                 ]
             );
         }
+     
+        // Save cost to the Step if provided
+        if (isset($validated['cost'])) {
+            $step = Step::find($validated['step_field_id']);
+            
+            if ($step) {
+                $step->update([
+                    'cost' => number_format((float)$request->cost, 2, '.', ''),
+                ]);
+            }
+        }
 
-        return back()->with('success', 'Form submitted successfully!');
+        return back()->with('success', 'Response submitted successfully!');
     }
 
 

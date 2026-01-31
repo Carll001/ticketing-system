@@ -140,7 +140,8 @@ const handleStatusClick = (status: string) => {
                                         <Button class="h-6 p-2 text-xs" variant="outline">
                                             {{ step.assigned?.name ?? 'Anyone' }}
                                         </Button>
-                                        <Button class="h-6 p-2 text-xs capitalize" variant="outline" @click="handleStatusClick(step.status)">
+                                        <Button class="h-6 p-2 text-xs capitalize" variant="outline"
+                                            @click="handleStatusClick(step.status)">
                                             {{ step.status }}
                                         </Button>
                                     </div>
@@ -220,12 +221,18 @@ const handleStatusClick = (status: string) => {
                                                         '2-digit', minute: '2-digit'
                                                 }) }}
                                         </p>
+
                                     </div>
 
                                 </div>
 
                             </div>
-
+                            <div v-if="step.has_cost" class="space-y-4 my-4">
+                                <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field
+                                    Preview</Label>
+                                <Input disabled placeholder="User will enter cost amount..." :model-value="step.cost"
+                                    class="h-8 text-xs bg-zinc-900/50 " />
+                            </div>
                             <div v-if="!step.fields?.length" class="text-xs text-zinc-600 italic text-center">
                                 No fields configured for this step.
                             </div>

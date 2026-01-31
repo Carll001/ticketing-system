@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignUuid('step_field_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
             $table->text('response')->nullable();
+            $table->text('cost')->nullable();
             $table->timestamps();
         });
     }

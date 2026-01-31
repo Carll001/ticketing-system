@@ -18,6 +18,7 @@ class Response extends Model
         'step_field_id',
         'user_id',
         'response',
+        'cost'
     ];
 
     /**
