@@ -22,13 +22,12 @@ class Department extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(
-                    User::class,
-                    'department_users',   // Pivot table
-                    'department_id',      // Foreign key on pivot table for this model
-                    'user_id'             // Foreign key on pivot table for related model
-                )
-                ->using(DepartmentUser::class)  // Link the custom pivot model
-                ->withTimestamps();             // Manage created_at / updated_at automatically
+            User::class,
+            'department_users',   // Pivot table
+            'department_id',      // Foreign key on pivot table for this model
+            'user_id'             // Foreign key on pivot table for related model
+        )
+            ->using(DepartmentUser::class)  // Link the custom pivot model
+            ->withTimestamps();             // Manage created_at / updated_at automatically
     }
 }
-

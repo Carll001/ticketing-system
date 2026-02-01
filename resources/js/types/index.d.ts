@@ -60,6 +60,8 @@ export interface Task {
     name: string
   }; 
 
+  total_steps_cost: number;
+
 }
 
 export interface Proof {
@@ -102,12 +104,15 @@ export interface Step {
 
   // ✅ Add proofs here
   proofs?: Proof[];
+  position: number
 }
 
 export interface Department {
   id: string;
   name: string;
   users?: User[];
+
+  assigned_users: User[]
 }
 
 export interface Field { 

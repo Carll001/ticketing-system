@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import user from '@/routes/user';
 import { BreadcrumbItem, Department } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -87,6 +87,24 @@ const toggleDepartment = (id: string) => {
     }
 }
 
+const isPermissionChecked = (permissionName: string) => {
+    return computed({
+        get: () => form.permissions.includes(permissionName),
+        set: (value: boolean) => {
+            if (value) {
+                if (!form.permissions.includes(permissionName)) {
+                    form.permissions.push(permissionName);
+                }
+            } else {
+                const index = form.permissions.indexOf(permissionName);
+                if (index > -1) {
+                    form.permissions.splice(index, 1);
+                }
+            }
+        }
+    });
+};
+
 const selectedLabel = computed(() => {
     if (form.department_id.length === 0) return "Select departments...";
     if (form.department_id.length === 1) {
@@ -114,6 +132,10 @@ const createUser = () => {
         onSuccess: () => form.reset()
     });
 };
+
+const discardChanges = () => {
+    router.visit(user.index().url)
+}
 </script>
 
 <template>
@@ -124,17 +146,17 @@ const createUser = () => {
             <form @submit.prevent="createUser">
                 <section class="flex justify-between items-center mb-4">
                     <div>
-                        <h3>Create New User</h3>
+                        <h3>Creating New User</h3>
                     </div>
                     <div class="space-x-2">
-                        <Button size="sm" type="button" variant="destructive">Discard</Button>
+                        <Button size="sm" type="button" variant="destructive" @click="discardChanges">Discard</Button>
                         <Button size="sm" type="submit" variant="default" :disabled="form.processing">
                             {{ form.processing ? 'Creating...' : 'Create User' }}
                         </Button>
                     </div>
                 </section>
 
-                <section class="grid grid-cols-[3fr_2fr] gap-4">
+                <section class="flex flex-col lg:grid grid-cols-[3fr_2fr] gap-4">
                     <Card>
                         <CardHeader>
                             <CardTitle>User Details</CardTitle>
@@ -146,6 +168,7 @@ const createUser = () => {
                                     <div class="space-y-2">
                                         <Label for="name">Name</Label>
                                         <Input placeholder="e.g Juan Dela Cruz" id="name" v-model="form.name" />
+                                        <InputError :message="form.errors.name" />
                                     </div>
                                     <div class="space-y-2 flex flex-col">
                                         <Label for="department">Departments</Label>
@@ -184,6 +207,7 @@ const createUser = () => {
                                         <Label for="email">Email</Label>
                                         <Input placeholder="example@sample.com" id="email" type="email"
                                             v-model="form.email" />
+                                        <InputError :message="form.errors.email" />
                                     </div>
                                     <div class="space-y-2">
                                         <Label for="email">Role</Label>
@@ -225,7 +249,7 @@ const createUser = () => {
                         <CardContent>
                             <div class="space-y-4">
                                 <div class="flex items-center gap-2 pb-4 border-b">
-                                    <input type="checkbox" id="select-all" v-model="allPermissionsSelected"
+                                    <Checkbox type="checkbox" id="select-all" v-model="allPermissionsSelected"
                                         class="h-4 w-4 rounded border-gray-300" />
                                     <Label for="select-all" class="text-sm font-semibold cursor-pointer">
                                         Select All
@@ -234,8 +258,11 @@ const createUser = () => {
                                 <div class="columns-2 space-y-4">
                                     <div v-for="permission in permissions" :key="permission.name"
                                         class="flex items-center gap-2">
-                                        <input type="checkbox" :id="permission.name" :value="permission.name"
-                                            v-model="form.permissions" class="h-4 w-4 rounded border-gray-300" />
+                                        <!-- <input type="checkbox" :id="permission.name" :value="permission.name"
+                                            v-model="form.permissions" class="h-4 w-4 rounded border-gray-300" /> -->
+                                        <Checkbox :id="permission.name"
+                                            v-model="isPermissionChecked(permission.name).value"
+                                            class="h-4 w-4 rounded border-gray-300" />
 
                                         <Label :for="permission.name"
                                             class="text-sm font-normal cursor-pointer capitalize">
@@ -249,7 +276,7 @@ const createUser = () => {
                     </Card>
                 </section>
             </form>
+            <pre>{{ form }}</pre>
         </div>
-        <pre>{{ form }}</pre>
     </AppLayout>
 </template>

@@ -92,15 +92,16 @@ const createTask = () => {
     <Head title="Task" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-4 p-4">
-            <div class="flex justify-end">
+            <div class="flex justify-between gap-4">
+                <div class="relative w-120">
+                    <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input v-model="search" class="pl-10" placeholder="Search..." />
+                </div>
                 <PermissionGuard permission="can create task">
                     <Button @click="createTask" class="cursor-pointer">Creat Task</Button>
                 </PermissionGuard>
             </div>
-            <div class="relative w-120">
-                <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input v-model="search" class="pl-10" placeholder="Search..." />
-            </div>
+
             <div class="flex flex-col gap-4">
                 <TaskCard :tasks="props.tasks.data" />
             </div>

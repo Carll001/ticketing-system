@@ -30,7 +30,7 @@ class StoreTaskRequest extends FormRequest
             'description' => 'sometimes|nullable',
             'assigned_to' => 'sometimes|nullable|uuid|exists:departments,id',
             'due_date' => 'nullable|date',
-    
+            'order' => 'nullable|in:random,sequential'
         ];
     }
 

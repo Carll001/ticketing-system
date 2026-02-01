@@ -5,7 +5,7 @@ import stepLink from '@/routes/step';
 import taskLink from '@/routes/task';
 import { BreadcrumbItem, Step } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import StepDeleteDialog from '@/components/task-step-components/StepDeleteDialog.vue';
 import response from '@/routes/response';
 import stepRoute from '@/routes/step';
@@ -15,11 +15,12 @@ import Comment from '@/components/task-step-components/Comment.vue';
 import Fields from '@/components/task-step-components/Field.vue';
 import { toast } from 'vue-sonner';
 import EmptyData from '@/components/EmptyData.vue';
-import { FileQuestion } from 'lucide-vue-next';
-
+import { Ellipsis, FileQuestion } from 'lucide-vue-next';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 const page = usePage();
 const auth = computed(() => page.props.auth);
-
+const showDeleteDialog = ref(false);
 const props = defineProps<{
   step: { data: Step }
 }>();
@@ -38,7 +39,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     href: stepLink.show({ task: props.step.data.task_id, step: props.step.data.id }).url,
   },
 ];
-
+const deleteStep = () => {
+  router.delete(stepLink.delete({ task: props.step.data.task_id, step: props.step.data.id }).url, {
+    preserveScroll: true,
+  })
+}
 // Initialize form with existing responses
 const form = useForm<{
   step_field_id: string | number;
@@ -90,7 +95,7 @@ const editStep = (task_id: string, step_id: string) => {
 };
 
 const submitResponse = () => {
-  
+
   form.post(response.store().url, {
     preserveScroll: true,
     onSuccess: () => {
@@ -139,7 +144,25 @@ const isCreator = computed(() => {
           <p class="text-muted-foreground">{{ props.step.data.description ?? 'No description' }}</p>
         </div>
 
-        <div class="flex gap-2 flex-col items-end mb-6">
+        <div class="flex gap-2 flex-col items-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" size="icon-sm">
+                <Ellipsis />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <PermissionGuard permission="can edit task">
+                <DropdownMenuItem @click="editStep(props.step.data.task_id, props.step.data.id)">Edit Task
+                </DropdownMenuItem>
+              </PermissionGuard>
+              <PermissionGuard permission="can delete task">
+                <DropdownMenuItem class="text-destructive focus:text-destructive" @click="showDeleteDialog = true">
+                  Delete
+                </DropdownMenuItem>
+              </PermissionGuard>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <!-- Assignment Info -->
           <div class="flex gap-2 items-center">
             <p class="text-muted-foreground text-sm">Assigned to:</p>
@@ -150,16 +173,6 @@ const isCreator = computed(() => {
 
           <!-- Action Buttons -->
           <div class="space-x-2">
-            <PermissionGuard permission="can delete step">
-              <StepDeleteDialog :step="props.step.data" />
-            </PermissionGuard>
-
-            <PermissionGuard permission="can edit step">
-              <Button size="sm" @click="editStep(props.step.data.task_id, props.step.data.id)">
-                Edit
-              </Button>
-            </PermissionGuard>
-
             <Button v-if="canMarkComplete && hasFields" size="sm" @click="markAsCompleted">
               Mark as Completed
             </Button>
@@ -196,6 +209,23 @@ const isCreator = computed(() => {
           </section>
         </div>
       </section>
+      <Dialog v-model:open="showDeleteDialog">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Are you absolutely sure?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone. This will permanently delete your account
+            and remove your data from our servers.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose as-child>
+            <Button variant="ghost">Close</Button>
+          </DialogClose>
+          <Button @click="deleteStep">Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+      </Dialog>
     </div>
 
   </AppLayout>

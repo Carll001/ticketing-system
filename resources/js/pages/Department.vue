@@ -65,11 +65,11 @@ const goToPage = (page: number) => {
 
 watch(search, (value) => {
     router.get(
-        department.index.url(),   
-        { search: value ?? '' },  
+        department.index.url(),
+        { search: value ?? '' },
         {
-            preserveState: true,  
-            replace: true,        
+            preserveState: true,
+            replace: true,
         }
     );
 });
@@ -270,12 +270,9 @@ const breadcrumbs: BreadcrumbItem[] = [
             </Dialog>
 
             <!-- Table -->
-            <div class="overflow-hidden rounded-xl border shadow-sm">
-                <!-- <div class="border-b p-3">
-                    <h2 class="text-md">Department List</h2>
-                </div> -->
-
-                <Table>
+            <!-- Table -->
+            <div class="overflow-hidden rounded-xl border shadow-sm h-126 flex flex-col">
+                <Table class="flex-1">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Department</TableHead>
@@ -306,7 +303,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <div class="flex items-center gap-2">
                                     <span class="font-medium">{{
                                         employeesPerDept.get(dept.id) || 0
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-sm">employees</span>
                                 </div>
                             </TableCell>
@@ -337,13 +334,17 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </TableBody>
                 </Table>
 
-                <!-- Pagination -->
-                <div class="border-t px-6 py-4">
+                <!-- Pagination - will always stick to bottom -->
+                <div class="border-t px-6 py-4 mt-auto">
                     <div class="flex items-center justify-between">
-                        <p class="text-sm">Showing {{ props.departments.from }} to {{ props.departments.to }} of {{ props.departments.total }} departments</p>
+                        <p class="text-sm">Showing {{ props.departments.from }} to {{ props.departments.to }} of {{
+                            props.departments.total }} departments</p>
                         <div class="flex gap-2">
-                            <Button variant="outline" size="sm" :disabled="props.departments.current_page === 1" @click="goToPage(props.departments.current_page - 1)">Previous</Button>
-                            <Button variant="outline" size="sm" :disabled="props.departments.current_page === props.departments.last_page" @click="goToPage(props.departments.current_page + 1)">Next</Button>
+                            <Button variant="outline" size="sm" :disabled="props.departments.current_page === 1"
+                                @click="goToPage(props.departments.current_page - 1)">Previous</Button>
+                            <Button variant="outline" size="sm"
+                                :disabled="props.departments.current_page === props.departments.last_page"
+                                @click="goToPage(props.departments.current_page + 1)">Next</Button>
                         </div>
                     </div>
                 </div>

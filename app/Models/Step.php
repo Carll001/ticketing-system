@@ -15,7 +15,7 @@ class Step extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        "task_id", "title","description","assigned_to", "status", 'has_cost', 'cost'
+        "task_id", "title","description","assigned_to", "status", 'has_cost', 'cost', 'position'
     ];
 
     public function task()

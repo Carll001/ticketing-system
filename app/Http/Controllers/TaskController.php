@@ -57,11 +57,11 @@ class TaskController extends Controller
                     ->orWhereIn('assigned_to', $userDepartmentIds);
             })
             ->when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'ILIKE', "%{$search}%")
-                  ->orWhere('description', 'ILIKE', "%{$search}%");
-            });
-        })
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'ILIKE', "%{$search}%")
+                        ->orWhere('description', 'ILIKE', "%{$search}%");
+                });
+            })
             ->paginate(8);
 
         return Inertia::render('Task/Index', [
@@ -113,35 +113,38 @@ class TaskController extends Controller
     {
         $isCreator = $task->creator_id === Auth::id();
 
-        // Load task relationships with step filtering
         $task->load([
             'creator',
             'assigned',
-            'steps' => function ($query) use ($isCreator) {
-                if (!$isCreator) {
-                    // Non-creators only see unassigned steps OR steps assigned to them
-                    $query->where(function ($q) {
-                        $q->whereNull('assigned_to')
-                            ->orWhere('assigned_to', Auth::id());
-                    });
+            'steps' => function ($query) use ($isCreator, $task) {
+                // if (!$isCreator) {
+                //     $query->where(function ($q) {
+                //         $q->whereNull('assigned_to')
+                //             ->orWhere('assigned_to', Auth::id());
+                //     });
+                // }
+
+                // Order steps by position for sequential tasks
+                if ($task->order === 'sequence') {
+                    $query->orderBy('position', 'asc');
                 }
-                // Creators see all steps (no filter applied)
             },
             'steps.assigned',
-            'steps.fields' => function ($query) {
-                $query->orderByRaw("CASE 
-            WHEN type = 'Checkbox' THEN 1 
-            WHEN type = 'Input' THEN 2 
-            WHEN type = 'Description' THEN 3 
-            ELSE 4 END");
-            },
+            'steps.fields',
             'steps.fields.responses.user'
         ]);
+
+        // Get next available step for current user
+        $nextStep = null;
+        if ($task->order === 'sequence') {
+            $nextStep = $task->getNextAvailableStep(Auth::id());
+        }
 
         $departments = Department::all();
 
         return Inertia::render('Task/Show', [
             'task' => TaskResource::make($task),
+            'nextAvailableStep' => $nextStep?->id,
             'departments' => $departments,
             'presets' => Preset::with(['fields'])->get(),
         ]);

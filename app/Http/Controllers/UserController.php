@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
 use App\Models\Department;
 use App\Models\DepartmentUser;
 use App\Models\User;
 use App\Models\Task;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -18,82 +20,40 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-
     public function index(Request $request)
-{
-    $search = $request->input('search');
-    $user = auth()->user();
+    {
+        $search = $request->input('search');
+        $user = auth()->user();
 
-    // Determine which roles the user is allowed to see
-    $rolesAllowed = match ($user->role) {
-        'superadmin' => ['!=', 'superadmin'],
-        'admin' => ['=', 'staff'],
-        'staff' => abort(403, 'Unauthorized action.'),
-        default => abort(403, 'Unauthorized action.'),
-    };
+        // Determine which roles the user is allowed to see
+        $rolesAllowed = match ($user->role) {
+            'superadmin' => ['!=', 'superadmin'],
+            'admin' => ['=', 'staff'],
+            'staff' => abort(403, 'Unauthorized action.'),
+            default => abort(403, 'Unauthorized action.'),
+        };
 
-    $usersQuery = User::query()
-        ->when($rolesAllowed[0] === '!=', fn($q) => $q->where('role', '!=', $rolesAllowed[1]))
-        ->when($rolesAllowed[0] === '=', fn($q) => $q->where('role', $rolesAllowed[1]))
-        ->when($search, function ($q) use ($search) {
-            $q->where(function ($query) use ($search) {
-                $query->where('name', 'ILIKE', "%{$search}%")
-                      ->orWhere('email', 'ILIKE', "%{$search}%");
-            });
-        })
-        ->with('departments');
+        $usersQuery = User::query()
+            ->when($rolesAllowed[0] === '!=', fn($q) => $q->where('role', '!=', $rolesAllowed[1]))
+            ->when($rolesAllowed[0] === '=', fn($q) => $q->where('role', $rolesAllowed[1]))
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('name', 'ILIKE', "%{$search}%")
+                        ->orWhere('email', 'ILIKE', "%{$search}%");
+                });
+            })
+            ->with('departments');
 
-    $users = $usersQuery->paginate(10);
+        $users = $usersQuery->paginate(10);
 
-    $departments = Department::all();
+        $departments = Department::all();
 
-    return Inertia::render('User/Index', [
-        'users' => $users,
-        'departments' => $departments,
-        'filters' => ['search' => $search],
-    ]);
-}
-
-    // public function index(Request $request)
-    // {
-    //     $search = $request->input('search');
-    //     $user = auth()->user();
-
-    //     // Determine which roles the user is allowed to see
-    //     $rolesAllowed = match ($user->role) {
-    //         'superadmin' => ['!=', 'superadmin'], // can see everyone except superadmins
-    //         'admin' => ['=', 'staff'],            // can see only staff
-    //         'staff' => abort(403, 'Unauthorized action.'),
-    //         default => abort(403, 'Unauthorized action.'),
-    //     };
-
-    //     $usersQuery = User::query()
-    //         ->when($rolesAllowed[0] === '!=', fn($q) => $q->where('role', '!=', $rolesAllowed[1]))
-    //         ->when($rolesAllowed[0] === '=', fn($q) => $q->where('role', $rolesAllowed[1]))
-    //         ->when($search, function ($q) use ($search) {
-    //             $q->where(
-    //                 fn($query) => $query
-    //                     ->where('name', 'like', "%{$search}%")
-    //                     ->orWhere('email', 'like', "%{$search}%")
-    //             );
-    //         })
-    //         ->with('departments');
-
-    //     $users = $usersQuery->paginate(10);
-
-    //     $departments = Department::all();
-
-    //     return Inertia::render('User/Index', [
-    //         'users' => $users,
-    //         'departments' => $departments,
-    //         'filters' => [
-    //             'search' => $search,
-    //         ],
-    //     ]);
-    // }
-
-
-
+        return Inertia::render('User/Index', [
+            'users' => $users,
+            'departments' => $departments,
+            'filters' => ['search' => $search],
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -110,40 +70,32 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
+        $validated = $request->validated();
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min:4', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique(User::class) // No dot concatenation here
-            ],
-            'password' => [
-                'required',
-                'confirmed',
-                Password::defaults() // Use the object directly in the array
-            ],
-            // Validate that department_id is an array and each UUID exists in the departments table
-            'role' => 'nullable|in:superadmin,admin,staff',
-            'department_id' => ['nullable', 'array'],
-            'department_id.*' => ['exists:departments,id'],
-        ]);
+        DB::transaction(function () use ($validated) {
+            // Create user
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => $validated['role'] ?? 'staff', // Set role if provided
+            ]);
 
-        $user = User::create($validated + [
-            'password' => Hash::make($validated['password']),
-        ]);
+            // Sync permissions
+            if (!empty($validated['permissions'])) {
+                $user->syncPermissions($validated['permissions']);
+            }
 
-        if ($request->has('permissions')) {
-            $user->givePermissionTo($request->permissions);
-        }
+            // Sync departments
+            if (!empty($validated['department_id'])) {
+                $user->departments()->sync($validated['department_id']);
+            }
+        });
 
-        $user->departments()->sync($validated['department_id']);
-
-        return redirect()->route('user.index');
+        return redirect()->route('user.index')
+            ->with('success', 'User created successfully');
     }
 
     /**
@@ -176,46 +128,40 @@ class UserController extends Controller
         ]);
     }
 
-
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UserRequest $request, User $user)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'min:4', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($user->id),
-            ],
-            'password' => ['nullable', 'confirmed', Password::defaults()],
-            'department_id' => ['nullable', 'array'],
-            'department_id.*' => ['exists:departments,id'],
-            'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string'],
-        ]);
+        $validated = $request->validated();
 
+        DB::transaction(function () use ($validated, $user) {
+            // Update basic info
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+            ];
 
-        $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ]);
+            // Update role if provided
+            if (!empty($validated['role'])) {
+                $updateData['role'] = $validated['role'];
+            }
 
+            if (!empty($validated['password'])) {
+                $updateData['password'] = Hash::make($validated['password']);
+            }
 
+            $user->update($updateData);
 
-        if (!empty($validated['password'])) {
-            $user->update(['password' => Hash::make($validated['password'])]);
-        }
+            // Sync permissions
+            $user->syncPermissions($validated['permissions'] ?? []);
 
-        $user->syncPermissions($validated['permissions'] ?? []);
+            // Sync departments
+            $user->departments()->sync($validated['department_id'] ?? []);
+        });
 
-        $user->departments()->sync($validated['department_id']);
-
-        // return redirect()->route('user.index');
-        return back();
+        return redirect()->route('user.index')
+            ->with('success', 'User updated successfully');
     }
 
     /**

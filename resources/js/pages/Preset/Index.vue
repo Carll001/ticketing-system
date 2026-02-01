@@ -14,7 +14,9 @@ import {
 } from '@/components/ui/table'
 import preset from '@/routes/preset';
 import { Preset } from '@/types';
-import {type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
+import { Search } from 'lucide-vue-next';
+import { Input } from '@/components/ui/input';
 
 const props = defineProps<{
     presets: {
@@ -71,12 +73,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-col flex-1 gap-4 p-4">
             <section class="flex justify-between items-center">
+                <div class="relative w-120">
+                    <Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input  class="pl-10" placeholder="Search..." />
+                </div>
                 <div>
                     <Button size="sm" @click="createPreset">Create Preset</Button>
                 </div>
             </section>
-            <section>
-                <Table class="overflow-hidden">
+            <section class="overflow-hidden rounded-xl border shadow-sm h-126 flex flex-col">
+                <Table class="flex-1">
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-[100px]">
@@ -90,8 +96,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <TableBody>
                         <TableRow v-for="preset in presets.data">
                             <TableCell class="font-medium max-w-lg truncate">
-    {{ preset.name }}
-</TableCell>
+                                {{ preset.name }}
+                            </TableCell>
                             <TableCell class="text-right space-x-2">
                                 <Button size="sm" variant="destructive" @click="deletePreset(preset.id)">Delete</Button>
                                 <Button size="sm" variant="secondary" @click="editPreset(preset.id)">Edit</Button>
@@ -111,29 +117,22 @@ const breadcrumbs: BreadcrumbItem[] = [
                             </TableCell>
                         </TableRow>
                     </TableBody> -->
-                    <TableFooter>
-                        <!-- <TableRow>
-                            <TableCell colspan="">
-                                Total
-                            </TableCell>
-                            <TableCell class="text-right">
-                                $2,500.00
-                            </TableCell>
-                        </TableRow> -->
-                    </TableFooter>
                 </Table>
-                 <!-- pagination here -->
-          <div class="border-t px-6 py-4">
+                <!-- pagination here -->
+                <div class="border-t px-6 py-4 mt-auto ">
                     <div class="flex items-center justify-between">
-                        <p class="text-sm">Showing {{ presets.from }} to {{ presets.to }} of {{ presets.total }} presets</p>
+                        <p class="text-sm">Showing {{ presets.from }} to {{ presets.to }} of {{ presets.total }} presets
+                        </p>
                         <div class="flex gap-2">
-                            <Button variant="outline" size="sm" :disabled="presets.current_page === 1" @click="goToPage(presets.current_page - 1)">Previous</Button>
-                            <Button variant="outline" size="sm" :disabled="presets.current_page === presets.last_page" @click="goToPage(presets.current_page + 1)">Next</Button>
+                            <Button variant="outline" size="sm" :disabled="presets.current_page === 1"
+                                @click="goToPage(presets.current_page - 1)">Previous</Button>
+                            <Button variant="outline" size="sm" :disabled="presets.current_page === presets.last_page"
+                                @click="goToPage(presets.current_page + 1)">Next</Button>
                         </div>
                     </div>
                 </div>
             </section>
         </div>
-        
+
     </AppLayout>
 </template>

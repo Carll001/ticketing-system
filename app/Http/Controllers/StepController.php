@@ -11,7 +11,7 @@ use App\Http\Requests\StepRequest;
 use App\Http\Resources\StepResource;
 use App\Models\Preset;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB ;
+use Illuminate\Support\Facades\DB;
 
 class StepController extends Controller
 {
@@ -29,13 +29,12 @@ class StepController extends Controller
     public function create(Task $task)
     {
         $users = User::all();
-    
+
         return Inertia::render('Step/Create', [
             'task' => $task,
             'users' => $users,
             'presets' => Preset::with(['fields'])->get(),
         ]);
-
     }
 
     /**
@@ -44,22 +43,25 @@ class StepController extends Controller
     public function store(StepRequest $request)
     {
         $data = $request->validated();
-        // Wrap in a transaction for safety
-        $step = DB::transaction(function () use ($data) {
-            // 1. Create the Step
 
-            
+        $step = DB::transaction(function () use ($data) {
+            // Get the task to calculate position
+            $task = Task::findOrFail($data['task_id']);
+            $maxPosition = $task->steps()->max('position') ?? -1;
+
+            // Create the Step
             $step = Step::create([
                 'task_id'     => $data['task_id'],
-                'preset_id' => $data['preset_id'] ?? null,
+                'preset_id'   => $data['preset_id'] ?? null,
                 'title'       => $data['title'],
-                'has_cost'   => $data['has_cost'],
-                // 'type'       => $data['type'],
+                'has_cost'    => $data['has_cost'] ?? false,
                 'description' => $data['description'],
-                'assigned_to' => $data['assigned_to'],
+                'assigned_to' => $data['assigned_to'] ?? null,
                 'status'      => $data['assigned_to'] ? 'assigned' : 'pending',
+                'position'    => $maxPosition + 1,
             ]);
-            // 2. Create the Field Definitions (Questions)
+
+            // Create the Field Definitions (Questions)
             if (!empty($data['fields'])) {
                 foreach ($data['fields'] as $field) {
                     $step->fields()->create([
@@ -129,7 +131,7 @@ class StepController extends Controller
         $step->status = $request->status;
         $step->assigned_to = Auth::id();
         $step->save();
-        
+
         return redirect()->route('task.show', $step->task_id);
     }
 
@@ -138,23 +140,23 @@ class StepController extends Controller
      */
     public function update(StepRequest $request, Task $task, Step $step)
     {
-
         $data = $request->validated();
 
         // Logic for setting status based on assignment
         $data['status'] = !empty($data['assigned_to']) ? 'assigned' : 'pending';
 
         DB::transaction(function () use ($data, $step) {
-            // 1. Update the Step basic info
+            // Update the Step basic info
             $step->update([
+                'preset_id'   => $data['preset_id'] ?? null,
                 'title'       => $data['title'],
                 'description' => $data['description'],
-                'assigned_to' => $data['assigned_to'],
+                'assigned_to' => $data['assigned_to'] ?? null,
                 'status'      => $data['status'],
+                'has_cost'    => $data['has_cost'] ?? false,
             ]);
 
-            // 2. Sync Field Definitions (Questions)
-            // Simplest approach: delete old ones and insert new ones
+            // Sync Field Definitions (Questions)
             $step->fields()->delete();
 
             if (!empty($data['fields'])) {
@@ -183,6 +185,4 @@ class StepController extends Controller
 
         return redirect()->route('step.show', ['task' => $step->task_id, 'step' => $step->id]);
     }
-
-    
 }

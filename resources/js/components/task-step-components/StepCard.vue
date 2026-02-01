@@ -23,6 +23,8 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import StepDeleteDialog from './StepDeleteDialog.vue';
 import { Checkbox } from '../ui/checkbox';
+import { useCurrency } from '@/composables/useCurrency';
+const { formatCurrency, formatNumber } = useCurrency();
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
@@ -67,7 +69,40 @@ const rejectStep = (taskId: string, stepId: string) => {
 const props = defineProps<{
     steps?: Step[];
     creator?: User;
+    taskOrder?: 'sequential' | 'random';
 }>();
+
+const isStepLocked = (step: Step) => {
+    console.log('🔒 isStepLocked called for:', step.title);
+    console.log('  - taskOrder:', props.taskOrder);
+    console.log('  - step.position:', step.position);
+    
+    // If task is random order, no steps are locked
+    if (props.taskOrder === 'random') {
+        console.log('  - Result: FALSE (random order)');
+        return false;
+    }
+    
+    // If not sequential/sequence, don't lock (safety fallback)
+    if (props.taskOrder !== 'sequential') {
+        console.log('  - Result: FALSE (not sequential)');
+        return false;
+    }
+
+    // Check if all previous steps (by position, not index) are accepted or completed
+    const previousSteps = props.steps?.filter(s => s.position < step.position);
+    console.log('  - Previous steps:', previousSteps?.map(s => ({
+        title: s.title,
+        position: s.position,
+        status: s.status
+    })));
+    
+    const result = previousSteps?.some(s => !['accepted', 'completed'].includes(s.status)) ?? false;
+    console.log('  - Has incomplete previous steps?', result);
+    console.log('  - Result:', result);
+    
+    return result;
+};
 
 const openStepId = ref<string | null>(null);
 
@@ -85,6 +120,7 @@ const editStep = (task_id: string, step_id: string) => {
 const showStep = (task_id: string, step_id: string) => {
     router.visit(stepLink.show({ task: task_id, step: step_id }).url)
 }
+
 const groupedFields = computed(() => {
     if (!props.steps) return [];
 
@@ -111,6 +147,72 @@ const isCreator = computed(() => {
     return auth.value.user.id === props.creator?.id;
 });
 
+// Helper functions for button visibility
+const canViewStep = (step: Step) => {
+    if (isCreator.value) return true;
+    
+    if (step.assigned?.id === auth.value.user.id && ['accepted', 'in-progress', 'completed'].includes(step.status)) {
+        return true;
+    }
+    
+    if (isStepLocked(step)) return false;
+    
+    if (auth.value.user.role !== 'admin' && !['pending', 'assigned'].includes(step.status)) {
+        return true;
+    }
+    
+    return false;
+};
+
+// Add this debug log
+console.log('StepCard props:', {
+    taskOrder: props.taskOrder,
+    stepsCount: props.steps?.length,
+    steps: props.steps?.map(s => ({ id: s.id, position: s.position, status: s.status }))
+});
+const canTakeStep = (step: Step) => {
+    console.log('=== canTakeStep for:', step.title, '===');
+    console.log('taskOrder:', props.taskOrder);
+    console.log('isCreator:', isCreator.value);
+    console.log('assigned_to:', step.assigned_to);
+    console.log('isStepLocked result:', isStepLocked(step));
+    
+    // Can't take if you're the creator
+    if (isCreator.value) {
+        console.log('❌ Cannot take: You are creator');
+        return false;
+    }
+    
+    // Can't take if already assigned to someone
+    if (step.assigned_to !== null) {
+        console.log('❌ Cannot take: Already assigned');
+        return false;
+    }
+    
+    // Can't take if locked (this already handles sequential order check)
+    if (isStepLocked(step)) {
+        console.log('❌ Cannot take: Step is locked');
+        return false;
+    }
+    
+    console.log('✅ CAN TAKE');
+    return true;
+};
+
+const canRejectStep = (step: Step) => {
+    return !isStepLocked(step) && 
+           !isCreator.value && 
+           step.status === 'assigned' && 
+           step.assigned_to === auth.value.user.id;
+};
+
+const canAcceptStep = (step: Step) => {
+    return !isStepLocked(step) && 
+           !isCreator.value && 
+           step.status === 'assigned' && 
+           step.assigned_to === auth.value.user.id;
+};
+
 // Emit event to parent component to change active tab
 const emit = defineEmits<{
     filterByStatus: [status: string]
@@ -124,7 +226,9 @@ const handleStatusClick = (status: string) => {
 </script>
 <template>
     <Collapsible v-for="step in props.steps" :key="step.id" :open="openStepId === step.id">
-        <Card>
+        
+        <Card :class="{ 'opacity-50': isStepLocked(step) }">
+
             <div class="flex flex-row px-2">
                 <Button variant="ghost" size="icon-sm" class="" @click="toggleStep(step.id)">
                     <ChevronDown v-if="openStepId === step.id" />
@@ -145,20 +249,50 @@ const handleStatusClick = (status: string) => {
                                             {{ step.status }}
                                         </Button>
                                     </div>
+                                    <p class="text-xs" v-if="step.has_cost">
+                                        <span class="font-bold">Cost: </span>{{ formatCurrency(step.cost) }}
+                                    </p>
                                 </CardDescription>
                             </section>
                             <section class="space-x-2">
-                                <Button size="sm" @click="showStep(step.task_id, step.id)"
-                                    v-if="isCreator || (auth.user.role !== 'admin' && step.status !== 'pending' && step.status !== 'assigned') || (step.status === 'accepted' && step.assigned.id === auth.user.id)">View
-                                    Step</Button>
-                                <Button size="sm" v-if="creator?.id !== auth.user.id && step.assigned_to === null"
-                                    @click="takeStep(step.task_id, step.id)">Take</Button>
-                                <Button size="sm"
-                                    v-if="creator?.id !== auth.user.id && step.status === 'assigned' && step.assigned_to === auth.user.id"
-                                    @click="rejectStep(step.task_id, step.id)">Reject</Button>
-                                <Button size="sm"
-                                    v-if="creator?.id !== auth.user.id && step.status === 'assigned' && step.assigned_to === auth.user.id"
-                                    @click="acceptStep(step.task_id, step.id)">Accept</Button>
+                                <Button 
+                                    v-if="canViewStep(step)" 
+                                    size="sm" 
+                                    @click="showStep(step.task_id, step.id)"
+                                >
+                                    View Step
+                                </Button>
+                                
+                                <p 
+                                    v-if="isStepLocked(step)" 
+                                    class="text-muted-foreground text-sm"
+                                >
+                                    Locked
+                                </p>
+                                
+                                <Button 
+                                    v-if="canTakeStep(step)" 
+                                    size="sm"
+                                    @click="takeStep(step.task_id, step.id)"
+                                >
+                                    Take
+                                </Button>
+                                
+                                <Button 
+                                    v-if="canRejectStep(step)" 
+                                    size="sm"
+                                    @click="rejectStep(step.task_id, step.id)"
+                                >
+                                    Reject
+                                </Button>
+                                
+                                <Button 
+                                    v-if="canAcceptStep(step)" 
+                                    size="sm"
+                                    @click="acceptStep(step.task_id, step.id)"
+                                >
+                                    Accept
+                                </Button>
                             </section>
                         </div>
 
@@ -184,7 +318,7 @@ const handleStatusClick = (status: string) => {
                                                 <Input v-if="type === 'Input'"
                                                     :model-value="field.responses?.[0]?.response ?? ''" readonly
                                                     :disabled="auth.user.id === props.creator?.id"
-                                                    :placeholder="`asdEnter ${field.label.toLowerCase()}...`"
+                                                    :placeholder="`Enter ${field.label.toLowerCase()}...`"
                                                     class="h-8 text-xs bg-zinc-900/50" />
 
                                                 <Textarea v-else-if="type === 'Description'"
@@ -230,8 +364,8 @@ const handleStatusClick = (status: string) => {
                             <div v-if="step.has_cost" class="space-y-4 my-4">
                                 <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field
                                     Preview</Label>
-                                <Input disabled placeholder="User will enter cost amount..." :model-value="step.cost"
-                                    class="h-8 text-xs bg-zinc-900/50 " />
+                                <Input disabled placeholder="User will enter cost amount..."
+                                    :model-value="formatCurrency(step.cost)" class="h-8 text-xs bg-zinc-900/50 " />
                             </div>
                             <div v-if="!step.fields?.length" class="text-xs text-zinc-600 italic text-center">
                                 No fields configured for this step.
@@ -242,7 +376,6 @@ const handleStatusClick = (status: string) => {
                 </div>
 
             </div>
-            <!-- <pre>{{ props }}</pre> -->
         </Card>
     </Collapsible>
 </template>

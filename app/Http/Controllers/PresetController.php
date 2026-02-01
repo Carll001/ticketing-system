@@ -17,7 +17,7 @@ class PresetController extends Controller
      */
     public function index()
     {
-        $presets = Preset::paginate(10);
+        $presets = Preset::paginate(8);
         return Inertia::render('Preset/Index', [
             'presets' => [
                 'data' => $presets->items(),

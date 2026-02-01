@@ -57,12 +57,12 @@ class DepartmentController extends Controller
         $search = $request->input('search');
 
         $departments = Department::with('users')
-           ->when($search, function ($query, $search) {
-    $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
-})
+            ->when($search, function ($query, $search) {
+                $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
+            })
 
             ->latest()
-            ->paginate(10);
+            ->paginate(8);
 
         $users = User::with('departments')->get();
 
@@ -104,33 +104,33 @@ class DepartmentController extends Controller
     /**
      * Display the specified resource.
      */
-   public function show(Department $department)
-{
-    // Eager load assigned users
-    $department->load('users');
+    public function show(Department $department)
+    {
+        // Eager load assigned users
+        $department->load('users');
 
-    // Fetch tasks assigned to this department
-    $tasks = Task::where('assigned_to', $department->id)->get();
+        // Fetch tasks assigned to this department
+        $tasks = Task::where('assigned_to', $department->id)->get();
 
-    return inertia('Department/Show', [
-        'department' => [
-            'data' => [
-                'id' => $department->id,
-                'name' => $department->name,
-                'created_at' => $department->created_at,
-                'updated_at' => $department->updated_at,
-                'assigned_users' => $department->users->map(function ($user) {
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                    ];
-                }),
+        return inertia('Department/Show', [
+            'department' => [
+                'data' => [
+                    'id' => $department->id,
+                    'name' => $department->name,
+                    'created_at' => $department->created_at,
+                    'updated_at' => $department->updated_at,
+                    'assigned_users' => $department->users->map(function ($user) {
+                        return [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'email' => $user->email,
+                        ];
+                    }),
+                ],
             ],
-        ],
-        'tasks' => $tasks,
-    ]);
-}
+            'tasks' => $tasks,
+        ]);
+    }
 
 
     /**
