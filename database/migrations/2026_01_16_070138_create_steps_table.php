@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
-            $table->enum('status', ['assigned', 'receive', 'pending', 'accepted', 'in_progress', 'cancelled', 'completed'])->default('pending');
+            $table->enum('status', ['assigned', 'receive', 'pending', 'rejected', 'accepted', 'in_progress', 'cancelled', 'completed'])->default('pending');
             // $table->foreignUuid('proof_id')->nullable()->constrained('task_step_attachments');
             $table->foreignUuid('preset_id')->nullable()->constrained()->nullOnDelete();
             $table->integer('position')->default(0);

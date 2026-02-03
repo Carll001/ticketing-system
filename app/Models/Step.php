@@ -15,7 +15,14 @@ class Step extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        "task_id", "title","description","assigned_to", "status", 'has_cost', 'cost', 'position'
+        "task_id",
+        "title",
+        "description",
+        "assigned_to",
+        "status",
+        'has_cost',
+        'cost',
+        'position'
     ];
 
     public function task()
@@ -28,20 +35,28 @@ class Step extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function fields() {
+    public function fields()
+    {
         return $this->hasMany(StepField::class);
     }
 
     public function proofs()
-{
-    return $this->hasMany(Proof::class)->with('attachments', 'user');
-}
+    {
+        return $this->hasMany(Proof::class)->with('attachments', 'user');
+    }
 
-public function comments()
-{
-    return $this->hasMany(StepComment::class)->latest();
-}
+    public function comments()
+    {
+        return $this->hasMany(StepComment::class)->latest();
+    }
 
+    public function rejections()
+    {
+        return $this->hasMany(RejectedStep::class)->latest();
+    }
 
-
+    public function latestRejection()
+    {
+        return $this->hasOne(RejectedStep::class)->latestOfMany();
+    }
 }

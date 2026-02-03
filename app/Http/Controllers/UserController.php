@@ -29,7 +29,7 @@ class UserController extends Controller
         $rolesAllowed = match ($user->role) {
             'superadmin' => ['!=', 'superadmin'],
             'admin' => ['=', 'staff'],
-            'staff' => abort(403, 'Unauthorized action.'),
+            'staff' => [abort(403, 'Unauthorized action.')],
             default => abort(403, 'Unauthorized action.'),
         };
 

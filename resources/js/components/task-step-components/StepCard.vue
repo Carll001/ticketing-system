@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import stepLink from '@/routes/step';
 import { Step, User } from '@/types';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import {
     Collapsible,
     CollapsibleContent,
@@ -24,10 +24,13 @@ import { Textarea } from '../ui/textarea';
 import StepDeleteDialog from './StepDeleteDialog.vue';
 import { Checkbox } from '../ui/checkbox';
 import { useCurrency } from '@/composables/useCurrency';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 const { formatCurrency, formatNumber } = useCurrency();
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
+
+
 
 const takeStep = (taskId: string, stepId: string) => {
     router.patch(
@@ -56,7 +59,7 @@ const acceptStep = (taskId: string, stepId: string) => {
 const rejectStep = (taskId: string, stepId: string) => {
     router.patch(
         stepLink.updateStatus({ task: taskId, step: stepId }).url,
-        { status: 'reject' },
+        { status: 'rejected' },
         {
             preserveScroll: true,
             onSuccess: () => {
@@ -72,17 +75,40 @@ const props = defineProps<{
     taskOrder?: 'sequential' | 'random';
 }>();
 
+
+const rejectForm = useForm({
+    status: 'rejected',
+    reason: '',
+});
+
+const submitRejectForm = (taskId: string, stepId: string) => {
+    console.log('dddd');
+    rejectForm.patch(
+        stepLink.updateStatus({ task: taskId, step: stepId }).url,
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                rejectForm.reset();
+                // Optional: show success toast
+            },
+            onError: () => {
+                // Optional: show error toast
+            }
+        }
+    );
+};
+
 const isStepLocked = (step: Step) => {
     console.log('🔒 isStepLocked called for:', step.title);
     console.log('  - taskOrder:', props.taskOrder);
     console.log('  - step.position:', step.position);
-    
+
     // If task is random order, no steps are locked
     if (props.taskOrder === 'random') {
         console.log('  - Result: FALSE (random order)');
         return false;
     }
-    
+
     // If not sequential/sequence, don't lock (safety fallback)
     if (props.taskOrder !== 'sequential') {
         console.log('  - Result: FALSE (not sequential)');
@@ -96,11 +122,11 @@ const isStepLocked = (step: Step) => {
         position: s.position,
         status: s.status
     })));
-    
+
     const result = previousSteps?.some(s => !['accepted', 'completed'].includes(s.status)) ?? false;
     console.log('  - Has incomplete previous steps?', result);
     console.log('  - Result:', result);
-    
+
     return result;
 };
 
@@ -150,17 +176,17 @@ const isCreator = computed(() => {
 // Helper functions for button visibility
 const canViewStep = (step: Step) => {
     if (isCreator.value) return true;
-    
+
     if (step.assigned?.id === auth.value.user.id && ['accepted', 'in-progress', 'completed'].includes(step.status)) {
         return true;
     }
-    
+
     if (isStepLocked(step)) return false;
-    
+
     if (auth.value.user.role !== 'admin' && !['pending', 'assigned'].includes(step.status)) {
         return true;
     }
-    
+
     return false;
 };
 
@@ -176,41 +202,41 @@ const canTakeStep = (step: Step) => {
     console.log('isCreator:', isCreator.value);
     console.log('assigned_to:', step.assigned_to);
     console.log('isStepLocked result:', isStepLocked(step));
-    
+
     // Can't take if you're the creator
     if (isCreator.value) {
         console.log('❌ Cannot take: You are creator');
         return false;
     }
-    
+
     // Can't take if already assigned to someone
     if (step.assigned_to !== null) {
         console.log('❌ Cannot take: Already assigned');
         return false;
     }
-    
+
     // Can't take if locked (this already handles sequential order check)
     if (isStepLocked(step)) {
         console.log('❌ Cannot take: Step is locked');
         return false;
     }
-    
+
     console.log('✅ CAN TAKE');
     return true;
 };
 
 const canRejectStep = (step: Step) => {
-    return !isStepLocked(step) && 
-           !isCreator.value && 
-           step.status === 'assigned' && 
-           step.assigned_to === auth.value.user.id;
+    return !isStepLocked(step) &&
+        !isCreator.value &&
+        step.status === 'assigned' &&
+        step.assigned_to === auth.value.user.id;
 };
 
 const canAcceptStep = (step: Step) => {
-    return !isStepLocked(step) && 
-           !isCreator.value && 
-           step.status === 'assigned' && 
-           step.assigned_to === auth.value.user.id;
+    return !isStepLocked(step) &&
+        !isCreator.value &&
+        step.status === 'assigned' &&
+        step.assigned_to === auth.value.user.id;
 };
 
 // Emit event to parent component to change active tab
@@ -226,7 +252,7 @@ const handleStatusClick = (status: string) => {
 </script>
 <template>
     <Collapsible v-for="step in props.steps" :key="step.id" :open="openStepId === step.id">
-        
+
         <Card :class="{ 'opacity-50': isStepLocked(step) }">
 
             <div class="flex flex-row px-2">
@@ -255,42 +281,60 @@ const handleStatusClick = (status: string) => {
                                 </CardDescription>
                             </section>
                             <section class="space-x-2">
-                                <Button 
-                                    v-if="canViewStep(step)" 
-                                    size="sm" 
-                                    @click="showStep(step.task_id, step.id)"
-                                >
+                                <Button v-if="canViewStep(step)" size="sm" @click="showStep(step.task_id, step.id)">
                                     View Step
                                 </Button>
-                                
-                                <p 
-                                    v-if="isStepLocked(step)" 
-                                    class="text-muted-foreground text-sm"
-                                >
+
+                                <p v-if="isStepLocked(step)" class="text-muted-foreground text-sm">
                                     Locked
                                 </p>
-                                
-                                <Button 
-                                    v-if="canTakeStep(step)" 
-                                    size="sm"
-                                    @click="takeStep(step.task_id, step.id)"
-                                >
+
+                                <Button v-if="canTakeStep(step)" size="sm" @click="takeStep(step.task_id, step.id)">
                                     Take
                                 </Button>
-                                
-                                <Button 
-                                    v-if="canRejectStep(step)" 
-                                    size="sm"
-                                    @click="rejectStep(step.task_id, step.id)"
-                                >
+
+                                <Dialog v-if="canRejectStep(step)">
+                                    <DialogTrigger as-child>
+                                        <Button size="sm" variant="destructive">
+                                            Reject
+                                        </Button>
+                                    </DialogTrigger>
+
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Reject Step</DialogTitle>
+                                            <DialogDescription>
+                                                Please provide a reason for rejecting this step. This will be sent to
+                                                the task creator.
+                                            </DialogDescription>
+                                        </DialogHeader>
+
+                                        <div class="space-y-4 py-4">
+                                            <div class="space-y-2">
+                                                <Label for="reject-message">Reason for rejection</Label>
+                                                <Textarea id="reject-message" v-model="rejectForm.reason"
+                                                    placeholder="Explain why you're rejecting this step..."
+                                                    class="min-h-[100px]" />
+                                            </div>
+                                        </div>
+
+                                        <DialogFooter>
+                                            <DialogClose as-child>
+                                                <Button variant="ghost">Cancel</Button>
+                                            </DialogClose>
+                                            <Button variant="destructive"
+                                                @click="submitRejectForm(step.task_id, step.id)"
+                                                :disabled="!rejectForm.reason.trim()">
+                                                Reject Step
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                                <!-- <Button v-if="canRejectStep(step)" size="sm" @click="rejectStep(step.task_id, step.id)">
                                     Reject
-                                </Button>
-                                
-                                <Button 
-                                    v-if="canAcceptStep(step)" 
-                                    size="sm"
-                                    @click="acceptStep(step.task_id, step.id)"
-                                >
+                                </Button> -->
+
+                                <Button v-if="canAcceptStep(step)" size="sm" @click="acceptStep(step.task_id, step.id)">
                                     Accept
                                 </Button>
                             </section>
@@ -374,8 +418,8 @@ const handleStatusClick = (status: string) => {
 
                     </CollapsibleContent>
                 </div>
-
             </div>
         </Card>
+        <!-- <pre>{{ rejectForm }}</pre> -->
     </Collapsible>
 </template>

@@ -11,8 +11,9 @@ use App\Http\Controllers\PresetController;
 use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\StepCommentController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\RejectedStepController;
 
 
 
@@ -52,10 +53,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('{task}/step/{step}', [StepController::class, 'show'])->name('step.show');
         Route::get('/{task}/step/{step}/edit', [StepController::class, 'edit'])->name('step.edit');
         Route::patch('/{task}/step/{step}/updateStatus', [StepController::class, 'updateStatus'])->name('step.updateStatus');
+        Route::patch('{task}/step/{step}/reassign', [StepController::class, 'reassign'])->name('step.reassign');
 
         Route::post('/{task}/step', [StepController::class, 'store'])->name('step.store');
         Route::patch('/{task}/step/{step}', [StepController::class, 'update'])->name('step.update');
         Route::delete('/{task}/step/{step}', [StepController::class, 'destroy'])->name('step.delete');
+
+        
     });
 
     Route::prefix('/{task}/step/{step}')->group(function () {
@@ -121,6 +125,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [TransactionController::class, 'store'])->name('transaction.store');
         Route::patch('/{transaction}', [TransactionController::class, 'update'])->name('transaction.update');
         Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('transaction.destroy');
+    });
+
+    // REJECTED STEP
+    Route::prefix('rejected-step')->group(function () {
+        Route::get('/', [RejectedStepController::class, 'index'])->name('rejectedStep.index');
     });
 });
 
