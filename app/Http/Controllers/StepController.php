@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Step;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\Transaction;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Requests\StepRequest;
@@ -12,9 +13,17 @@ use App\Http\Resources\StepResource;
 use App\Models\Preset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Services\TransactionService;
 
 class StepController extends Controller
 {
+    protected TransactionService $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -74,6 +83,9 @@ class StepController extends Controller
             return $step;
         });
 
+        // Log the step creation using TransactionService
+        $this->transactionService->logStepCreated($step);
+
         if ($request->again) {
             return back();
         }
@@ -132,7 +144,32 @@ class StepController extends Controller
         $step->assigned_to = Auth::id();
         $step->save();
 
-        return redirect()->route('task.show', $step->task_id);
+        // Log the status change
+        $user = Auth::user();
+        $roleLabel = $user->role ?? 'user';
+        if ($roleLabel === 'super-admin') {
+            $roleLabel = 'super admin';
+        }
+
+        // Determine action based on status
+        $action = 'updated step status to ' . $request->status;
+        if ($request->status === 'accepted') {
+            $action = 'accepted task';
+        } elseif ($request->status === 'completed') {
+            $action = 'completed task';
+        } elseif ($request->status === 'cancelled') {
+            $action = 'cancelled task';
+        }
+
+        $content = sprintf('%s %s', $roleLabel, $action);
+
+        Transaction::create([
+            'content' => $content,
+            'user_id' => $user->id,
+            'task_id' => $task->id,
+        ]);
+        
+        return back();
     }
 
     /**
@@ -181,6 +218,22 @@ class StepController extends Controller
      */
     public function destroy(Task $task, Step $step)
     {
+        $taskId = $step->task_id;
+        $stepId = $step->id;
+        
+        // Log the step deletion only if super-admin (before deleting)
+        $user = Auth::user();
+        $roleLabel = $user->role ?? 'user';
+        if ($roleLabel === 'super-admin') {
+            $roleLabel = 'super admin';
+            Transaction::create([
+                'content' => sprintf('%s deleted step', $roleLabel),
+                'user_id' => $user->id,
+                'task_id' => $taskId,
+                'step_id' => $stepId,
+            ]);
+        }
+        
         $step->delete();
 
         return redirect()->route('step.show', ['task' => $step->task_id, 'step' => $step->id]);

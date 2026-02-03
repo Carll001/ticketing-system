@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StepRequest;
 use App\Http\Requests\TaskStepRequest;
 use App\Models\Task;
+use App\Models\Transaction;
 use Inertia\Inertia;
 use App\Http\Services\TaskService;
 use App\Http\Requests\StoreTaskRequest;
@@ -180,6 +181,21 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
+        $taskId = $task->id;
+        
+        // Log the task deletion before deleting
+        $user = Auth::user();
+        $roleLabel = $user->role ?? 'user';
+        if ($roleLabel === 'super-admin') {
+            $roleLabel = 'super admin';
+        }
+
+        Transaction::create([
+            'content' => sprintf('%s deleted task "%s"', $roleLabel, $task->title),
+            'user_id' => $user->id,
+            'task_id' => $taskId,
+        ]);
+
         $task->delete();
 
         return redirect()->route('task.index');

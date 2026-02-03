@@ -186,7 +186,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <!-- Right: Create Department -->
                     <Dialog v-model:open="isOpen">
                         <DialogTrigger as-child>
-                            <Button size="sm" class="w-full lg:w-auto">
+                            <Button size="sm" class="w-full lg:w-sm">
                                 Create Department
                             </Button>
                         </DialogTrigger>

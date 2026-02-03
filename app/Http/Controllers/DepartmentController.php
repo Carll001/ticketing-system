@@ -12,6 +12,7 @@ use App\Http\Resources\TaskResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Services\DepartmentService;
+use App\Http\Services\TransactionService;
 use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
@@ -22,10 +23,12 @@ class DepartmentController extends Controller
 {
 
     protected DepartmentService $departmentService;
+    protected TransactionService $transactionService;
 
-    public function __construct(DepartmentService $departmentService)
+    public function __construct(DepartmentService $departmentService, TransactionService $transactionService)
     {
         $this->departmentService = $departmentService;
+        $this->transactionService = $transactionService;
     }
     /**
      * Display a listing of the resource.
@@ -96,7 +99,10 @@ class DepartmentController extends Controller
      */
     public function store(StoreDepartmentRequest $request)
     {
-        $this->departmentService->store($request->validated());
+        $department = $this->departmentService->store($request->validated());
+
+        // Log transaction for department creation
+        $this->transactionService->logDepartmentCreated($department);
 
         return back()->with('success', 'department created successfully!');
     }
@@ -146,7 +152,16 @@ class DepartmentController extends Controller
      */
     public function update(UpdateDepartmentRequest $request, Department $department)
     {
+        $changes = [];
+        if ($department->name !== $request->validated()['name']) {
+            $changes['name'] = $request->validated()['name'];
+        }
+
         $this->departmentService->update($request->validated(), $department);
+
+        // Log transaction for department update
+        $this->transactionService->logDepartmentUpdated($department, $changes);
+
         return back()->with('success', 'Department created successfully!');
     }
 
@@ -155,7 +170,13 @@ class DepartmentController extends Controller
      */
     public function destroy(Department $department)
     {
+        $departmentName = $department->name;
+        $departmentId = $department->id;
+
         $department->delete();
+
+        // Log transaction for department deletion
+        $this->transactionService->logDepartmentDeleted($departmentName, $departmentId);
 
         return back()->with('success', 'Department deleted successfully!');
     }

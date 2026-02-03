@@ -149,9 +149,13 @@ export interface Transaction {
   content: string
   transaction_number: string
 
+  user_id?: string
   user?: User
+  task_id?: string
   task?: Task
+  step_id?: string
   step?: Step
+  department_id?: string
   department?: Department
 
   created_at: string

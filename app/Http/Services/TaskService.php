@@ -19,7 +19,7 @@ class TaskService
 
         // 2. Create the Transaction (The boot logic above handles the ID and TSK number)
         Transaction::create([
-            'content' => 'created task',
+            'content' => sprintf('created task "%s"', $task->title),
             'user_id' => Auth::id(),
             'task_id' => $task->id,
         ]);
@@ -32,8 +32,22 @@ class TaskService
 
     public function update($task, array $data)
     {
-
         $task->update($data);
+
+        // Log the update
+        $user = Auth::user();
+        $roleLabel = $user->role ?? 'user';
+        if ($roleLabel === 'super-admin') {
+            $roleLabel = 'super admin';
+        }
+
+        $content = sprintf('%s updated task "%s"', $roleLabel, $task->title);
+
+        Transaction::create([
+            'content' => $content,
+            'user_id' => $user->id,
+            'task_id' => $task->id,
+        ]);
 
         return $task;
     }

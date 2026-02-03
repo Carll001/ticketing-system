@@ -41,8 +41,8 @@ const props = defineProps<{
                         <Link v-if="transaction.user" :href="user.show({ id: transaction.user.id }).url" class="hover:underline">
                             {{ transaction.user.name }}
                         </Link>
-                        {{ transaction.content }} : 
-                        <Link v-if="transaction.task" :href="task.show({id: transaction.task.id}).url" class="hover:underline">
+                        {{ transaction.content }} :
+                        <Link v-if="transaction.task" :href="`/task/${transaction.task_id}`" class="hover:underline">
                             {{ transaction.task.title }}
                         </Link>
                         <Link v-if="transaction.step" :href="task.show({id: transaction.step.id}).url" class="hover:underline">

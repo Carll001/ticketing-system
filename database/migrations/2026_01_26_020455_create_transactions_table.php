@@ -15,10 +15,10 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('content');
             $table->string('transaction_number')->unique();
-            $table->foreignUuid('user_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignUuid('task_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignUuid('step_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignUuid('department_id')->nullable()->constrained()->onDelete('cascade');
+            $table->uuid('user_id')->nullable();
+            $table->uuid('task_id')->nullable();
+            $table->uuid('step_id')->nullable();
+            $table->uuid('department_id')->nullable();
             $table->timestamps();
         });
     }
@@ -31,3 +31,4 @@ return new class extends Migration
         Schema::dropIfExists('transactions');
     }
 };
+
