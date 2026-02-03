@@ -25,16 +25,26 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+// Idinagdag na imports para sa Combobox
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command';
 import { Textarea } from '@/components/ui/textarea';
 import taskLink from '@/routes/task';
 import { Department } from '@/types';
 import { Form, router, useForm } from '@inertiajs/vue3';
 import type { DateValue } from '@internationalized/date';
 import { getLocalTimeZone } from '@internationalized/date';
-import { ChevronDownIcon } from 'lucide-vue-next';
+import { ChevronDownIcon, Check, ChevronsUpDown } from 'lucide-vue-next';
 import { computed, Ref, ref, watch } from 'vue';
 import InputError from '../InputError.vue';
 import Separator from '../ui/separator/Separator.vue';
+import { cn } from '@/lib/utils'; // Utility para sa conditional classes
 
 const props = defineProps<{
     departments: Department[];
@@ -45,12 +55,20 @@ const hasDepartments = computed(() => (props.departments?.length ?? 0) > 0);
 const form = useForm({
     title: '',
     description: '',
-    assigned_to: null as string | null,
+    assigned_to: null as string | number | null,
     order: '',
     is_billable: false,
     expenses_total: 0,
     type: '',
     due_date: '',
+});
+
+// Logic para sa Combobox state at labels
+const open = ref(false);
+const selectedDepartmentLabel = computed(() => {
+    if (form.assigned_to === null) return 'Anyone';
+    const dept = props.departments.find((d) => d.id === form.assigned_to);
+    return dept ? dept.name : 'Select department...';
 });
 
 const date: Ref<DateValue | undefined> = ref(undefined);
@@ -61,16 +79,17 @@ watch(date, (value) => {
 
 const storeTask = () => {
     form.post(taskLink.store().url);
-    {
-    }
 };
 
 const discardCreate = () => {
     router.visit(taskLink.index().url, {
         preserveState: false,
     });
+
+    
 };
 </script>
+
 <template>
     <div class="space-y-4">
         <Form @submit.prevent="storeTask" v-slot="{ processing }">
@@ -178,34 +197,6 @@ const discardCreate = () => {
                         <CardDescription>additional details</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <!-- <div class="space-y-4">
-                            <Label for="tast-type"
-                                >Task type
-                                <span class="text-lg text-red-500"
-                                    >*</span
-                                ></Label
-                            >
-                            <Select id="task-type" v-model="form.type">
-                                <SelectTrigger class="w-full">
-                                    <SelectValue placeholder="Select a Type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Task types</SelectLabel>
-                                        <SelectItem value="preset">
-                                            Preset
-                                        </SelectItem>
-                                        <SelectItem value="custom">
-                                            Custom
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                            <InputError :message="form.errors.type" />
-                        </div>
-
-                        <Separator class="my-4" /> -->
-
                         <div class="space-y-4">
                             <Label for="tast-type"
                                 >Step order
@@ -236,25 +227,64 @@ const discardCreate = () => {
 
                         <div class="space-y-4">
                             <Label for="assigned_to">Assign to</Label>
-                            <Select id="assigned_to" v-model="form.assigned_to">
-                                <SelectTrigger class="w-full">
-                                    <SelectValue placeholder="Assign to" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectItem :value="null">
-                                            Anyone
-                                        </SelectItem>
-                                        <SelectItem
-                                            v-for="department in props.departments"
-                                            :key="department.id"
-                                            :value="department.id"
-                                        >
-                                            {{ department.name }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+                            
+                            <Popover v-model:open="open">
+                                <PopoverTrigger as-child>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        :aria-expanded="open"
+                                        class="w-full justify-between"
+                                    >
+                                        {{ selectedDepartmentLabel }}
+                                        <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent class="w-full p-0">
+                                    <Command>
+                                        <CommandInput placeholder="Search department..." />
+                                        <CommandEmpty>No department found.</CommandEmpty>
+                                        <CommandList>
+                                            <CommandGroup>
+                                                <CommandItem
+                                                    value="anyone"
+                                                    @select="() => {
+                                                        form.assigned_to = null;
+                                                        open = false;
+                                                    }"
+                                                >
+                                                    <Check
+                                                        :class="cn(
+                                                            'mr-2 h-4 w-4',
+                                                            form.assigned_to === null ? 'opacity-100' : 'opacity-0'
+                                                        )"
+                                                    />
+                                                    Anyone
+                                                </CommandItem>
+
+                                                <CommandItem
+                                                    v-for="department in props.departments"
+                                                    :key="department.id"
+                                                    :value="department.name"
+                                                    @select="() => {
+                                                        form.assigned_to = department.id;
+                                                        open = false;
+                                                    }"
+                                                >
+                                                    <Check
+                                                        :class="cn(
+                                                            'mr-2 h-4 w-4',
+                                                            form.assigned_to === department.id ? 'opacity-100' : 'opacity-0'
+                                                        )"
+                                                    />
+                                                    {{ department.name }}
+                                                </CommandItem>
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                            
                             <InputError :message="form.errors.assigned_to" />
                         </div>
                     </CardContent>
