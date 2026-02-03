@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StepRequest;
 use App\Http\Resources\StepResource;
 use App\Models\Preset;
+use App\Models\RejectedStep;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Services\TransactionService;
@@ -104,10 +105,14 @@ class StepController extends Controller
             'fields.responses.user',
             'proofs',
             'comments.user',
+            'rejections' => function ($query) {
+                $query->with('rejectedBy')->latest(); // Load rejections with user, newest first
+            },
         ]);
 
         return Inertia::render('Step/Show', [
             'step' => StepResource::make($step),
+            'users' => User::all(),
         ]);
     }
 
@@ -137,10 +142,33 @@ class StepController extends Controller
     public function updateStatus(Task $task, Step $step, Request $request)
     {
         $request->validate([
-            'status' => 'required|in:pending,assigned,accepted,cancelled,in-progress,completed',
+            'status' => 'required|in:pending,assigned,rejected,accepted,cancelled,in-progress,completed',
         ]);
 
         $step->status = $request->status;
+
+        if ($request->status === 'rejected') {
+            // Verify the user is assigned to this step
+            if ($step->assigned_to !== Auth::id()) {
+                abort(403, 'You are not assigned to this step');
+            }
+
+            // Create the rejection record
+            RejectedStep::create([
+                'step_id' => $step->id,
+                'rejected_by' => Auth::id(),
+                'reason' => $request->reason,
+            ]);
+
+            // Update the step - back to pending and unassign
+            $step->update([
+                'status' => 'rejected',
+            ]);
+
+            return redirect()->route('task.show', $step->task_id)
+                ->with('success', 'Step rejected successfully');
+        }
+
         $step->assigned_to = Auth::id();
         $step->save();
 
@@ -211,6 +239,39 @@ class StepController extends Controller
         }
 
         return redirect()->route('step.show', ['task' => $step->task_id, 'step' => $step->id]);
+    }
+
+    public function reassign(Request $request, Task $task, Step $step)
+    {
+        $request->validate([
+            'user_id' => 'nullable|exists:users,id', // Changed to nullable
+            'status' => 'sometimes|in:pending,assigned',
+        ]);
+
+        // Verify the current user is the task creator
+        if ($task->creator_id !== Auth::id()) {
+            abort(403, 'Only the task creator can reassign steps');
+        }
+
+        // Verify the step is rejected
+        if ($step->status !== 'rejected') {
+            abort(403, 'Only rejected steps can be reassigned');
+        }
+
+        // If user_id is null, set status to pending (anyone can take)
+        // If user_id is set, set status to assigned
+        $status = $request->user_id ? 'assigned' : 'pending';
+
+        $step->update([
+            'assigned_to' => $request->user_id, // Can be null
+            'status' => $status,
+        ]);
+
+        $message = $request->user_id
+            ? 'Step reassigned successfully'
+            : 'Step is now available to anyone';
+
+        return redirect()->back()->with('success', $message);
     }
 
     /**

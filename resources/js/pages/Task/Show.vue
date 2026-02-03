@@ -6,25 +6,34 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import taskLink from '@/routes/task';
 import { BreadcrumbItem, Task, Step } from '@/types';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { Ellipsis, NotepadText } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import step from '@/routes/step';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import PermissionGuard from '@/components/PermissionGuard.vue';
 import { useCurrency } from '@/composables/useCurrency';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'vue-sonner';
-const showDeleteDialog = ref(false);
+import PermissionGuard from '@/components/PermissionGuard.vue';
+import user from '@/routes/user';
 
+const showDeleteDialog = ref(false);
 const { formatCurrency, formatNumber } = useCurrency();
 
 const props = defineProps<{
     task: { data: Task }
 }>();
 
+const page = usePage();
+const auth = computed(() => page.props.auth);
+
 const activeTab = ref('all')
+
+// Add isCreator computed property
+const isCreator = computed(() => {
+    return auth.value.user.id === props.task.data.creator?.id;
+});
 
 // Helper to safely get steps array
 const getStepsArray = (): Step[] => {
@@ -70,6 +79,7 @@ const deleteTask = () => {
         }
     });
 };
+
 const editTask = () => {
     router.visit(taskLink.edit(props.task.data.id).url)
 }
@@ -128,8 +138,32 @@ const statusTabs = [
     },
 ];
 
-// check if task has steps
+// Check if user can see task actions (edit/delete dropdown)
+// This checks permission OR if user is creator OR if superadmin
+const canSeeTaskActions = computed(() => {
+    const user = auth.value.user;
 
+    // Superadmin can do everything
+    if (user.role === 'superadmin') return true;
+
+    // Creator can manage their own tasks if they have permissions
+    if (isCreator.value) {
+        return user.can?.includes('can edit task') || user.can?.includes('can delete task');
+    }
+
+    return false;
+});
+
+// Check if creator can add steps
+const canAddStep = computed(() => {
+    const user = auth.value.user;
+
+    // Superadmin can do everything
+    if (user.role === 'superadmin') return true;
+
+    // Creator can add steps if they have permission
+    return isCreator.value && user.can?.includes('can create task');
+});
 </script>
 
 <template>
@@ -143,28 +177,43 @@ const statusTabs = [
                     <h3 class="text-3xl truncate">{{ props.task.data.title }}</h3>
                     <p class="text-muted-foreground truncate">{{ props.task.data.description ?? 'No description' }}</p>
                     <p class="text-muted-foreground text-sm">Creator: {{ props.task.data.creator?.name }}</p>
-                    <p class="text-muted-foreground text-sm">total cost: {{ formatCurrency(task.data.total_steps_cost)
-                    }}</p>
+                    <p class="text-muted-foreground text-sm">Total cost: {{ formatCurrency(task.data.total_steps_cost)
+                        }}</p>
                 </section>
-                <section class="text-right">
-                    <DropdownMenu>
+                <section class="text-right space-y-2">
+
+                    <!-- Only show dropdown if user has any task management permissions -->
+                    <DropdownMenu v-if="canSeeTaskActions">
                         <DropdownMenuTrigger as-child>
                             <Button variant="ghost" size="icon-sm">
                                 <Ellipsis />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                            <!-- Edit option - only if creator AND has permission -->
                             <PermissionGuard permission="can edit task">
-                                <DropdownMenuItem @click="editTask">Edit Task</DropdownMenuItem>
+                                <DropdownMenuItem v-if="isCreator" @click="editTask">
+                                    Edit Task
+                                </DropdownMenuItem>
                             </PermissionGuard>
+
+                            <!-- Separator only if both actions are visible -->
+                            <PermissionGuard permission="can edit task">
+                                <PermissionGuard permission="can delete task">
+                                    <DropdownMenuSeparator v-if="isCreator" />
+                                </PermissionGuard>
+                            </PermissionGuard>
+
+                            <!-- Delete option - only if creator AND has permission -->
                             <PermissionGuard permission="can delete task">
-                                <DropdownMenuItem class="text-destructive focus:text-destructive"
+                                <DropdownMenuItem v-if="isCreator" class="text-destructive focus:text-destructive"
                                     @click="showDeleteDialog = true">
-                                    Delete
+                                    Delete Task
                                 </DropdownMenuItem>
                             </PermissionGuard>
                         </DropdownMenuContent>
                     </DropdownMenu>
+
                     <div class="flex gap-2 items-center">
                         <p class="text-muted-foreground text-sm">Assigned to:</p>
                         <Button class="text-xs p-2 h-8" variant="outline">
@@ -174,7 +223,7 @@ const statusTabs = [
                     <div>
                         <p class="text-muted-foreground text-sm gap-2">
                             Due:
-                            {{ props.task.data.due_date ? new Date(props.task.data.due_date).toDateString() : 'Noduedate' }}
+                            {{ props.task.data.due_date ? new Date(props.task.data.due_date).toDateString() : 'No due date' }}
                         </p>
                     </div>
                 </section>
@@ -188,8 +237,11 @@ const statusTabs = [
                         </TabsTrigger>
                     </TabsList>
                     <div class="space-x-2">
+                        <!-- Only show Add Step button if creator AND has permission -->
                         <PermissionGuard permission="can create task">
-                            <Button size="sm" @click="addStep">Add Step</Button>
+                            <Button v-if="isCreator" size="sm" @click="addStep">
+                                Add Step
+                            </Button>
                         </PermissionGuard>
                     </div>
                 </div>
@@ -197,7 +249,7 @@ const statusTabs = [
                 <TabsContent v-for="tab in statusTabs" :key="tab.value" :value="tab.value">
                     <div class="space-y-4">
                         <StepCard :steps="filteredSteps" :creator="props.task.data.creator"
-                            @filter-by-status="handleFilterByStatus" :task-order="props.task.data.order"/>
+                            @filter-by-status="handleFilterByStatus" :task-order="props.task.data.order" />
                     </div>
                     <EmptyData :icon="NotepadText" :title="tab.emptyTitle" :message="tab.emptyMessage"
                         :length="filteredSteps.length === 0" />

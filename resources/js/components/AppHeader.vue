@@ -43,6 +43,7 @@ import department from '@/routes/department';
 import user from '@/routes/user';
 import preset from '@/routes/preset';
 import transaction from '@/routes/transaction';
+import rejectedStep from '@/routes/rejectedStep';
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -91,6 +92,11 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Transactions',
         href: transaction.index(),
+        icon:  Building2,
+    },
+    {
+        title: 'Rejected Steps',
+        href: rejectedStep.index(),
         icon:  Building2,
     },
 ];

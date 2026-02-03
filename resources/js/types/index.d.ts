@@ -61,7 +61,16 @@ export interface Task {
   }; 
 
   total_steps_cost: number;
+  order: 'sequential' | 'random';
+}
 
+export interface StepRejection {
+    id: string;
+    step_id: string;
+    rejected_by: User;
+    reason: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Proof {
@@ -105,6 +114,8 @@ export interface Step {
   // ✅ Add proofs here
   proofs?: Proof[];
   position: number
+
+  rejections?: StepRejection[];
 }
 
 export interface Department {
