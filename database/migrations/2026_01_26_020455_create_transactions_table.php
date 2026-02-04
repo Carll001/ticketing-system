@@ -15,10 +15,10 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('content');
             $table->string('transaction_number')->unique();
-            $table->uuid('user_id')->nullable();
-            $table->uuid('task_id')->nullable();
-            $table->uuid('step_id')->nullable();
-            $table->uuid('department_id')->nullable();
+            // $table->uuid('user_id')->nullable();
+            // $table->uuid('task_id')->nullable();
+            // $table->uuid('step_id')->nullable();
+            // $table->uuid('department_id')->nullable();
             $table->timestamps();
         });
     }

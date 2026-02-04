@@ -19,9 +19,7 @@ class TaskService
 
         // 2. Create the Transaction (The boot logic above handles the ID and TSK number)
         Transaction::create([
-            'content' => sprintf('created task "%s"', $task->title),
-            'user_id' => Auth::id(),
-            'task_id' => $task->id,
+            'content' =>   Auth::user()->name . ' created a task named: ' . $data['title'] ,
         ]);
 
         // 3. Return the TASK object so the controller can redirect correctly
@@ -34,19 +32,9 @@ class TaskService
     {
         $task->update($data);
 
-        // Log the update
-        $user = Auth::user();
-        $roleLabel = $user->role ?? 'user';
-        if ($roleLabel === 'super-admin') {
-            $roleLabel = 'super admin';
-        }
-
-        $content = sprintf('%s updated task "%s"', $roleLabel, $task->title);
 
         Transaction::create([
-            'content' => $content,
-            'user_id' => $user->id,
-            'task_id' => $task->id,
+            'content' => Auth::user()->name . ' updated a task named: ' . $data['title'] ,
         ]);
 
         return $task;

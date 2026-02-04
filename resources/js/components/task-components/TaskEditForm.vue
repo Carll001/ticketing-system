@@ -30,15 +30,16 @@ import { getLocalTimeZone, parseDate } from '@internationalized/date'
 import { ChevronDownIcon } from 'lucide-vue-next'
 import { Calendar } from '@/components/ui/calendar'
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { toast } from 'vue-sonner';
 
 const props = defineProps<{
     departments: Department[],
-    task: {data: Task},
+    task: { data: Task },
 }>()
 
 const form = useForm({
@@ -50,7 +51,7 @@ const form = useForm({
 });
 
 const date = ref(
-    props.task.data.due_date 
+    props.task.data.due_date
         ? parseDate(props.task.data.due_date.split('T')[0])  // only take the date part
         : undefined
 );
@@ -60,14 +61,18 @@ watch(date, (value) => {
 });
 
 const updateTask = () => {
-    form.patch(taskLink.update(props.task.data.id).url);
+    form.patch(taskLink.update(props.task.data.id).url, {
+        onSuccess: () => {
+            toast.success('sakses');
+        }
+    });
 };
 
 const discardEdit = () => {
     router.visit(taskLink.show(props.task.data.id).url, {
         preserveState: false,
     })
-} 
+}
 
 </script>
 <template>
@@ -79,7 +84,7 @@ const discardEdit = () => {
                 </div>
                 <div class="flex items-center gap-2">
                     <Button size="sm" type="button" @click="discardEdit" variant="destructive">Discard</Button>
-                    <Button size="sm" type="submit" >Update</Button>
+                    <Button size="sm" type="submit">Update</Button>
                 </div>
             </section>
 
@@ -93,56 +98,38 @@ const discardEdit = () => {
                         <div class="space-y-4">
                             <section class="flex items-center gap-4">
                                 <div class="w-full space-y-4">
-                                    <Label for="task-title"
-                                        >Task title
-                                        <span class="text-lg text-red-500"
-                                            >*</span
-                                        ></Label
-                                    >
-                                    <Input
-                                        id="task-title"
-                                        v-model="form.title"
-                                        placeholder="task title"
-                                    />
+                                    <Label for="task-title">Task title
+                                        <span class="text-lg text-red-500">*</span></Label>
+                                    <Input id="task-title" v-model="form.title" placeholder="task title" />
                                     <InputError :message="form.errors.title" />
                                 </div>
                                 <div class="flex flex-col gap-3">
                                     <Label for="date" class="px-1">
-                                    Due date
+                                        Due date
                                     </Label>
                                     <Popover v-slot="{ close }">
-                                    <PopoverTrigger as-child>
-                                        <Button
-                                        id="date"
-                                        variant="outline"
-                                        class="w-48 justify-between font-normal"
-                                        >
-                                        {{ date ? date.toDate(getLocalTimeZone()).toLocaleDateString() : "Select date" }}
-                                        <ChevronDownIcon />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent class="w-auto overflow-hidden p-0" align="start">
-                                        <Calendar
-                                        :model-value="date as any"
-                                        layout="month-and-year"
-                                        @update:model-value="(value: any) => {
-                                            if (value) {
-                                            date = value
-                                            close()
-                                            }
-                                        }"
-                                        />
-                                    </PopoverContent>
+                                        <PopoverTrigger as-child>
+                                            <Button id="date" variant="outline"
+                                                class="w-48 justify-between font-normal">
+                                                {{ date ? date.toDate(getLocalTimeZone()).toLocaleDateString() : "Select date" }}
+                                                <ChevronDownIcon />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent class="w-auto overflow-hidden p-0" align="start">
+                                            <Calendar :model-value="date as any" layout="month-and-year"
+                                                @update:model-value="(value: any) => {
+                                                    if (value) {
+                                                        date = value
+                                                        close()
+                                                    }
+                                                }" />
+                                        </PopoverContent>
                                     </Popover>
                                 </div>
                             </section>
                             <section class="space-y-4">
                                 <Label for="task-title">Task description</Label>
-                                <Textarea
-                                    id="task-title"
-                                    v-model="form.description"
-                                    placeholder="task title"
-                                />
+                                <Textarea id="task-title" v-model="form.description" placeholder="task title" />
                                 <InputError :message="form.errors.description" />
                             </section>
                         </div>
@@ -203,11 +190,8 @@ const discardEdit = () => {
                                         </SelectItem>
 
                                         <!-- Departments -->
-                                        <SelectItem
-                                            v-for="department in props.departments"
-                                            :key="department.id"
-                                            :value="department.id"
-                                        >
+                                        <SelectItem v-for="department in props.departments" :key="department.id"
+                                            :value="department.id">
                                             {{ department.name }}
                                         </SelectItem>
                                     </SelectGroup>

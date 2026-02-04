@@ -184,20 +184,14 @@ class TaskController extends Controller
         $taskId = $task->id;
         
         // Log the task deletion before deleting
-        $user = Auth::user();
-        $roleLabel = $user->role ?? 'user';
-        if ($roleLabel === 'super-admin') {
-            $roleLabel = 'super admin';
-        }
+        $user = Auth::user()->name;
 
         Transaction::create([
-            'content' => sprintf('%s deleted task "%s"', $roleLabel, $task->title),
-            'user_id' => $user->id,
-            'task_id' => $taskId,
+            'content' => $user .' deleted a named: '. $task->title,
         ]);
 
         $task->delete();
 
-        return redirect()->route('task.index');
+        return redirect()->route('task.index')->with('success', 'asd');
     }
 }

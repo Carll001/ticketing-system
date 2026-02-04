@@ -173,14 +173,10 @@ class StepController extends Controller
         $step->save();
 
         // Log the status change
-        $user = Auth::user();
-        $roleLabel = $user->role ?? 'user';
-        if ($roleLabel === 'super-admin') {
-            $roleLabel = 'super admin';
-        }
+        $user = Auth::user()->name;
 
         // Determine action based on status
-        $action = 'updated step status to ' . $request->status;
+        $action = $user . 'updated step status to ' . $request->status;
         if ($request->status === 'accepted') {
             $action = 'accepted task';
         } elseif ($request->status === 'completed') {

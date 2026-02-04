@@ -23,21 +23,6 @@ class StepCommentController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        // Log the comment
-        $user = Auth::user();
-        $roleLabel = $user->role ?? 'user';
-        if ($roleLabel === 'super-admin') {
-            $roleLabel = 'super admin';
-        }
-
-        $content = sprintf('%s commented on task', $roleLabel);
-
-        Transaction::create([
-            'content' => $content,
-            'user_id' => $user->id,
-            'task_id' => $task->id,
-        ]);
-
         return back();
     }
 

@@ -45,6 +45,7 @@ import { computed, Ref, ref, watch } from 'vue';
 import InputError from '../InputError.vue';
 import Separator from '../ui/separator/Separator.vue';
 import { cn } from '@/lib/utils'; // Utility para sa conditional classes
+import { toast } from 'vue-sonner';
 
 const props = defineProps<{
     departments: Department[];
@@ -78,7 +79,11 @@ watch(date, (value) => {
 });
 
 const storeTask = () => {
-    form.post(taskLink.store().url);
+    form.post(taskLink.store().url, {
+        onSuccess: () => {
+            toast.success('sakses');
+        }
+    });
 };
 
 const discardCreate = () => {

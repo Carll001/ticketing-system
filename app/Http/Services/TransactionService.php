@@ -12,11 +12,9 @@ class TransactionService
      */
     public function logUserCreated($user)
     {
-        return $this->createTransaction(
-            "User '{$user->name}' ({$user->email}) created",
-            'USER_CREATED',
-            Auth::id()
-        );
+        $content = Auth::user()->name . ' created a user named: ' . $user->name;
+
+        return $this->createTransaction($content);
     }
 
     /**
@@ -25,24 +23,18 @@ class TransactionService
     public function logUserUpdated($user, $changes = [])
     {
         $changeDescription = !empty($changes) ? ' - Changes: ' . implode(', ', array_keys($changes)) : '';
-        
-        return $this->createTransaction(
-            "User '{$user->name}' ({$user->email}) updated{$changeDescription}",
-            'USER_UPDATED',
-            Auth::id()
-        );
+        $content = Auth::user()->name . ' updated a user named: ' . $user->name;
+
+        return $this->createTransaction($content);
     }
 
     /**
      * Log a transaction for user deletion
      */
-    public function logUserDeleted($userName, $userEmail)
+    public function logUserDeleted($userName)
     {
-        return $this->createTransaction(
-            "User '{$userName}' ({$userEmail}) deleted",
-            'USER_DELETED',
-            Auth::id()
-        );
+        $content = Auth::user()->name . ' deleted a user named: ' . $userName;
+        return $this->createTransaction($content);
     }
 
     /**
@@ -50,14 +42,9 @@ class TransactionService
      */
     public function logDepartmentCreated($department)
     {
-        return $this->createTransaction(
-            "Department '{$department->name}' created",
-            'DEPARTMENT_CREATED',
-            Auth::id(),
-            null,
-            null,
-            $department->id
-        );
+
+        $content = Auth::user()->name . ' created a department named: ' . $department->name;
+        return $this->createTransaction($content);
     }
 
     /**
@@ -66,15 +53,9 @@ class TransactionService
     public function logDepartmentUpdated($department, $changes = [])
     {
         $changeDescription = !empty($changes) ? ' - Changes: ' . implode(', ', array_keys($changes)) : '';
-        
-        return $this->createTransaction(
-            "Department '{$department->name}' updated{$changeDescription}",
-            'DEPARTMENT_UPDATED',
-            Auth::id(),
-            null,
-            null,
-            $department->id
-        );
+        $content = Auth::user()->name . 'Step ' . $department->name . ' updated  ' . $changeDescription;
+
+        return $this->createTransaction($content);
     }
 
     /**
@@ -82,14 +63,9 @@ class TransactionService
      */
     public function logDepartmentDeleted($departmentName, $departmentId)
     {
-        return $this->createTransaction(
-            "Department '{$departmentName}' deleted",
-            'DEPARTMENT_DELETED',
-            Auth::id(),
-            null,
-            null,
-            $departmentId
-        );
+        $content = Auth::user()->name . ' deleted a department named ' . $departmentName;
+
+        return $this->createTransaction($content);
     }
 
     /**
@@ -97,13 +73,8 @@ class TransactionService
      */
     public function logStepCreated($step)
     {
-        return $this->createTransaction(
-            "Step '{$step->title}' created",
-            'STEP_CREATED',
-            Auth::id(),
-            $step->task_id,
-            $step->id
-        );
+        $content = Auth::user()->name . ' created a Step named: ' . $step->title;
+        return $this->createTransaction($content);
     }
 
     /**
@@ -112,28 +83,18 @@ class TransactionService
     public function logStepUpdated($step, $changes = [])
     {
         $changeDescription = !empty($changes) ? ' - Changes: ' . implode(', ', array_keys($changes)) : '';
-        
-        return $this->createTransaction(
-            "Step '{$step->title}' updated{$changeDescription}",
-            'STEP_UPDATED',
-            Auth::id(),
-            $step->task_id,
-            $step->id
-        );
+        $content = Auth::user()->name . 'Step ' . $step->title . ' status changed to ' . $changeDescription;
+
+        return $this->createTransaction($content);
     }
 
     /**
      * Log a transaction for step deletion
      */
-    public function logStepDeleted($stepTitle, $taskId, $stepId)
+    public function logStepDeleted($stepTitle)
     {
-        return $this->createTransaction(
-            "Step '{$stepTitle}' deleted",
-            'STEP_DELETED',
-            Auth::id(),
-            $taskId,
-            $stepId
-        );
+        $content = Auth::user()->name . 'Step ' . $stepTitle . ' deleted';
+        return $this->createTransaction($content);
     }
 
     /**
@@ -141,28 +102,18 @@ class TransactionService
      */
     public function logStepStatusChanged($step, $newStatus)
     {
-        $statusLabel = str_replace('-', ' ', ucfirst($newStatus));
-        
-        return $this->createTransaction(
-            "Step '{$step->title}' status changed to {$statusLabel}",
-            'STEP_STATUS_CHANGED',
-            Auth::id(),
-            $step->task_id,
-            $step->id
-        );
+        $content = Auth::user()->name . 'Step ' . $step->title . ' status changed to ' . $newStatus;
+
+        return $this->createTransaction($content);
     }
 
     /**
      * Generic method to create a transaction record
      */
-    private function createTransaction($content, $action, $user_id, $task_id = null, $step_id = null, $department_id = null)
+    private function createTransaction($content)
     {
         return Transaction::create([
             'content' => $content,
-            'user_id' => $user_id,
-            'task_id' => $task_id,
-            'step_id' => $step_id,
-            'department_id' => $department_id,
         ]);
     }
 }

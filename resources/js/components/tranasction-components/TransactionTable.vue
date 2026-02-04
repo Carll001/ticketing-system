@@ -28,6 +28,7 @@ const props = defineProps<{
                     <TableHead>ID</TableHead>
                     <TableHead>Transaction Number</TableHead>
                     <TableHead>Content</TableHead>
+                    <TableHead></TableHead>
                     <!-- <TableHead class="text-right"> Action </TableHead> -->
                 </TableRow>
             </TableHeader>
@@ -37,21 +38,8 @@ const props = defineProps<{
                         {{ index + 1 }}
                     </TableCell>
                     <TableCell>{{ transaction.transaction_number }}</TableCell>
-                    <TableCell>
-                        <Link v-if="transaction.user" :href="user.show({ id: transaction.user.id }).url" class="hover:underline">
-                            {{ transaction.user.name }}
-                        </Link>
-                        {{ transaction.content }} :
-                        <Link v-if="transaction.task" :href="`/task/${transaction.task_id}`" class="hover:underline">
-                            {{ transaction.task.title }}
-                        </Link>
-                        <Link v-if="transaction.step" :href="task.show({id: transaction.step.id}).url" class="hover:underline">
-                            {{ transaction.step.title }}
-                        </Link>
-                        <Link v-if="transaction.department" :href="task.show({id: transaction.department.id}).url" class="hover:underline">
-                            {{ transaction.department.name }}
-                        </Link>
-                    </TableCell>
+                    <TableCell>{{ transaction.content }}</TableCell>
+                    <TableCell class="text-right">{{ new Date(transaction.created_at).toLocaleString() }}</TableCell>
                     <!-- <TableCell class="text-right">
                         <div class="space-x-2">
 
@@ -60,5 +48,6 @@ const props = defineProps<{
                 </TableRow>
             </TableBody>
         </Table>
+        
     </div>
 </template>
