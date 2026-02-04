@@ -74,6 +74,15 @@ const permissions = [
     {
         name: 'can delete task',
     },
+    {
+        name: 'can view user',
+    },
+    {
+        name: 'can view dashboard',
+    },
+    {
+        name: 'can view transaction',
+    },
     // {
     //     name: 'can manage preset',
     // },

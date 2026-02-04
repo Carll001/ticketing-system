@@ -63,16 +63,25 @@ function activeItemStyles(url: NonNullable<InertiaLinkProps['href']>) {
         : '';
 }
 
-const mainNavItems: NavItem[] = [
+// Helper function to check if user has permission
+const hasPermission = (permission: string) => {
+    return auth.value.permissions?.includes(permission) ?? false;
+};
+console.log(auth.value.permissions);
+
+// Define all navigation items with their required permissions
+const allNavItems: (NavItem & { permission?: string })[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+        permission: 'can view dashboard',
     },
     {
         title: 'Users',
         href: user.index(),
         icon: LayoutGrid,
+        permission: 'can view user',
     },
     {
         title: 'Task',
@@ -82,24 +91,37 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Department',
         href: department.index(),
-        icon:  Building2,
+        icon: Building2,
     },
     {
         title: 'Preset',
         href: preset.index(),
-        icon:  Building2,
+        icon: Building2,
     },
     {
         title: 'Transactions',
         href: transaction.index(),
-        icon:  Building2,
+        icon: Building2,
+        permission: 'can view transaction',
     },
     {
         title: 'Rejected Steps',
         href: rejectedStep.index(),
-        icon:  Building2,
+        icon: Building2,
     },
 ];
+
+// Filter navigation items based on user permissions
+const mainNavItems = computed(() => {
+    return allNavItems.filter(item => {
+        // If no permission is required, show the item
+        if (!item.permission) {
+            return true;
+        }
+        // Otherwise, check if user has the required permission
+        return hasPermission(item.permission);
+    });
+});
 
 const rightNavItems: NavItem[] = [
     {
@@ -296,7 +318,7 @@ const rightNavItems: NavItem[] = [
                         <DropdownMenuContent align="end" class="w-56">
                             <UserMenuContent :user="auth.user" />
                         </DropdownMenuContent>
-                    </DropdownMenu>
+                                    </DropdownMenu>
                 </div>
             </div>
         </div>

@@ -44,6 +44,8 @@ class DatabaseSeeder extends Seeder
             'can edit task',
             'can view task',
             'can delete task',
+
+            'can view transaction',
         ];
 
         // Create all permissions

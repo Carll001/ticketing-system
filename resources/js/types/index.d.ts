@@ -4,6 +4,7 @@ import comment from './../routes/step/comment/index';
 
 export interface Auth {
   user: User;
+  permissions: string[];
 }
 
 export interface BreadcrumbItem {
@@ -38,6 +39,7 @@ export interface User {
   role: 'superadmin' | 'admin' | 'staff';
   can: string[];
   [key: string]: unknown;
+  permissions: string[];
 
   departments?: Department[];
 }

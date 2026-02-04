@@ -74,6 +74,15 @@ const permissions = [
     {
         name: 'can delete task',
     },
+    {
+        name: 'can view user',
+    },
+    {
+        name: 'can view dashboard',
+    },
+    {
+        name: 'can view transaction',
+    },
 ];
 
 const toggleDepartment = (id: string) => {
@@ -139,6 +148,7 @@ const discardChanges = () => {
 </script>
 
 <template>
+
     <Head title="Edit User" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-4 p-4">
@@ -167,7 +177,7 @@ const discardChanges = () => {
                                     <div class="space-y-2">
                                         <Label for="name">Name</Label>
                                         <Input id="name" v-model="form.name" />
-                                        <InputError :message="form.errors.name"/>
+                                        <InputError :message="form.errors.name" />
                                     </div>
                                     <div class="space-y-2 flex flex-col">
                                         <Label for="department">Departments</Label>
@@ -206,7 +216,7 @@ const discardChanges = () => {
                                         <Label for="email">Email</Label>
                                         <Input placeholder="example@sample.com" id="email" type="email"
                                             v-model="form.email" />
-                                        <InputError :message="form.errors.email"/>
+                                        <InputError :message="form.errors.email" />
                                     </div>
                                     <div class="space-y-2">
                                         <Label for="role">Role</Label>
