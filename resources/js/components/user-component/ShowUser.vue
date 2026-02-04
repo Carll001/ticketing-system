@@ -119,20 +119,24 @@ const props = defineProps<{
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead class="font-bold">#</TableHead>
                                 <TableHead class="font-bold">Task Title</TableHead>
                                 <TableHead class="font-bold">Steps Title</TableHead>
                                 <TableHead class="font-bold">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow v-for="task in tasks" :key="task.id">
+                            <TableRow v-for="(task, index) in props.tasks" :key="task.id">
+                                <TableCell class="font-medium">{{
+                                    index + 1
+                                }}</TableCell>
                                 <TableCell class="font-medium">{{
                                     task.title
                                 }}</TableCell>
                                 <TableCell>
-                                    <div v-if="task.steps && task.steps.length" class="flex flex-wrap gap-2">
+                                    <div v-if="task.steps && task.steps.data.length" class="flex flex-wrap gap-2">
                                         <RouterLink v-for="step in task.steps" :key="step.id" :to="`/steps/${step.id}`">
-                                            {{ step.title }}
+                                            {{ step.name }}
                                         </RouterLink>
                                     </div>
                                     <span v-else class="text-sm text-muted-foreground">-</span>
@@ -158,6 +162,8 @@ const props = defineProps<{
                 <div v-else class="p-6 text-center text-muted-foreground">
                     <p>No tasks assigned to this user</p>
                 </div>
+
+                <!-- <pre>{{ props }}</pre> -->
             </div>
         </div>
     </div>

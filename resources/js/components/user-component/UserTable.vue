@@ -61,7 +61,7 @@ const editUser = (id: string) => {
         <Table class="flex-1">
             <TableHeader>
                 <TableRow>
-                    <TableHead>ID</TableHead>
+                    <TableHead>#</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>

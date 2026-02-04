@@ -275,6 +275,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <Table class="flex-1">
                     <TableHeader>
                         <TableRow>
+                            <TableHead>#</TableHead>
                             <TableHead>Department</TableHead>
                             <TableHead>Employees</TableHead>
                             <TableHead class="text-end">Actions</TableHead>
@@ -290,7 +291,11 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </TableRow>
 
                         <!-- Otherwise, render all departments -->
-                        <TableRow v-else v-for="dept in props.departments.data" :key="dept.id">
+                        <TableRow v-else v-for="(dept, index) in props.departments.data" :key="dept.id">
+                            <TableCell>
+                                {{ index + 1 }}
+                            </TableCell>
+                            
                             <TableCell>
                                 <div class="flex items-center gap-3 w-lg">
                                     <p class="font-medium truncate">
