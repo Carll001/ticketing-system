@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { Plus, Trash2Icon, Save } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea';
+import InputError from '@/components/InputError.vue';
+import { toast } from 'vue-sonner';
 
 const form = useForm({
     name: '',
@@ -45,7 +47,10 @@ const form = useForm({
 
 const createField = () => {
     form.post(preset.store().url, {
-        onSuccess: () => form.reset()
+        onSuccess: () => {
+            form.reset();
+            toast.success('Preset created successfully!');
+        }
     });
 };
 
@@ -74,7 +79,7 @@ const groupedFields = computed(() => {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Preset',
-        href: '',
+        href: preset.index().url,
     },
     {
         title: 'Create',
@@ -88,13 +93,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head title="Presets" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-col flex-1 gap-4 p-4">
-            <form @submit.prevent="createField">
+            <form @submit.prevent="createField" class="space-y-4">
                 <section class="flex justify-between items-center">
                     <div>
                         <h3>Add Custom Preset</h3>
                     </div>
                     <div class="space-x-2">
-                        <Button size="sm" variant="destructive">Discard</Button>
+                        <Button size="sm" variant="destructive" type="button" @click="router.visit(preset.index().url)">Discard</Button>
                         <Button size="sm" variant="default">Create</Button>
                     </div>
                 </section>
@@ -108,11 +113,12 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <section class="space-y-4">
                                 <div class="space-y-4">
                                     <Label for="name">Present Name</Label>
-                                    <Input id="name" v-model="form.name" />
+                                    <Input id="name" v-model="form.name" placeholder="enter preset name"/>
+                                    <InputError :message="form.errors.name"/>
                                 </div>
                                 <div class="space-y-4">
                                     <Label for="description">Present Description</Label>
-                                    <Input id="description" v-model="form.description" />
+                                    <Input id="description" v-model="form.description" placeholder="enter description"/>
                                 </div>
                                 <div class="space-y-4">
                                     <section class="flex gap-2 items-center justify-between">
@@ -151,7 +157,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                                     <section v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
                                         <Label
-                                            class="text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800/50 pb-1 block">
+                                            class="text-sm uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800/50 pb-1 ">
                                             {{ type }}{{ type === 'Checkbox' ? 'es' : 's' }}
                                         </Label>
 
@@ -162,9 +168,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                 <div class="flex items-center justify-between">
                                                     <div class="flex-1 mr-4">
                                                         <Label
-                                                            class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Field
+                                                            class="text-xs  uppercase font-bold mb-1 block">Field
                                                             Label / Question</Label>
-                                                        <Input v-model="form.fields[form.fields.indexOf(field)].label"
+                                                        <Input  v-model="form.fields[form.fields.indexOf(field)].label"
                                                             :placeholder="`e.g. ${type === 'Checkbox' ? 'Check if confirmed' : 'Enter detail name'}`" />
                                                     </div>
                                                     <Button variant="ghost" size="icon"
@@ -175,8 +181,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                 </div>
 
                                                 <div
-                                                    class="mt-4 pt-4 border-t border-zinc-800/50 opacity-40 grayscale pointer-events-none">
-                                                    <p class="text-[9px] uppercase font-bold text-zinc-600 mb-2">User
+                                                    class="mt-4 pt-4 border-t border-zinc-800/50 opacity-80 grayscale pointer-events-none">
+                                                    <p class="text-xs uppercase font-bold tracking-[2px] mb-2">User
                                                         Response
                                                         Preview</p>
 
@@ -264,9 +270,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </CardContent>
                     </Card>
                 </section>
-                <div>
+                <!-- <div>
                     <pre>{{ form }}</pre>
-                </div>
+                </div> -->
             </form>
         </div>
     </AppLayout>

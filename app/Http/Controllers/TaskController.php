@@ -63,7 +63,7 @@ class TaskController extends Controller
                         ->orWhere('description', 'ILIKE', "%{$search}%");
                 });
             })
-            ->paginate(8);
+            ->paginate(9);
 
         return Inertia::render('Task/Index', [
             'tasks' => [

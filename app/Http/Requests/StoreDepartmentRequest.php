@@ -22,7 +22,7 @@ class StoreDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|min:4|max:255',
+            'name' => 'required|min:4|max:255|unique:departments,name|regex:/^[a-zA-Z\s]+$/u',
         ];
     }
 }

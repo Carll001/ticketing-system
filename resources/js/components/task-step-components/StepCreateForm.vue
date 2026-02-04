@@ -397,7 +397,7 @@ const applyPreset = (presetId: string | null) => {
                 </Card>
             </section>
         </Form>
-        <!-- <pre>{{ props.presets }}</pre> -->
+        <pre>{{ props }}</pre>
         <!-- <pre>{{ form }}</pre> -->
     </div>
 </template>

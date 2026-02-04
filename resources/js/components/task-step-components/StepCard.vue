@@ -281,7 +281,7 @@ const handleStatusClick = (status: string) => {
                                 </CardDescription>
                             </section>
                             <section class="space-x-2">
-                                <Button v-if="canViewStep(step)" size="sm" @click="showStep(step.task_id, step.id)">
+                                <Button v-if="canViewStep(step)" size="sm" @click="showStep(step.task_id, step.id)" variant="outline">
                                     View Step
                                 </Button>
 

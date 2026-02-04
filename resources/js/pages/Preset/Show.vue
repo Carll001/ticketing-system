@@ -43,11 +43,11 @@ const editField = () => {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Preset',
-        href: '',
+        href: preset.index().url,
     },
     {
         title: 'View',
-        href: '',
+        href: preset.index().url,
     }
 ]
 </script>
@@ -60,10 +60,6 @@ const breadcrumbs: BreadcrumbItem[] = [
             <section class="flex justify-between items-center">
                 <div>
                     <h3>View Preset</h3>
-                </div>
-                <div class="space-x-2">
-                    <Button size="sm" variant="destructive">Delete</Button>
-                    <Button size="sm" variant="secondary" @click="editField">Edit</Button>
                 </div>
             </section>
             <section class="grid grid-cols-[2fr_1fr] gap-4">
@@ -201,6 +197,6 @@ const breadcrumbs: BreadcrumbItem[] = [
             </section>
         </div>
 
-        <pre>{{ props.preset }}</pre>
+        <!-- <pre>{{ props.preset }}</pre> -->
     </AppLayout>
 </template>

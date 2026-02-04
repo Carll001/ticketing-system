@@ -23,7 +23,7 @@ class TransactionController extends Controller
             $query->whereRaw('LOWER(content) LIKE ?', ["%{$search}%"])
                   ->orWhereRaw('LOWER(transaction_number) LIKE ?', ["%{$search}%"]);
         })
-        ->paginate(15);
+        ->paginate(10);
 
     return Inertia::render('Transaction/Index', [
         'transactions' => [

@@ -38,7 +38,10 @@ class StepController extends Controller
      */
     public function create(Task $task)
     {
-        $users = User::all();
+        // Fetch only users who belong to the same department as the task
+        $users = User::whereHas('departments', function ($query) use ($task) {
+            $query->where('departments.id', $task->assigned_to); // or $task->department_id
+        })->get();
 
         return Inertia::render('Step/Create', [
             'task' => $task,
@@ -192,7 +195,7 @@ class StepController extends Controller
             'user_id' => $user->id,
             'task_id' => $task->id,
         ]);
-        
+
         return back();
     }
 
@@ -277,7 +280,7 @@ class StepController extends Controller
     {
         $taskId = $step->task_id;
         $stepId = $step->id;
-        
+
         // Log the step deletion only if super-admin (before deleting)
         $user = Auth::user();
         $roleLabel = $user->role ?? 'user';
@@ -290,7 +293,7 @@ class StepController extends Controller
                 'step_id' => $stepId,
             ]);
         }
-        
+
         $step->delete();
 
         return redirect()->route('step.show', ['task' => $step->task_id, 'step' => $step->id]);

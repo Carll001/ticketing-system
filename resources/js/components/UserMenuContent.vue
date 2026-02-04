@@ -12,6 +12,10 @@ import type { User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
 import { LogOut, Settings } from 'lucide-vue-next';
 
+import { index as transactions } from '@/routes/transaction';
+import { index as rejectedSteps } from '@/routes/rejectedStep';
+import PermissionGuard from './PermissionGuard.vue';
+
 interface Props {
     user: User;
 }
@@ -31,6 +35,23 @@ defineProps<Props>();
     </DropdownMenuLabel>
     <DropdownMenuSeparator />
     <DropdownMenuGroup>
+        <PermissionGuard permission="can view transactions">
+            <DropdownMenuItem :as-child="true">
+                <Link class="block w-full cursor-pointer" :href="transactions()" prefetch>
+                    <Settings class="mr-2 h-4 w-4" />
+                    Transactions
+                </Link>
+            </DropdownMenuItem>
+        </PermissionGuard>
+
+        <PermissionGuard permission="can view rejected steps">
+            <DropdownMenuItem :as-child="true">
+                <Link class="block w-full cursor-pointer" :href="rejectedSteps()" prefetch>
+                    <Settings class="mr-2 h-4 w-4" />
+                    Rejected Steps
+                </Link>
+            </DropdownMenuItem>
+        </PermissionGuard>
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
                 <Settings class="mr-2 h-4 w-4" />
@@ -40,13 +61,8 @@ defineProps<Props>();
     </DropdownMenuGroup>
     <DropdownMenuSeparator />
     <DropdownMenuItem :as-child="true">
-        <Link
-            class="block w-full cursor-pointer"
-            :href="logout()"
-            @click="handleLogout"
-            as="button"
-            data-test="logout-button"
-        >
+        <Link class="block w-full cursor-pointer" :href="logout()" @click="handleLogout" as="button"
+            data-test="logout-button">
             <LogOut class="mr-2 h-4 w-4" />
             Log out
         </Link>

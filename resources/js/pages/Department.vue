@@ -200,7 +200,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                             </DialogHeader>
 
                             <Form @submit.prevent="createDepartment" class="space-y-5">
-                                <div class="py-2">
+                                <div class="py-2 space-y-4">
                                     <Label for="dept-name" class="pb-2">
                                         Department Name
                                         <span class="text-red-500">*</span>

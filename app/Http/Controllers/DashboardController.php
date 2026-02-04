@@ -19,7 +19,9 @@ class DashboardController extends Controller
         $totalTasks = Task::count();
 
         return Inertia::render('Dashboard', [
-            'totalUsers' => $totalUsers,
+            'totalUsers'       => User::whereNot('role', 'superadmin')->count(),
+            'staffCount'       => User::where('role', 'staff')->count(),
+            'adminCount'       => User::where('role', 'admin')->count(),
             'totalDepartments' => $totalDepartments,
             'totalTasks' => $totalTasks,
         ]);

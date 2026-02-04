@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea';
 import InputError from '@/components/InputError.vue';
+import preset from '@/routes/preset';
 
 const props = defineProps<{
     preset: Preset
@@ -85,7 +86,7 @@ const groupedFields = computed(() => {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Preset',
-        href: '',
+        href: preset.index().url,
     },
     {
         title: 'Edit',
@@ -275,9 +276,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </CardContent>
                     </Card>
                 </section>
-                <div>
+                <!-- <div>
                     <pre>{{ form }}</pre>
-                </div>
+                </div> -->
             </form>
         </div>
     </AppLayout>

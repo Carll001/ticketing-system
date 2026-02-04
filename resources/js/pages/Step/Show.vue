@@ -243,7 +243,7 @@ const availableUsers = computed(() => {
           <div class="space-x-2">
             <Button v-if="props.step.data.status === 'rejected' && props.step.data.task.creator_id === auth.user.id"
               @click="showReassign = true" size="sm">Reassign</Button>
-            <Button v-if="canMarkComplete && hasFields" size="sm" @click="markAsCompleted">
+            <Button v-if="canMarkComplete && hasFields && props.step.data.status !== 'rejected'" size="sm" @click="markAsCompleted">
               Mark as Completed
             </Button>
 
