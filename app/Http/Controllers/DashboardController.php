@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Department;
 use App\Models\Task;
+use App\Models\Transaction;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -24,6 +25,7 @@ class DashboardController extends Controller
             'adminCount'       => User::where('role', 'admin')->count(),
             'totalDepartments' => $totalDepartments,
             'totalTasks' => $totalTasks,
+            'transactions' => Transaction::latest()->take(10)->get(),
         ]);
     }
 }

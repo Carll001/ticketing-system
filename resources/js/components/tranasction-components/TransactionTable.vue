@@ -15,7 +15,7 @@ import user from '@/routes/user';
 import task from '@/routes/task';
 
 const props = defineProps<{
-    transaction: Transaction[]
+    transactions: Transaction[]
 }>();
 
 
@@ -33,7 +33,7 @@ const props = defineProps<{
                 </TableRow>
             </TableHeader>
             <TableBody>
-                <TableRow v-for="(transaction, index) in props.transaction" :key="transaction.id">
+                <TableRow v-for="(transaction, index) in props.transactions" :key="transaction.id">
                     <TableCell class="font-medium">
                         {{ index + 1 }}
                     </TableCell>

@@ -98,7 +98,7 @@ const createTask = () => {
                     <Input v-model="search" class="pl-10" placeholder="Search..." />
                 </div>
                 <PermissionGuard permission="can create task">
-                    <Button @click="createTask" class="cursor-pointer">Create Task</Button>
+                    <Button @click="createTask" size="sm" class="cursor-pointer">Create Task</Button>
                 </PermissionGuard>
             </div>
 

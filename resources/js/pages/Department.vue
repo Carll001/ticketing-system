@@ -25,7 +25,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import department from '@/routes/department';
 import { Department, User, type BreadcrumbItem } from '@/types';
 import { Form, Head, Link, useForm } from '@inertiajs/vue3';
-import { Building, Pencil, Search, Trash2 } from 'lucide-vue-next';
+import { Building, Eye, Pencil, Search, Trash, Trash2 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { router } from '@inertiajs/vue3';
@@ -186,7 +186,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <!-- Right: Create Department -->
                     <Dialog v-model:open="isOpen">
                         <DialogTrigger as-child>
-                            <Button size="sm" class="w-full lg:w-sm">
+                            <Button size="sm">
                                 Create Department
                             </Button>
                         </DialogTrigger>
@@ -317,11 +317,11 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <div class="flex justify-end gap-2">
                                     <Link :href="department.show(dept.id).url">
                                         <Button size="sm" variant="outline" class="gap-1">
-                                            View
+                                          <Eye class="w-3 h-3" />  View
                                         </Button>
                                     </Link>
                                     <PermissionGuard permission="can edit department">
-                                        <Button @click="openEditDialog(dept)" size="sm" variant="outline" class="gap-1">
+                                        <Button @click="openEditDialog(dept)" size="sm" variant="secondary" class="gap-1">
                                             <Pencil class="h-3 w-3" />
                                             Edit
                                         </Button>
@@ -329,7 +329,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                     <PermissionGuard permission="can delete department">
                                         <Button @click="confirmDelete(dept.id)" size="sm" variant="destructive"
                                             class="gap-1">
-                                            <Trash2 class="h-3 w-3" />
+                                            <Trash class="h-3 w-3" />
                                             Delete
                                         </Button>
                                     </PermissionGuard>

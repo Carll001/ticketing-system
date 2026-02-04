@@ -3,7 +3,7 @@ import { router } from '@inertiajs/vue3';
 import { Button } from '../ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { ref } from 'vue';
-import { AlertTriangle } from 'lucide-vue-next';
+import { AlertTriangle, Trash } from 'lucide-vue-next';
 import { User } from '@/types';
 import { toast, Toaster } from 'vue-sonner';
 import user from '@/routes/user';
@@ -28,7 +28,7 @@ const deleteUser = () => {
 <template>
     <Dialog v-model:open="closeDeleteModal">
         <DialogTrigger as-child>
-            <Button size="sm" variant="destructive">Delete</Button>
+            <Button size="sm" variant="destructive"><Trash class="w-4 h-4"/> Delete</Button>
         </DialogTrigger>
         <DialogContent class="max-w-md">
             <DialogHeader>

@@ -15,7 +15,7 @@ import {
 import preset from '@/routes/preset';
 import { Preset } from '@/types';
 import { type BreadcrumbItem } from '@/types';
-import { Search } from 'lucide-vue-next';
+import { Eye, Pencil, Search, Trash } from 'lucide-vue-next';
 import { Input } from '@/components/ui/input';
 
 const props = defineProps<{
@@ -99,9 +99,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 {{ preset.name }}
                             </TableCell>
                             <TableCell class="text-right space-x-2">
-                                <Button size="sm" variant="destructive" @click="deletePreset(preset.id)">Delete</Button>
-                                <Button size="sm" variant="secondary" @click="editPreset(preset.id)">Edit</Button>
-                                <Button size="sm" variant="default" @click="viewPreset(preset.id)">View</Button>
+                                 <Button size="sm" variant="outline" @click="viewPreset(preset.id)"> <Eye class="w-3 h-3" /> View</Button>
+                                <Button size="sm" variant="secondary" @click="editPreset(preset.id)"> <Pencil class="w-3 h-3" /> Edit</Button>
+                                 <Button size="sm" variant="destructive" @click="deletePreset(preset.id)"> <Trash class="w-3 h-3" />Delete</Button>
                             </TableCell>
                         </TableRow>
                     </TableBody>
