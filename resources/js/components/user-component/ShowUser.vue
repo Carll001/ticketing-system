@@ -161,5 +161,5 @@ const props = defineProps<{
             </div>
         </div>
     </div>
-    <pre>{{ props }}</pre>
+    <!-- <pre>{{ props }}</pre> -->
 </template>

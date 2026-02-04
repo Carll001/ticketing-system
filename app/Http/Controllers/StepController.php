@@ -38,10 +38,14 @@ class StepController extends Controller
      */
     public function create(Task $task)
     {
-        // Fetch only users who belong to the same department as the task
-        $users = User::whereHas('departments', function ($query) use ($task) {
-            $query->where('departments.id', $task->assigned_to); // or $task->department_id
-        })->get();
+        if ($task->assigned_to !== null) {
+            // Fetch only users who belong to the same department as the task
+            $users = User::whereHas('departments', function ($query) use ($task) {
+                $query->where('departments.id', $task->assigned_to); // or $task->department_id
+            })->get();
+        } else {
+            $users = User::where('role', 'staff')->get();
+        }
 
         return Inertia::render('Step/Create', [
             'task' => $task,

@@ -136,6 +136,6 @@ const props = defineProps<{
       </div>
     </div>
 
-    <pre>{{ props }}</pre>
+    <!-- <pre>{{ props }}</pre> -->
   </AppLayout>
 </template>
