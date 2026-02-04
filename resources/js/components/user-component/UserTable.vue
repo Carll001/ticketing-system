@@ -11,7 +11,7 @@ import {
 import userLink from '@/routes/user';
 import { Department, User } from '@/types';
 import { router } from '@inertiajs/vue3';
-import { Building } from 'lucide-vue-next';
+import { Building, Eye, Pencil } from 'lucide-vue-next';
 import PermissionGuard from '../PermissionGuard.vue';
 import { Badge } from '../ui/badge';
 import {
@@ -91,15 +91,15 @@ const editUser = (id: string) => {
                     </TableCell>
                     <TableCell class="text-right">
                         <div class="space-x-2">
-                            <PermissionGuard permission="can delete user">
-                                <DeleteUserModal :user="user" />
+                            <PermissionGuard permission="can view user">
+                              <Button size="sm" variant="outline" @click="viewUser(user.id)"> <Eye class="w-4 h-4"/> View</Button>
                             </PermissionGuard>
                             <PermissionGuard permission="can edit user">
                                 <!-- <EditUserForm :user="user" :departments="props.departments" /> -->
-                                <Button @click="editUser(user.id)" size="sm">Edit</Button>
+                                <Button @click="editUser(user.id)" variant="secondary" size="sm"><Pencil class="w-4 h-4"/> Edit</Button>
                             </PermissionGuard>
-                            <PermissionGuard permission="can view user">
-                                <Button size="sm" variant="default" @click="viewUser(user.id)">View</Button>
+                              <PermissionGuard permission="can delete user">
+                                <DeleteUserModal :user="user" />
                             </PermissionGuard>
                         </div>
                     </TableCell>
