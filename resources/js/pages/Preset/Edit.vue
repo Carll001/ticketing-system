@@ -253,7 +253,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectItem value="sequencial">
-                                                    Sequence
+                                                    Sequencial
                                                 </SelectItem>
                                                 <SelectItem value="random">
                                                     Random

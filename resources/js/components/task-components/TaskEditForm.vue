@@ -163,7 +163,7 @@ const discardEdit = () => {
                                 <SelectContent>
                                     <SelectGroup>
                                         <SelectLabel>Task order</SelectLabel>
-                                        <SelectItem value="sequential">Preset</SelectItem>
+                                        <SelectItem value="sequential">Sequencial</SelectItem>
                                         <SelectItem value="custom">Custom</SelectItem>
                                     </SelectGroup>
                                 </SelectContent>

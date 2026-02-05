@@ -217,7 +217,7 @@ const discardCreate = () => {
                                     <SelectGroup>
                                         <SelectLabel>Task order</SelectLabel>
                                         <SelectItem value="sequential">
-                                            Sequence
+                                            Sequential
                                         </SelectItem>
                                         <SelectItem value="random">
                                             Random

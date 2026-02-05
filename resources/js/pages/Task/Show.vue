@@ -55,8 +55,10 @@ const getStepsArray = (): Step[] => {
 };
 
 const filteredSteps = computed(() => {
-    const stepsArray = getStepsArray();
+    let stepsArray = getStepsArray();
 
+
+    // Existing logic for Creator/Superadmin
     if (activeTab.value === 'all') {
         return stepsArray;
     }
@@ -178,7 +180,7 @@ const canAddStep = computed(() => {
                     <p class="text-muted-foreground truncate">{{ props.task.data.description ?? 'No description' }}</p>
                     <p class="text-muted-foreground text-sm">Creator: {{ props.task.data.creator?.name }}</p>
                     <p class="text-muted-foreground text-sm">Total cost: {{ formatCurrency(task.data.total_steps_cost)
-                        }}</p>
+                    }}</p>
                 </section>
                 <section class="text-right space-y-2">
 

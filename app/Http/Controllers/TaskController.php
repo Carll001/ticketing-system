@@ -124,12 +124,9 @@ class TaskController extends Controller
                 //             ->orWhere('assigned_to', Auth::id());
                 //     });
                 // }
-                if ($task->order === 'random') {
-                    $query->where('status' , 'pending');
-                }
 
                 // Order steps by position for sequential tasks
-                if ($task->order === 'sequence') {
+                if ($task->order === 'sequencial') {
                     $query->orderBy('position', 'asc');
                 }
 
@@ -142,7 +139,7 @@ class TaskController extends Controller
 
         // Get next available step for current user
         $nextStep = null;
-        if ($task->order === 'sequence') {
+        if ($task->order === 'sequencial') {
             $nextStep = $task->getNextAvailableStep(Auth::id());
         }
 
@@ -177,7 +174,7 @@ class TaskController extends Controller
 
         $data = $request->validated();
         $this->taskService->update($task, $data);
-    
+
         return redirect()->route('task.show', $task->id);
     }
 

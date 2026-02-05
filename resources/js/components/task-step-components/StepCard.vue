@@ -109,7 +109,7 @@ const isStepLocked = (step: Step) => {
         return false;
     }
 
-    // If not sequential/sequence, don't lock (safety fallback)
+    // If not sequential, don't lock (safety fallback)
     if (props.taskOrder !== 'sequential') {
         console.log('  - Result: FALSE (not sequential)');
         return false;
