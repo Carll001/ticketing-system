@@ -8,7 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Task, User } from '@/types';
+import { Step, Task, User } from '@/types';
 import { Badge } from '../ui/badge';
 import { useInitials } from '@/composables/useInitials';
 import { Separator } from '../ui/separator';
@@ -21,7 +21,7 @@ const { getInitials } = useInitials();
 
 const props = defineProps<{
     user: User;
-    tasks?: Task[];
+    steps?: Step[];
     userPermissions?: string[];
 }>();
 
@@ -115,7 +115,7 @@ const props = defineProps<{
                     <h3 class="text-lg font-semibold">Assigned Steps</h3>
                 </div>
 
-                <div v-if="tasks && tasks.length > 0" class="overflow-x-auto">
+                <div v-if="steps && steps.length > 0" class="overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -126,33 +126,34 @@ const props = defineProps<{
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow v-for="(task, index) in props.tasks" :key="task.id">
+                            <TableRow v-for="(step, index) in props.steps" :key="step.id">
                                 <TableCell class="font-medium">{{
                                     index + 1
                                 }}</TableCell>
                                 <TableCell class="font-medium">{{
-                                    task.title
+                                    step.title
                                 }}</TableCell>
                                 <TableCell>
-                                    <div v-if="task.steps && task.steps.data.length" class="flex flex-wrap gap-2">
-                                        <RouterLink v-for="step in task.steps" :key="step.id" :to="`/steps/${step.id}`">
-                                            {{ step.name }}
+                                    <div v-if="steps && steps.length" class="flex flex-wrap gap-2">
+                                        <RouterLink v-for="step in steps" :key="step.id" :to="`/steps/${step.id}`">
+                                            {{ step.title }}
                                         </RouterLink>
                                     </div>
                                     <span v-else class="text-sm text-muted-foreground">-</span>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-blue-600">
-                                        Assigned
-                                    </Badge>
-                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-yellow-600">
+
+                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-yellow-600" v-if="step.status === 'assigned'">
                                         Pending
                                     </Badge>
-                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-green-600">
+                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-blue-600" v-if="step.status === 'accepted'">
+                                        Accepted
+                                    </Badge>
+                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-green-600" v-if="step.status === 'completed'">
                                         Completed
                                     </Badge>
-                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-red-600">
-                                        Cancelled
+                                    <Badge variant="outline" class="cursor-pointer hover:bg-accent text-red-600" v-if="step.status === 'rejected'">
+                                        Rejected
                                     </Badge>
                                 </TableCell>
                             </TableRow>

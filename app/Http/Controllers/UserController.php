@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Models\Department;
 use App\Models\DepartmentUser;
+use App\Models\Step;
 use App\Models\User;
 use App\Models\Task;
 use Inertia\Inertia;
@@ -106,10 +107,11 @@ class UserController extends Controller
         // Get tasks assigned to departments this user belongs to
         $departmentIds = $user->departments()->pluck('departments.id');
         $tasks = Task::whereIn('assigned_to', $departmentIds)->with('creator', 'steps')->get();
+        $steps = Step::where('assigned_to', $user->id)->get();
 
         return Inertia::render('User/Show', [
             'user' => $user->load('departments'),
-            'tasks' => $tasks,
+            'steps' => $steps,
             'userPermissions' => $user->permissions->pluck('name'),
         ]);
     }

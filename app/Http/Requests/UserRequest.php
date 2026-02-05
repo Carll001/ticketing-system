@@ -23,6 +23,8 @@ class UserRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
+                // 'unique:users,email'
+                
             ],
             'role' => 'nullable|in:superadmin,admin,staff',
             'department_id' => ['nullable', 'array'],

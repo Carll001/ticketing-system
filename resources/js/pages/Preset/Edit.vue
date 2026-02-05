@@ -36,6 +36,8 @@ const props = defineProps<{
 const form = useForm({
     name: props.preset.name,
     description: props.preset.description,
+    order: props.preset.order,
+    
     has_cost: props.preset.has_cost,
     step_cost: null as number | null,
 
@@ -100,7 +102,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head title="Edit Preset" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-col flex-1 gap-4 p-4">
-            <form @submit.prevent="updatePreset">
+            <form @submit.prevent="updatePreset" class="space-y-4">
                 <section class="flex justify-between items-center">
                     <div>
                         <h3>Edit Preset</h3>
@@ -228,7 +230,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost
                                             Field Preview</Label>
                                         <Input disabled placeholder="User will enter cost amount..."
-                                            class="h-8 text-xs bg-zinc-900/50 " />
+                                            class="h-8 text-xs  " />
 
                                     </div>
                                 </div>
@@ -244,13 +246,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <section class="space-y-4">
                                 <div class="space-y-2">
                                     <Label for="order">Order</Label>
-                                    <Select id="order">
+                                    <Select id="order" v-model="form.order">
                                         <SelectTrigger class="w-full">
                                             <SelectValue placeholder="Select a order" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
-                                                <SelectItem value="sequence">
+                                                <SelectItem value="sequencial">
                                                     Sequence
                                                 </SelectItem>
                                                 <SelectItem value="random">
@@ -277,7 +279,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </Card>
                 </section>
                 <!-- <div>
-                    <pre>{{ form }}</pre>
+                    <pre>{{ form.has_cost }}</pre>
                 </div> -->
             </form>
         </div>

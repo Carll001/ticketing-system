@@ -97,7 +97,7 @@ const discardCreate = () => {
 
 <template>
     <div class="space-y-4">
-        <Form @submit.prevent="storeTask" v-slot="{ processing }">
+        <form @submit.prevent="storeTask" >
             <section class="flex justify-between">
                 <div class="flex gap-2">
                     <Heading title="Add Task" />
@@ -110,8 +110,8 @@ const discardCreate = () => {
                         @click="discardCreate"
                         >Discard</Button
                     >
-                    <Button size="sm" type="submit" :disabled="processing">
-                        {{ processing ? 'Creating...' : 'Create' }}
+                    <Button size="sm" type="submit" :disabled="form.processing">
+                        {{ form.processing ? 'Creating...' : 'Create' }}
                     </Button>
                 </div>
             </section>
@@ -125,7 +125,7 @@ const discardCreate = () => {
                     <CardContent>
                         <div class="space-y-4">
                             <section class="flex items-center gap-4">
-                                <div class="w-full space-y-4">
+                                <div class="w-full ">
                                     <Label for="task-title"
                                         >Task title
                                         <span class="text-lg text-red-500"
@@ -141,7 +141,7 @@ const discardCreate = () => {
                                 </div>
                                 <div class="flex flex-col gap-3">
                                     <Label for="date" class="px-1">
-                                        Due date
+                                        Due date <span class="text-muted-foreground text-xs"> (Optional) </span>
                                     </Label>
                                     <Popover v-slot="{ close }">
                                         <PopoverTrigger as-child>
@@ -183,7 +183,7 @@ const discardCreate = () => {
                                 </div>
                             </section>
                             <section class="space-y-4">
-                                <Label for="task-title">Task description</Label>
+                                <Label for="task-title">Task description <span class="text-muted-foreground text-xs"> (Optional) </span></Label>
                                 <Textarea
                                     id="task-title"
                                     v-model="form.description"
@@ -231,7 +231,7 @@ const discardCreate = () => {
                         <Separator class="my-4" />
 
                         <div class="space-y-4">
-                            <Label for="assigned_to">Assign to</Label>
+                            <Label for="assigned_to">Assign department</Label>
                             
                             <Popover v-model:open="open">
                                 <PopoverTrigger as-child>
@@ -295,7 +295,7 @@ const discardCreate = () => {
                     </CardContent>
                 </Card>
             </section>
-        </Form>
+        </form>
 
         <!-- <pre>{{ form }}</pre> -->
     </div>

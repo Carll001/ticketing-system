@@ -153,6 +153,7 @@ export interface Preset {
     name: string
     description: string
     has_cost: boolean
+    order: 'sequencial' | 'order'
 
     fields: Field[]
 }

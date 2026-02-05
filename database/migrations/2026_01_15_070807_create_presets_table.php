@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->boolean('has_cost')->default(false);
+            $table->enum('order', ['sequencial','random'])->default('random');
             $table->timestamps();
         });
     }

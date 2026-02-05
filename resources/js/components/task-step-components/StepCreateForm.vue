@@ -59,7 +59,7 @@ const form = useForm({
     preset_id: null as string | null,
     title: '',
     description: '',
-    type: '',
+    type: 'custom',
     assigned_to: null as string | null,
     status: '',
     has_cost: null as boolean | null,
@@ -146,12 +146,12 @@ const applyPreset = (presetId: string | null) => {
 </script>
 <template>
     <div class="">
-        <Form @submit.prevent="storeStep" class="space-y-2">
+        <form @submit.prevent="storeStep" class="space-y-2">
             <section class="flex justify-between items-start">
                 <Heading title="Add Task Step" />
                 <div class="flex items-center gap-2">
                     <Button size="sm" type="button" variant="destructive" @click="discardCreate">Discard</Button>
-                    <Button size="sm" type="submit">Create</Button>
+                    <Button size="sm" type="submit" :disabled="form.processing">{{ form.processing ? 'Creating...' : 'Create' }}</Button>
                 </div>
             </section>
 
@@ -163,8 +163,8 @@ const applyPreset = (presetId: string | null) => {
                     </CardHeader>
                     <CardContent>
                         <div class="space-y-4">
-                            <section class="flex items-center gap-4">
-                                <div class="w-full space-y-4">
+                            <section class="flex items-start gap-4">
+                                <div class="w-full">
                                     <Label for="step-title">Step title
                                         <span class="text-lg text-red-500">*</span></Label>
                                     <Input id="step-title" v-model="form.title" placeholder="step title" />
@@ -280,7 +280,7 @@ const applyPreset = (presetId: string | null) => {
                     </CardHeader>
                     <CardContent>
                         <div class="space-y-4">
-                            <Label for="task-type">Task type <span class="text-red-500">*</span></Label>
+                            <Label for="task-type">Task type</Label>
                             <Select id="task-type" v-model="form.type">
                                 <SelectTrigger class="w-full">
                                     <SelectValue placeholder="Select a Type" />
@@ -319,7 +319,7 @@ const applyPreset = (presetId: string | null) => {
                                     <Button variant="outline" role="combobox" :class="cn(
                                         'w-full justify-between',
                                         form.assigned_to
-                                            ? 'text-white'
+                                            ? 'text-black dark:text-white'
                                             : 'text-zinc-400',
                                     )
                                         ">
@@ -396,8 +396,8 @@ const applyPreset = (presetId: string | null) => {
                     </CardContent>
                 </Card>
             </section>
-        </Form>
+        </form>
         <!-- <pre>{{ props }}</pre> -->
-        <!-- <pre>{{ form }}</pre> -->
+        <pre>{{ form }}</pre>
     </div>
 </template>

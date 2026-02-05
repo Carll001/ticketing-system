@@ -27,5 +27,5 @@ defineProps<Props>();
         />
     </svg> -->
 
-    <img src="jm.png" alt="" class="w-full h-8 rounded-full " />
+    <img src="/jm.png" alt="" class="w-full h-8 rounded-full " />
 </template>

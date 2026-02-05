@@ -53,7 +53,10 @@ class PresetController extends Controller
                 'name'        => $data['name'],
                 'description' => $data['description'],
                 'has_cost'    => $data['has_cost'] ?? false,
+                'order' => $data['order'],
             ]);
+
+            
 
             // 2. Create the Fields
             if (!empty($data['fields'])) {
@@ -100,6 +103,7 @@ class PresetController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'has_cost' => 'nullable',
             'fields' => 'array',
             'fields.*.id' => 'required', // This is the UUID from the frontend
             'fields.*.type' => 'required|in:Checkbox,Input,Description',
@@ -108,10 +112,7 @@ class PresetController extends Controller
 
         DB::transaction(function () use ($preset, $validated) {
             // 2. Update the parent Preset
-            $preset->update([
-                'name' => $validated['name'],
-                'description' => $validated['description'],
-            ]);
+            $preset->update($validated);
 
             // 3. Handle the Fields (Syncing)
             $incomingFields = collect($validated['fields']);

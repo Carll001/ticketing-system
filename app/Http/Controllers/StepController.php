@@ -148,9 +148,15 @@ class StepController extends Controller
 
     public function updateStatus(Task $task, Step $step, Request $request)
     {
+        // Log the status change
+        $user = Auth::user()->name;
+
         $request->validate([
             'status' => 'required|in:pending,assigned,rejected,accepted,cancelled,in-progress,completed',
         ]);
+
+        $currentStatus = $step->status;
+        $newStatus = $request->status;
 
         $step->status = $request->status;
 
@@ -172,6 +178,10 @@ class StepController extends Controller
                 'status' => 'rejected',
             ]);
 
+            Transaction::create([
+                'content' => $user->name . ' updated ' . $step->title . ' status from ' . $currentStatus . ' to ' . $newStatus,
+            ]);
+
             return redirect()->route('task.show', $step->task_id)
                 ->with('success', 'Step rejected successfully');
         }
@@ -179,25 +189,10 @@ class StepController extends Controller
         $step->assigned_to = Auth::id();
         $step->save();
 
-        // Log the status change
-        $user = Auth::user()->name;
 
-        // Determine action based on status
-        $action = $user . 'updated step status to ' . $request->status;
-        if ($request->status === 'accepted') {
-            $action = 'accepted task';
-        } elseif ($request->status === 'completed') {
-            $action = 'completed task';
-        } elseif ($request->status === 'cancelled') {
-            $action = 'cancelled task';
-        }
-
-        $content = sprintf('%s %s', $roleLabel, $action);
 
         Transaction::create([
-            'content' => $content,
-            'user_id' => $user->id,
-            'task_id' => $task->id,
+            'content' => $user->name . ' updated ' . $step->title . ' status from ' . $currentStatus . ' to ' . $newStatus,
         ]);
 
         return back();

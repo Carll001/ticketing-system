@@ -12,7 +12,7 @@ class Preset extends Model
 
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['name', 'description', 'has_cost', 'user_id'];
+    protected $fillable = ['name', 'description', 'has_cost', 'user_id', 'order'];
 
     public function fields()
     {

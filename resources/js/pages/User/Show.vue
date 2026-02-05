@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { User, Task } from '@/types';
+import { User, Task, Step } from '@/types';
 import ShowUser from '@/components/user-component/ShowUser.vue';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-vue-next';
@@ -10,6 +10,7 @@ import { router } from '@inertiajs/vue3';
 const props = defineProps<{
     user: User;
     tasks?: Task[];
+    steps?: Step[],
     userPermissions: string[];
 }>();
 
@@ -32,7 +33,7 @@ const props = defineProps<{
 
             <!-- User Profile and Tasks -->
             <section>
-                <ShowUser :user="props.user" :tasks="props.tasks" :user-permissions="userPermissions"/>
+                <ShowUser :user="props.user" :steps="props.steps" :user-permissions="userPermissions"/>
             </section>
         </div>
     </AppLayout>

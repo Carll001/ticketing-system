@@ -65,7 +65,7 @@ watch(search, (value) => {
                 </div> -->
             </section>
             <section>
-                <TransactionTable :transaction="props.transactions.data"/>
+                <TransactionTable :transactions="props.transactions.data"/>
                 <div class="border-t px-6 py-4">
                     <div class="flex items-center justify-between">
                         <p class="text-sm">Showing {{ props.transactions.from }} to {{ props.transactions.to }} of {{ props.transactions.total }} transactions</p>

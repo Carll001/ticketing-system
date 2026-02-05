@@ -91,6 +91,7 @@ const form = useForm({
 });
 
 const createDepartment = () => {
+    
     form.post(department.store().url, {
         onSuccess: () => {
             toast.success('Department created successfulluy!');
@@ -199,7 +200,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 </DialogDescription>
                             </DialogHeader>
 
-                            <Form @submit.prevent="createDepartment" class="space-y-5">
+                            <form @submit.prevent="createDepartment" class="space-y-5">
                                 <div class="py-2 space-y-4">
                                     <Label for="dept-name" class="pb-2">
                                         Department Name
@@ -220,7 +221,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         Create Department
                                     </Button>
                                 </DialogFooter>
-                            </Form>
+                            </form>
                         </DialogContent>
                     </Dialog>
                 </PermissionGuard>
@@ -236,6 +237,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                         <form @submit.prevent="updateDepartment" class="space-y-5">
                             <Input v-model="editForm.name" placeholder="Department Name" />
+                            <InputError :message="editForm.errors.name"/>
                             <DialogFooter class="gap-2 border-t pt-4">
                                 <DialogClose as-child>
                                     <Button variant="outline">Cancel</Button>

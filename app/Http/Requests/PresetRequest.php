@@ -25,6 +25,7 @@ class PresetRequest extends FormRequest
             'name'       => 'required|string|min:4|max:255',
             'description' => 'nullable|string',
             'has_cost'   => 'nullable|boolean',
+            'order' => 'in:sequencial,random',
             
             // Add validation for dynamic fields
             'fields'      => 'array',

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import TransactionTable from '@/components/tranasction-components/TransactionTable.vue';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import transaction from '@/routes/transaction';
+import { Head, router } from '@inertiajs/vue3';
 import { Building2, UserCheck, UserCog, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -55,6 +57,7 @@ const quickAccessButtons = [
 </script>
 
 <template>
+
     <Head title="Dashboard" />
 
     <AppLayout>
@@ -71,20 +74,17 @@ const quickAccessButtons = [
                             organization today.
                         </p>
                     </div>
+
                 </div>
             </div>
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <!-- Total Users Card -->
-                <Card
-                    class="p-6 transition-shadow duration-200 hover:shadow-lg"
-                >
+                <Card class="p-6 transition-shadow duration-200 hover:shadow-lg">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p
-                                class="flex items-center gap-2 text-sm font-medium text-muted-foreground"
-                            >
+                            <p class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                                 <Users class="h-4 w-4" />
                                 Total Users
                             </p>
@@ -93,22 +93,16 @@ const quickAccessButtons = [
                             </p>
                         </div>
                         <div class="rounded-full bg-blue-600/10 p-3">
-                            <Users
-                                class="h-6 w-6 rounded-lg text-blue-600 dark:text-blue-400"
-                            />
+                            <Users class="h-6 w-6 rounded-lg text-blue-600 dark:text-blue-400" />
                         </div>
                     </div>
                 </Card>
 
                 <!-- Staff Card -->
-                <Card
-                    class="p-6 transition-shadow duration-200 hover:shadow-lg"
-                >
+                <Card class="p-6 transition-shadow duration-200 hover:shadow-lg">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p
-                                class="flex items-center gap-2 text-sm font-medium text-muted-foreground"
-                            >
+                            <p class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                                 <UserCheck class="h-4 w-4" />
                                 Staff Members
                             </p>
@@ -116,25 +110,17 @@ const quickAccessButtons = [
                                 {{ props.staffCount }}
                             </p>
                         </div>
-                        <div
-                            class="rounded-full bg-emerald-50 p-3 dark:bg-emerald-500/10"
-                        >
-                            <UserCheck
-                                class="h-6 w-6 text-emerald-600 dark:text-emerald-400"
-                            />
+                        <div class="rounded-full bg-emerald-50 p-3 dark:bg-emerald-500/10">
+                            <UserCheck class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                         </div>
                     </div>
                 </Card>
 
                 <!-- Admin Card -->
-                <Card
-                    class="p-6 transition-shadow duration-200 hover:shadow-lg"
-                >
+                <Card class="p-6 transition-shadow duration-200 hover:shadow-lg">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p
-                                class="flex items-center gap-2 text-sm font-medium text-muted-foreground"
-                            >
+                            <p class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                                 <UserCog class="h-4 w-4" />
                                 Administrators
                             </p>
@@ -142,25 +128,17 @@ const quickAccessButtons = [
                                 {{ props.adminCount }}
                             </p>
                         </div>
-                        <div
-                            class="rounded-full bg-purple-50 p-3 dark:bg-purple-500/10"
-                        >
-                            <UserCog
-                                class="h-6 w-6 text-purple-600 dark:text-purple-400"
-                            />
+                        <div class="rounded-full bg-purple-50 p-3 dark:bg-purple-500/10">
+                            <UserCog class="h-6 w-6 text-purple-600 dark:text-purple-400" />
                         </div>
                     </div>
                 </Card>
 
                 <!-- Departments Card -->
-                <Card
-                    class="p-6 transition-shadow duration-200 hover:shadow-lg"
-                >
+                <Card class="p-6 transition-shadow duration-200 hover:shadow-lg">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p
-                                class="flex items-center gap-2 text-sm font-medium text-muted-foreground"
-                            >
+                            <p class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                                 <Building2 class="h-4 w-4" />
                                 Departments
                             </p>
@@ -168,12 +146,8 @@ const quickAccessButtons = [
                                 {{ props.totalDepartments }}
                             </p>
                         </div>
-                        <div
-                            class="rounded-full bg-amber-50 p-3 dark:bg-amber-500/10"
-                        >
-                            <Building2
-                                class="h-6 w-6 text-amber-600 dark:text-amber-400"
-                            />
+                        <div class="rounded-full bg-amber-50 p-3 dark:bg-amber-500/10">
+                            <Building2 class="h-6 w-6 text-amber-600 dark:text-amber-400" />
                         </div>
                     </div>
                 </Card>
@@ -184,7 +158,7 @@ const quickAccessButtons = [
                 <!-- Tasks Card -->
                 <div class="lg:col-span-2">
                     <Card class="h-full p-6">
-                        <div class="mb-6 flex items-center justify-between">
+                        <div class="mb-6 flex items-center justify-between items-start">
                             <div>
                                 <h3 class="text-lg font-semibold">
                                     Tranaction Overview
@@ -193,15 +167,14 @@ const quickAccessButtons = [
                                     Total transactions in the system
                                 </p>
                             </div>
+                            <div class="">
+                                <Button variant="outline" size="sm" @click="router.visit(transaction.index().url)">View</Button>
+                            </div>
                         </div>
                         <div class="lg:col-span-2">
                             <!-- Table wrapper -->
-                            <div
-                                class="flex-1 overflow-x-hidden overflow-y-auto"
-                            >
-                                <TransactionTable
-                                    :transactions="props.transactions"
-                                />
+                            <div class="flex-1 overflow-x-hidden overflow-y-auto">
+                                <TransactionTable :transactions="props.transactions" />
                             </div>
                         </div>
                     </Card>
@@ -214,27 +187,22 @@ const quickAccessButtons = [
                         </CardHeader>
                         <CardContent>
                             <div>
-                              
+
                                 <div class="space-y-3 p-2 pr-0">
-                                    <div
-                                        v-for="stat in userStats.userDistribution"
-                                        :key="stat.role"
-                                        class="flex items-center justify-between"
-                                    >
+                                    <div v-for="stat in userStats.userDistribution" :key="stat.role"
+                                        class="flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <div
-                                                :class="[
-                                                    'h-2 w-2 rounded-full',
-                                                    stat.color,
-                                                ]"
-                                            ></div>
+                                            <div :class="[
+                                                'h-2 w-2 rounded-full',
+                                                stat.color,
+                                            ]"></div>
                                             <span class="text-sm">{{
                                                 stat.role
-                                            }}</span>
+                                                }}</span>
                                         </div>
                                         <span class="text-sm font-medium">{{
                                             stat.count
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </div>
                             </div>

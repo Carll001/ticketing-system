@@ -37,6 +37,7 @@ const form = useForm({
     description: '',
     has_cost: null as boolean | null,
     step_cost: null as number | null,
+    order: null as string | null ,
 
     fields: [] as {
         id: string;
@@ -238,13 +239,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <section class="space-y-4">
                                 <div class="space-y-2">
                                     <Label for="order">Order</Label>
-                                    <Select id="order">
+                                    <Select id="order" v-model="form.order">
                                         <SelectTrigger class="w-full">
                                             <SelectValue placeholder="Select a order" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
-                                                <SelectItem value="sequence">
+                                                <SelectItem value="sequencial">
                                                     Sequence
                                                 </SelectItem>
                                                 <SelectItem value="random">
@@ -270,9 +271,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </CardContent>
                     </Card>
                 </section>
-                <!-- <div>
+                <div>
                     <pre>{{ form }}</pre>
-                </div> -->
+                </div>
             </form>
         </div>
     </AppLayout>
