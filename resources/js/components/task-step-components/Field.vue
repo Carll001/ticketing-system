@@ -96,13 +96,13 @@ const getCheckboxValue = (fieldId: string | number): boolean => {
                   <!-- Text Input -->
                   <Input v-if="type === 'Input'" :id="String(field.id)" v-model="form.response[field.id]"
                     :readonly="isReadonly" :disabled="isDisabled" :placeholder="`Enter ${field.label.toLowerCase()}...`"
-                    class="h-8 text-xs bg-zinc-900/50" />
+                    class="h-8 text-xs " />
 
                   <!-- Textarea -->
                   <Textarea v-else-if="type === 'Description'" :id="String(field.id)" v-model="form.response[field.id]"
                     :readonly="isReadonly" :disabled="isDisabled"
                     :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
-                    class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                    class="min-h-[60px] text-xs  resize-none" />
 
                   <!-- Checkbox -->
                   <div v-else-if="type === 'Checkbox'" class="flex items-center">
@@ -125,7 +125,7 @@ const getCheckboxValue = (fieldId: string | number): boolean => {
         <div v-if="step.has_cost" class="space-y-2 pt-4 border-t border-zinc-800">
           <Label>Cost</Label>
           <Input type="number" v-model="form.cost" placeholder="Enter cost amount..."
-            class="h-8 text-xs bg-zinc-900/50" :readonly="isCreator" />
+            class="h-8 text-xs " :readonly="isCreator" />
         </div>
       </div>
 

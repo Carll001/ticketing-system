@@ -364,13 +364,13 @@ const handleStatusClick = (status: string) => {
                                                     :model-value="field.responses?.[0]?.response ?? ''" readonly
                                                     :disabled="auth.user.id === props.creator?.id"
                                                     :placeholder="`Enter ${field.label.toLowerCase()}...`"
-                                                    class="h-8 text-xs bg-zinc-900/50" />
+                                                    class="h-8 text-xs " />
 
                                                 <Textarea v-else-if="type === 'Description'"
                                                     :model-value="field.responses?.[0]?.response ?? ''" readonly
                                                     disabled
                                                     :placeholder="`Provide details for ${field.label.toLowerCase()}...`"
-                                                    class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                                    class="min-h-[60px] text-xs  resize-none" />
 
                                                 <div v-else-if="type === 'Checkbox'" class="flex items-center">
                                                     <Checkbox :id="field.id"
@@ -410,7 +410,7 @@ const handleStatusClick = (status: string) => {
                                 <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field
                                     Preview</Label>
                                 <Input disabled placeholder="User will enter cost amount..."
-                                    :model-value="formatCurrency(step.cost)" class="h-8 text-xs bg-zinc-900/50 " />
+                                    :model-value="formatCurrency(step.cost)" class="h-8 text-xs  " />
                             </div>
                             <div v-if="!step.fields?.length" class="text-xs text-zinc-600 italic text-center">
                                 No fields configured for this step.

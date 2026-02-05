@@ -112,7 +112,7 @@ const submitProof = () => {
             <CardContent>
                 <div class="space-y-4">
                     <Textarea v-model="proofForm.description" placeholder="Enter proof description..."
-                        class="bg-zinc-900/50 resize-none" />
+                        class=" resize-none" />
 
                     <!-- Hidden file input -->
                     <input ref="fileInputRef" type="file" multiple accept="image/*,application/pdf,.doc,.docx,.txt"

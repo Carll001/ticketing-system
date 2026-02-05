@@ -72,11 +72,11 @@ const breadcrumbs: BreadcrumbItem[] = [
                         <section class="space-y-4">
                             <div class="space-y-4">
                                 <Label for="name">Present Name</Label>
-                                <Input id="name" v-model="props.preset.name" readonly class="bg-zinc-900/50" />
+                                <Input id="name" v-model="props.preset.name" readonly class="" />
                             </div>
                             <div class="space-y-4">
                                 <Label for="description">Present Description</Label>
-                                <Input id="description" v-model="props.preset.description" readonly class="bg-zinc-900/50" />
+                                <Input id="description" v-model="props.preset.description" readonly class="" />
                             </div>
                             <div class="space-y-4">
                                 <section class="flex gap-2 items-center justify-between">
@@ -108,7 +108,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                     <Label
                                                         class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Field
                                                         Label / Question</Label>
-                                                    <Input :value="field.label" readonly class="bg-zinc-900/50" />
+                                                    <Input :value="field.label" readonly class="" />
                                                 </div>
                                             </div>
 
@@ -127,11 +127,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                                                         <Input v-if="type === 'Input'" disabled
                                                             :placeholder="`User will enter ${field.label || 'data'}...`"
-                                                            class="h-8 text-xs bg-zinc-900/50" />
+                                                            class="h-8 text-xs " />
 
                                                         <Textarea v-if="type === 'Description'" disabled
                                                             :placeholder="`User will provide ${field.label || 'details'}...`"
-                                                            class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                                            class="min-h-[60px] text-xs  resize-none" />
                                                     </div>
 
                                                     <span
@@ -147,7 +147,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost
                                             Field Preview</Label>
                                         <Input disabled placeholder="User will enter cost amount..."
-                                            class="h-8 text-xs bg-zinc-900/50 " />
+                                            class="h-8 text-xs  " />
 
                                     </div>
                             </div>

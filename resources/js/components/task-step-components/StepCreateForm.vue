@@ -151,7 +151,8 @@ const applyPreset = (presetId: string | null) => {
                 <Heading title="Add Task Step" />
                 <div class="flex items-center gap-2">
                     <Button size="sm" type="button" variant="destructive" @click="discardCreate">Discard</Button>
-                    <Button size="sm" type="submit" :disabled="form.processing">{{ form.processing ? 'Creating...' : 'Create' }}</Button>
+                    <Button size="sm" type="submit" :disabled="form.processing">{{ form.processing ? 'Creating...' :
+                        'Create' }}</Button>
                 </div>
             </section>
 
@@ -214,12 +215,12 @@ const applyPreset = (presetId: string | null) => {
 
                                 <div class="space-y-4">
                                     <section v-for="field in fields" :key="field.id"
-                                        class="relative p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-3 group">
+                                        class="relative p-4 rounded-xl border border-zinc-300  space-y-3 group">
 
                                         <div class="flex items-center justify-between">
                                             <div class="flex-1 mr-4">
                                                 <Label
-                                                    class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Field
+                                                    class="text-xs dark:text-white text-black uppercase font-bold mb-1 block">Field
                                                     Label / Question</Label>
                                                 <Input v-model="form.fields[form.fields.indexOf(field)].label"
                                                     :placeholder="`e.g. ${type === 'Checkbox' ? 'Check if confirmed' : 'Enter detail name'}`" />
@@ -232,8 +233,8 @@ const applyPreset = (presetId: string | null) => {
                                         </div>
 
                                         <div
-                                            class="mt-4 pt-4 border-t border-zinc-800/50 opacity-40 grayscale pointer-events-none">
-                                            <p class="text-[9px] uppercase font-bold text-zinc-600 mb-2">User Response
+                                            class="mt-4 pt-4 border-t border-zinc-800/50 opacity-80 grayscale pointer-events-none">
+                                            <p class="text-xs uppercase font-bold text-black dark:text-white mb-2">User Response
                                                 Preview</p>
 
                                             <div
@@ -244,15 +245,15 @@ const applyPreset = (presetId: string | null) => {
 
                                                     <Input v-if="type === 'Input'" disabled
                                                         :placeholder="`User will enter ${field.label || 'data'}...`"
-                                                        class="h-8 text-xs bg-zinc-900/50" />
+                                                        class="h-8 text-xs " />
 
                                                     <Textarea v-if="type === 'Description'" disabled
                                                         :placeholder="`User will provide ${field.label || 'details'}...`"
-                                                        class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                                        class="min-h-[60px] text-xs  resize-none" />
                                                 </div>
 
                                                 <span
-                                                    :class="['text-sm', type === 'Checkbox' ? 'order-2' : 'order-1 font-medium text-zinc-300']">
+                                                    :class="['text-sm', type === 'Checkbox' ? 'order-2' : 'order-1 font-medium text-black']">
                                                     {{ field.label || 'Field Label' }}
                                                 </span>
                                             </div>
@@ -268,7 +269,7 @@ const applyPreset = (presetId: string | null) => {
                                 <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field
                                     Preview</Label>
                                 <Input disabled placeholder="User will enter cost amount..."
-                                    class="h-8 text-xs bg-zinc-900/50 " />
+                                    class="h-8 text-xs" />
                             </div>
                         </div>
                     </CardContent>
@@ -398,6 +399,6 @@ const applyPreset = (presetId: string | null) => {
             </section>
         </form>
         <!-- <pre>{{ props }}</pre> -->
-        <pre>{{ form }}</pre>
+        <!-- <pre>{{ form }}</pre> -->
     </div>
 </template>

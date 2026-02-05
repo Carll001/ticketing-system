@@ -45,8 +45,8 @@ const submitComment = () => {
                                 <!-- Display actual comments if they exist -->
                                 <template v-if="props.step.comments && props.step.comments.length > 0">
                                     <div v-for="stepComment in [...props.step.comments].reverse()" :key="stepComment.id"
-                                        class="p-4 bg-zinc-900 rounded border border-zinc-800">
-                                        <p class="text-xs text-zinc-300">{{ stepComment.content }}</p>
+                                        class="p-4 bg-zinc-200 dark:bg-zinc-900 rounded border border-zinc-200 dakr:border-zinc-800">
+                                        <p class="text-xs text-black dark:text-white">{{ stepComment.content }}</p>
                                         <p class="text-[10px] text-zinc-500 mt-2">
                                             by <span class="font-medium text-zinc-400">{{ stepComment.user?.name ??
                                                 'Someone'
@@ -68,7 +68,7 @@ const submitComment = () => {
             <CardFooter class="pt-4 w-full" v-if="props.step.status !== 'completed'">
                 <div class="space-y-2 flex flex-col w-full">
                     <Textarea placeholder="Add a comment..." v-model="commentForm.content"
-                        class="bg-zinc-900/50 resize-none" />
+                        class=" resize-none" />
                     <Button size="sm" class="ml-auto" @click="submitComment">Post Comment</Button>
                 </div>
             </CardFooter>
