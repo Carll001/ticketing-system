@@ -112,25 +112,30 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
+        $userId = Auth::id();
         $isCreator = $task->creator_id === Auth::id();
 
         $task->load([
             'creator',
             'assigned',
-            'steps' => function ($query) use ($isCreator, $task) {
-                // if (!$isCreator) {
-                //     $query->where(function ($q) {
-                //         $q->whereNull('assigned_to')
-                //             ->orWhere('assigned_to', Auth::id());
-                //     });
-                // }
+            'steps' => function ($query) use ($task, $isCreator, $userId) {
+                // Logic for non-creators
+                if (!$isCreator) {
+                    $query->where(function ($q) use ($userId) {
+                        // Condition A: Show all steps that are still pending
+                        $q->where('status', 'pending')
+                            // Condition B: OR show steps assigned to me that I've accepted
+                            ->orWhere(function ($sub) use ($userId) {
+                                $sub->where('assigned_to', $userId)
+                                    ->where('status', 'accepted');
+                            });
+                    });
+                }
 
                 // Order steps by position for sequential tasks
                 if ($task->order === 'sequencial') {
                     $query->orderBy('position', 'asc');
                 }
-
-                
             },
             'steps.assigned',
             'steps.fields',

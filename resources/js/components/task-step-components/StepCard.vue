@@ -183,9 +183,10 @@ const canViewStep = (step: Step) => {
 
     if (isStepLocked(step)) return false;
 
-    if (auth.value.user.role !== 'admin' && !['pending', 'assigned'].includes(step.status)) {
+    if (auth.value.user.role !== 'admin' && !['pending', 'assigned'].includes(step.status) && step.assigned.id === auth.value.user.id) {
         return true;
     }
+    
 
     return false;
 };
@@ -419,6 +420,7 @@ const handleStatusClick = (status: string) => {
                     </CollapsibleContent>
                 </div>
             </div>
+
         </Card>
         <!-- <pre>{{ rejectForm }}</pre> -->
     </Collapsible>

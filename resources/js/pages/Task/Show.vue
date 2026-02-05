@@ -105,8 +105,8 @@ const statusTabs = [
     {
         value: 'all',
         label: 'All',
-        emptyTitle: 'No Steps Yet',
-        emptyMessage: 'You haven\'t created any steps yet. Get started by creating first step.'
+        emptyTitle: 'No Steps Available Yet',
+        emptyMessage: 'No steps available yet.'
     },
     {
         value: 'pending',
