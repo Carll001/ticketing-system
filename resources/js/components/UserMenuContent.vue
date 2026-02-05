@@ -10,7 +10,7 @@ import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 import { Link, router } from '@inertiajs/vue3';
-import { LogOut, Settings } from 'lucide-vue-next';
+import { FileText, LogOut, Settings, X } from 'lucide-vue-next';
 
 import { index as transactions } from '@/routes/transaction';
 import { index as rejectedSteps } from '@/routes/rejectedStep';
@@ -38,7 +38,7 @@ defineProps<Props>();
         <PermissionGuard permission="can view transactions">
             <DropdownMenuItem :as-child="true">
                 <Link class="block w-full cursor-pointer" :href="transactions()" prefetch>
-                    <Settings class="mr-2 h-4 w-4" />
+                    <FileText class="mr-2 h-4 w-4" />
                     Transactions
                 </Link>
             </DropdownMenuItem>
@@ -47,7 +47,7 @@ defineProps<Props>();
         <PermissionGuard permission="can view rejected steps">
             <DropdownMenuItem :as-child="true">
                 <Link class="block w-full cursor-pointer" :href="rejectedSteps()" prefetch>
-                    <Settings class="mr-2 h-4 w-4" />
+                    <X class="mr-2 h-4 w-4" />
                     Rejected Steps
                 </Link>
             </DropdownMenuItem>

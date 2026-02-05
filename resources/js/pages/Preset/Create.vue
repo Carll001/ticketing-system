@@ -50,7 +50,7 @@ const createField = () => {
     form.post(preset.store().url, {
         onSuccess: () => {
             form.reset();
-            toast.success('Preset created successfully!');
+            toast.success('Preset Created successfully!');
         }
     });
 };

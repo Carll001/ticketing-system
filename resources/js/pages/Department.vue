@@ -94,7 +94,7 @@ const createDepartment = () => {
     
     form.post(department.store().url, {
         onSuccess: () => {
-            toast.success('Department created successfulluy!');
+            toast.success('Department Created successfulluy!');
             form.reset();
             isOpen.value = false;
         },

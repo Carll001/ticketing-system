@@ -63,7 +63,7 @@ watch(date, (value) => {
 const updateTask = () => {
     form.patch(taskLink.update(props.task.data.id).url, {
         onSuccess: () => {
-            toast.success('sakses');
+            toast.success('Saved Changes');
         }
     });
 };

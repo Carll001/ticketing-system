@@ -97,7 +97,7 @@ const storeStep = () => {
     form.post(stepLink.store({ task: props.task.id }).url, {
         onSuccess: () => {
             form.reset();
-            toast.success('Task step created successfully!');
+            toast.success('Task Step Created successfully!');
         },
     });
 };

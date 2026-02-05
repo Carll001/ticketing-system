@@ -81,7 +81,7 @@ watch(date, (value) => {
 const storeTask = () => {
     form.post(taskLink.store().url, {
         onSuccess: () => {
-            toast.success('sakses');
+            toast.success('Created successfully');
         }
     });
 };

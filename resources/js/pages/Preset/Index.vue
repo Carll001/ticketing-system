@@ -37,6 +37,7 @@ const props = defineProps<{
 }>();
 
 import { ref, watch } from 'vue';
+import { toast } from 'vue-sonner';
 
 const search = ref(props.filters?.search ?? '');
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -106,6 +107,9 @@ const remove = () => {
     if (!id.value) return;
 
     router.delete(preset.delete(id.value).url, {
+        onSuccess: () => {
+            toast.success('Deleted successfully');
+        },
         onFinish: () => {
             show.value = false;
             id.value = null;
@@ -141,12 +145,16 @@ const remove = () => {
                 <Table class="flex-1">
                     <TableHeader>
                         <TableRow>
+                            <TableHead class="w-[100px]"> #</TableHead>
                             <TableHead class="w-[100px]"> Name </TableHead>
                             <TableHead class="text-right"> Action </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="preset in presets.data">
+                        <TableRow v-for="(preset, index) in presets.data">
+                            <TableCell class="">
+                                {{ index + 1 }}
+                            </TableCell>
                             <TableCell class="max-w-lg truncate font-medium">
                                 {{ preset.name }}
                             </TableCell>
