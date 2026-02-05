@@ -18,10 +18,12 @@ use App\Http\Controllers\RejectedStepController;
 
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
+    return Inertia::render('Welcome');
 })->name('home');
+
+Route::get('/register', function() {
+    return abort(404);
+});
 
 Route::get('/homepage', function () {
     if (auth()->user()->can('can view dashboard')) {
