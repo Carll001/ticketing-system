@@ -13,20 +13,35 @@ import {
 } from '@/components/ui/table'
 import { Step, User } from '@/types';
 import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-vue-next';
+import { ref, computed } from 'vue';
 
-const props = defineProps < {
-    rejectedSteps: {
-        data: {
-            id: string
-            rejected_by: User
-            reason: string
+interface RejectedStep {
+    id: string
+    rejected_by: User
+    reason: string
+    step: Step
+    created_at: string
+}
 
-            step: Step
+const props = defineProps<{
+    rejectedSteps: RejectedStep[]
+}>();
 
-            created_at: string
-        }
+const searchQuery = ref('');
+
+const filteredSteps = computed(() => {
+    if (!searchQuery.value.trim()) {
+        return props.rejectedSteps;
     }
-} > ();
+    
+    const query = searchQuery.value.toLowerCase();
+    return props.rejectedSteps.filter(step =>
+        step.id.toLowerCase().includes(query) ||
+        step.rejected_by.name.toLowerCase().includes(query) ||
+        step.step.title.toLowerCase().includes(query)
+    );
+});
 
 </script>
 <template>
@@ -35,7 +50,16 @@ const props = defineProps < {
     <AppLayout>
         <div class="flex flex-col flex-1 gap-4 p-4">
             <div class="w-lg">
-                <Input/>
+              <div class="relative w-120">
+                    <Search
+                        class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    />
+                    <Input
+                        v-model="searchQuery"
+                        class="pl-10"
+                        placeholder="Search..."
+                    />
+                </div>
             </div>
             <Table>
                 <TableCaption>A list of your recent invoices.</TableCaption>
@@ -52,7 +76,7 @@ const props = defineProps < {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow v-for="rejectedStep in props.rejectedSteps">
+                    <TableRow v-for="rejectedStep in filteredSteps" :key="rejectedStep.id">
                         <TableCell class="font-medium">
                             {{ rejectedStep.id }}
                         </TableCell>
@@ -64,7 +88,6 @@ const props = defineProps < {
                     </TableRow>
                 </TableBody>
             </Table>
-        <!-- <pre>{{ props.rejectedSteps }}</pre> -->
         </div>
     </AppLayout>
 </template>

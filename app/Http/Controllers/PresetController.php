@@ -15,9 +15,25 @@ class PresetController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $presets = Preset::paginate(8);
+        $search = $request->query('search');
+        $status = $request->query('status');
+
+        $presets = Preset::when($status, function ($q, $status) {
+                // filter presets that have steps with given status (e.g. 'rejected')
+                $q->whereHas('steps', function ($sq) use ($status) {
+                    $sq->where('status', $status);
+                });
+            })
+            ->when($search, function ($q, $search) {
+                $term = '%' . strtolower($search) . '%';
+                $q->whereRaw('LOWER(name) LIKE ?', [$term])
+                  ->orWhereRaw('LOWER(COALESCE(description, \'\')) LIKE ?', [$term]);
+            })
+            ->paginate(8)
+            ->withQueryString();
+
         return Inertia::render('Preset/Index', [
             'presets' => [
                 'data' => $presets->items(),
@@ -27,6 +43,10 @@ class PresetController extends Controller
                 'total' => $presets->total(),
                 'from' => $presets->firstItem(),
                 'to' => $presets->lastItem(),
+            ],
+            'filters' => [
+                'search' => $search,
+                'status' => $status,
             ],
         ]);
     }
@@ -56,7 +76,7 @@ class PresetController extends Controller
                 'order' => $data['order'],
             ]);
 
-            
+
 
             // 2. Create the Fields
             if (!empty($data['fields'])) {
@@ -142,6 +162,7 @@ class PresetController extends Controller
      */
     public function destroy(Preset $preset)
     {
-        dd('delete');
+        $preset->delete();
+        return redirect()->route('preset.index');
     }
 }
