@@ -149,7 +149,7 @@ class StepController extends Controller
     public function updateStatus(Task $task, Step $step, Request $request)
     {
         // Log the status change
-        $user = Auth::user()->name;
+        $user = Auth::user();
 
         $request->validate([
             'status' => 'required|in:pending,assigned,rejected,accepted,cancelled,in-progress,completed',
