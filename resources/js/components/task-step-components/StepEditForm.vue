@@ -190,7 +190,7 @@ const groupedFields = computed(() => {
 
                                 <div class="space-y-4">
                                     <section v-for="field in fields" :key="field.id"
-                                        class="relative p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-3 group">
+                                        class="relative p-4 rounded-xl border   space-y-3 group">
 
                                         <div class="flex items-end justify-between">
                                             <div class="flex-1 mr-4">
@@ -217,16 +217,16 @@ const groupedFields = computed(() => {
 
                                                 <div :class="[type === 'Checkbox' ? 'w-auto' : 'w-full order-2']">
                                                     <div v-if="type === 'Checkbox'"
-                                                        class="w-4 h-4 rounded border border-zinc-700 bg-zinc-900/50">
+                                                        class="w-4 h-4 rounded border border-zinc-700 0">
                                                     </div>
 
                                                     <Input v-if="type === 'Input'" disabled
                                                         :placeholder="`User will enter ${field.label || 'data'}...`"
-                                                        class="h-8 text-xs bg-zinc-900/50" />
+                                                        class="h-8 text-xs 0" />
 
                                                     <Textarea v-if="type === 'Description'" disabled
                                                         :placeholder="`User will provide ${field.label || 'details'}...`"
-                                                        class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                                        class="min-h-[60px] text-xs  resize-none" />
                                                 </div>
 
                                                 <span
@@ -248,7 +248,7 @@ const groupedFields = computed(() => {
                                 <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost Field
                                     Preview</Label>
                                 <Input disabled placeholder="User will enter cost amount..."
-                                    class="h-8 text-xs bg-zinc-900/50 " />
+                                    class="h-8 text-xs  " />
                             </div>
                         </div>
                     </CardContent>
@@ -266,7 +266,7 @@ const groupedFields = computed(() => {
                                 <PopoverTrigger as-child>
                                     <Button variant="outline" role="combobox" :class="cn(
                                         'w-full justify-between',
-                                        form.assigned_to ? 'text-white' : 'text-zinc-400',
+                                        form.assigned_to ? 'text-black dark:text-white' : 'text-zinc-400',
                                     )">
                                         {{ assignedUser }}
                                         <ChevronsUpDownIcon class="opacity-50" />
