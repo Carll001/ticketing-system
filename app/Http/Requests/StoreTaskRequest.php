@@ -20,15 +20,11 @@ class StoreTaskRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
-     $required = $this->isMethod('post')
-            ? 'required'
-            : 'sometimes|required';
-
+    {   
         return [
-            'title' => "$required|min:4|max:255",
-            'description' => 'sometimes|nullable',
-            'assigned_to' => 'sometimes|nullable|uuid|exists:departments,id',
+            'title' => "required|min:4|max:255",
+            'description' => 'nullable|nullable',
+            'assigned_to' => 'nullable|nullable|uuid|exists:departments,id',
             'due_date' => 'nullable|date',
             'order' => 'required|in:random,sequential',
         ];

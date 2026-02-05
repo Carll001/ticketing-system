@@ -46,7 +46,7 @@ const form = useForm({
     title: props.task.data.title,
     description: props.task.data.description,
     assigned_to: props.task.data.assigned_to === 'Anyone' ? null : props.task.data.assigned_to,
-    type: props.task.data.type,
+    order: props.task.data.order,
     due_date: props.task.data.due_date || '',
 });
 
@@ -77,7 +77,7 @@ const discardEdit = () => {
 </script>
 <template>
     <div class="space-y-4">
-        <Form @submit.prevent="updateTask">
+        <form @submit.prevent="updateTask">
             <section class="flex justify-between">
                 <div class="flex gap-2">
                     <Heading title="Edit Task" />
@@ -143,11 +143,11 @@ const discardEdit = () => {
                     <CardContent>
                         <div class="space-y-4">
                             <Label for="task-type">
-                                Task type
+                                Task order
                                 <span class="text-lg text-red-500">*</span>
                             </Label>
 
-                            <Select id="task-type" v-model="form.type" disabled>
+                            <Select id="task-type" v-model="form.order" disabled>
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger as-child>
@@ -162,14 +162,14 @@ const discardEdit = () => {
                                 </TooltipProvider>
                                 <SelectContent>
                                     <SelectGroup>
-                                        <SelectLabel>Task types</SelectLabel>
-                                        <SelectItem value="preset">Preset</SelectItem>
+                                        <SelectLabel>Task order</SelectLabel>
+                                        <SelectItem value="sequential">Preset</SelectItem>
                                         <SelectItem value="custom">Custom</SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
 
-                            <InputError :message="form.errors.type" />
+                            <InputError :message="form.errors.order" />
                         </div>
 
 
@@ -202,6 +202,7 @@ const discardEdit = () => {
                     </CardContent>
                 </Card>
             </section>
-        </Form>
+        </form>
+        <!-- <pre>{{ form }}</pre> -->
     </div>
 </template>

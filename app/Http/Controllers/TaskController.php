@@ -124,11 +124,16 @@ class TaskController extends Controller
                 //             ->orWhere('assigned_to', Auth::id());
                 //     });
                 // }
+                if ($task->order === 'random') {
+                    $query->where('status' , 'pending');
+                }
 
                 // Order steps by position for sequential tasks
                 if ($task->order === 'sequence') {
                     $query->orderBy('position', 'asc');
                 }
+
+                
             },
             'steps.assigned',
             'steps.fields',
@@ -172,7 +177,7 @@ class TaskController extends Controller
 
         $data = $request->validated();
         $this->taskService->update($task, $data);
-
+    
         return redirect()->route('task.show', $task->id);
     }
 
@@ -182,12 +187,12 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         $taskId = $task->id;
-        
+
         // Log the task deletion before deleting
         $user = Auth::user()->name;
 
         Transaction::create([
-            'content' => $user .' deleted a named: '. $task->title,
+            'content' => $user . ' deleted a named: ' . $task->title,
         ]);
 
         $task->delete();

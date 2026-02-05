@@ -240,13 +240,13 @@ const discardChanges = () => {
                                         <Label for="password">Password</Label>
                                         <Input id="password" type="password" v-model="form.password"
                                             placeholder="enter password" />
-                                            <InputError :message="form.errors.password" />
+                                        <InputError :message="form.errors.password" />
                                     </div>
                                     <div class="space-y-2">
                                         <Label for="password_confirmation">Confirm Password</Label>
                                         <Input id="password_confirmation" type="password"
-                                            v-model="form.password_confirmation" placeholder="comfiorm password" />
-                                            <InputError :message="form.errors.password_confirmation" />
+                                            v-model="form.password_confirmation" placeholder="comfirm password" />
+                                        <InputError :message="form.errors.password_confirmation" />
                                     </div>
                                 </section>
                             </div>
