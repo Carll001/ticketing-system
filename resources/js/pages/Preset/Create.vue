@@ -158,13 +158,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                                     <section v-for="(fields, type) in groupedFields" :key="type" class="space-y-4">
                                         <Label
-                                            class="text-sm uppercase font-black text-zinc-500 tracking-[0.2em] border-b border-zinc-800/50 pb-1 ">
+                                            class="text-sm uppercase font-black text-zinc-500 tracking-[0.2em] border-b  pb-1 ">
                                             {{ type }}{{ type === 'Checkbox' ? 'es' : 's' }}
                                         </Label>
 
                                         <div class="space-y-4">
                                             <section v-for="field in fields" :key="field.id"
-                                                class="relative p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-3 group">
+                                                class="relative p-4 rounded-xl border  space-y-3 group">
 
                                                 <div class="flex items-center justify-between">
                                                     <div class="flex-1 mr-4">
@@ -182,7 +182,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                 </div>
 
                                                 <div
-                                                    class="mt-4 pt-4 border-t border-zinc-800/50 opacity-80 grayscale pointer-events-none">
+                                                    class="mt-4 pt-4 border-t  opacity-80 grayscale pointer-events-none">
                                                     <p class="text-xs uppercase font-bold tracking-[2px] mb-2">User
                                                         Response
                                                         Preview</p>
@@ -196,11 +196,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                                                             <Input v-if="type === 'Input'" disabled
                                                                 :placeholder="`User will enter ${field.label || 'data'}...`"
-                                                                class="h-8 text-xs bg-zinc-900/50" />
+                                                                class="h-8 text-xs " />
 
                                                             <Textarea v-if="type === 'Description'" disabled
                                                                 :placeholder="`User will provide ${field.label || 'details'}...`"
-                                                                class="min-h-[60px] text-xs bg-zinc-900/50 resize-none" />
+                                                                class="min-h-[60px] text-xs  resize-none" />
                                                         </div>
 
                                                         <span
@@ -223,7 +223,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         <Label class="text-[10px] text-zinc-500 uppercase font-bold mb-1 block">Cost
                                             Field Preview</Label>
                                         <Input disabled placeholder="User will enter cost amount..."
-                                            class="h-8 text-xs bg-zinc-900/50 " />
+                                            class="h-8 text-xs  " />
 
                                     </div>
                                 </div>
@@ -271,9 +271,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </CardContent>
                     </Card>
                 </section>
-                <div>
+                <!-- <div>
                     <pre>{{ form }}</pre>
-                </div>
+                </div> -->
             </form>
         </div>
     </AppLayout>
