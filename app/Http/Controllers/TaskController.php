@@ -126,8 +126,7 @@ class TaskController extends Controller
                         $q->where('status', 'pending')
                             // Condition B: OR show steps assigned to me that I've accepted
                             ->orWhere(function ($sub) use ($userId) {
-                                $sub->where('assigned_to', $userId)
-                                    ->where('status', 'accepted');
+                                $sub->where('assigned_to', $userId);
                             });
                     });
                 }
