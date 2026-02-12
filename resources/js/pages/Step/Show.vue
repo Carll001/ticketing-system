@@ -134,12 +134,12 @@ const submitResponse = () => {
     preserveScroll: true,
     onSuccess: () => {
       // Optional: Show success toast/notification
-      console.log('Response submitted successfully');
+      // console.log('Response submitted successfully');
       toast.success('Response submitted successfully');
     },
     onError: (errors) => {
       // Optional: Show error toast/notification
-      console.error('Submission errors:', errors);
+      // console.error('Submission errors:', errors);
     },
   });
 };
@@ -151,10 +151,10 @@ const markAsCompleted = () => {
     {
       preserveScroll: true,
       onSuccess: () => {
-        console.log('Step marked as completed');
+        // console.log('Step marked as completed');
       },
       onError: (errors) => {
-        console.error('Failed to mark as completed:', errors);
+        // console.error('Failed to mark as completed:', errors);
       }
     }
   );

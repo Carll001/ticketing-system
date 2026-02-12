@@ -68,7 +68,7 @@ function activeItemStyles(url: NonNullable<InertiaLinkProps['href']>) {
 const hasPermission = (permission: string) => {
     return auth.value.permissions?.includes(permission) ?? false;
 };
-console.log(auth.value.permissions);
+// console.log(auth.value.permissions);
 
 // Define all navigation items with their required permissions
 const allNavItems: (NavItem & { permission?: string })[] = [

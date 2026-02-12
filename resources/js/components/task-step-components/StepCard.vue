@@ -82,7 +82,7 @@ const rejectForm = useForm({
 });
 
 const submitRejectForm = (taskId: string, stepId: string) => {
-    console.log('dddd');
+    // console.log('dddd');
     rejectForm.patch(
         stepLink.updateStatus({ task: taskId, step: stepId }).url,
         {
@@ -99,33 +99,33 @@ const submitRejectForm = (taskId: string, stepId: string) => {
 };
 
 const isStepLocked = (step: Step) => {
-    console.log('🔒 isStepLocked called for:', step.title);
-    console.log('  - taskOrder:', props.taskOrder);
-    console.log('  - step.position:', step.position);
+    // console.log('🔒 isStepLocked called for:', step.title);
+    // console.log('  - taskOrder:', props.taskOrder);
+    // console.log('  - step.position:', step.position);
 
     // If task is random order, no steps are locked
     if (props.taskOrder === 'random') {
-        console.log('  - Result: FALSE (random order)');
+        // console.log('  - Result: FALSE (random order)');
         return false;
     }
 
     // If not sequential, don't lock (safety fallback)
     if (props.taskOrder !== 'sequential') {
-        console.log('  - Result: FALSE (not sequential)');
+        // console.log('  - Result: FALSE (not sequential)');
         return false;
     }
 
     // Check if all previous steps (by position, not index) are accepted or completed
     const previousSteps = props.steps?.filter(s => s.position < step.position);
-    console.log('  - Previous steps:', previousSteps?.map(s => ({
-        title: s.title,
-        position: s.position,
-        status: s.status
-    })));
+    // console.log('  - Previous steps:', previousSteps?.map(s => ({
+    //     title: s.title,
+    //     position: s.position,
+    //     status: s.status
+    // })));
 
     const result = previousSteps?.some(s => !['accepted', 'completed'].includes(s.status)) ?? false;
-    console.log('  - Has incomplete previous steps?', result);
-    console.log('  - Result:', result);
+    // console.log('  - Has incomplete previous steps?', result);
+    // console.log('  - Result:', result);
 
     return result;
 };
@@ -192,37 +192,37 @@ const canViewStep = (step: Step) => {
 };
 
 // Add this debug log
-console.log('StepCard props:', {
-    taskOrder: props.taskOrder,
-    stepsCount: props.steps?.length,
-    steps: props.steps?.map(s => ({ id: s.id, position: s.position, status: s.status }))
-});
+// console.log('StepCard props:', {
+//     taskOrder: props.taskOrder,
+//     stepsCount: props.steps?.length,
+//     steps: props.steps?.map(s => ({ id: s.id, position: s.position, status: s.status }))
+// });
 const canTakeStep = (step: Step) => {
-    console.log('=== canTakeStep for:', step.title, '===');
-    console.log('taskOrder:', props.taskOrder);
-    console.log('isCreator:', isCreator.value);
-    console.log('assigned_to:', step.assigned_to);
-    console.log('isStepLocked result:', isStepLocked(step));
+    // console.log('=== canTakeStep for:', step.title, '===');
+    // console.log('taskOrder:', props.taskOrder);
+    // console.log('isCreator:', isCreator.value);
+    // console.log('assigned_to:', step.assigned_to);
+    // console.log('isStepLocked result:', isStepLocked(step));
 
     // Can't take if you're the creator
     if (isCreator.value) {
-        console.log('❌ Cannot take: You are creator');
+        // console.log('❌ Cannot take: You are creator');
         return false;
     }
 
     // Can't take if already assigned to someone
     if (step.assigned_to !== null) {
-        console.log('❌ Cannot take: Already assigned');
+        // console.log('❌ Cannot take: Already assigned');
         return false;
     }
 
     // Can't take if locked (this already handles sequential order check)
     if (isStepLocked(step)) {
-        console.log('❌ Cannot take: Step is locked');
+        // console.log('❌ Cannot take: Step is locked');
         return false;
     }
 
-    console.log('✅ CAN TAKE');
+    // console.log('✅ CAN TAKE');
     return true;
 };
 
