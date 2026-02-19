@@ -90,7 +90,7 @@ const canSubmitResponse = computed(() => !isStepCompleted.value && auth.value.us
 const canMarkComplete = computed(() => !isStepCompleted.value);
 
 // can revert 
-const canRevert = computed(() => isStepCompleted.value && auth.value.user.id !== props.step.data.task.creator_id);
+const canRevert = computed(() => isStepCompleted.value && auth.value.user.id === props.step.data.task.creator_id);
 
 // if step has fields
 const hasFields = computed(() => props.step.data.fields && props.step.data.fields.length > 0);
