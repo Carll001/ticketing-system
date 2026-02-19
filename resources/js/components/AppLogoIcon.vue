@@ -27,7 +27,7 @@ defineProps<Props>();
         />
     </svg> -->
 <div>
-    <img src="/logo.png" alt="" class="w-auto h-15 rounded-full " />
+    <img src="/logo.png" alt="" class="size-12 rounded-full " />
 </div>
     
 </template>
